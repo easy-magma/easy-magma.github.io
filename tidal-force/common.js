@@ -4,6 +4,12 @@
    힘의 크기는 "지구 중심이 받는 달의 인력 = 1"로 정규화 */
 const TF = {};
 
+/* [data-tex] 요소를 KaTeX로 렌더링 */
+window.addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('[data-tex]').forEach(el => katex.render(el.dataset.tex, el, { displayMode:true, throwOnError:false }));
+});
+
 TF.css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 /* 캔버스: 고해상도 + 크기 변화 대응. draw(ctx, w, h) 를 호출 */

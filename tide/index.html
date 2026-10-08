@@ -33,6 +33,7 @@
   .side{display:flex;flex-direction:column;gap:16px}
   .main{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .main .wide{grid-column:1 / -1}
+  .layout > *, .main > *{min-width:0}
   /* controls */
   .ctl{margin-bottom:16px}
   .ctl:last-child{margin-bottom:0}
@@ -315,7 +316,7 @@ function makePerson(){
   part(limb(0.09, 0.009), -0.042, 0.17, 0, 0.45);    // 팔
   part(limb(0.09, 0.009),  0.042, 0.17, 0, -0.45);
   part(new THREE.SphereGeometry(0.027, 16, 12), 0, 0.24, 0);            // 머리
-  g.scale.setScalar(1.25);
+  g.scale.setScalar(1.8);
   return g;
 }
 const person = makePerson();
