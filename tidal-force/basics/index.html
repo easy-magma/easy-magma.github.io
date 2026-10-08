@@ -312,8 +312,8 @@ const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   const gap = ((ma - ea) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
   if (TS.t >= 23.5 && gap > 0.003 && gap < 0.6){
     ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.arc(cx, cy, R*2.1, -ea, -ma, true); ctx.stroke(); ctx.restore();
-    const [lx, ly] = P((ea + ma)/2, R*2.5);
+    ctx.beginPath(); ctx.arc(cx, cy, R*2.1, -ma, -(ma - gap), false); ctx.stroke(); ctx.restore();
+    const [lx, ly] = P(ma - gap/2, R*2.5);
     TF.text(ctx, `${(gap/D2R).toFixed(1)}° 남음`, lx, ly, TF.css('--accent'), 'left', 13);
   }
   // 지구
