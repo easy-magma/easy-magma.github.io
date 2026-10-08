@@ -111,6 +111,40 @@
     </div>
   </section>
 
+  <!-- 2-1. 달의 남중 -->
+  <section>
+    <h2 class="sec">2-1. 달이 다시 남중하기까지</h2>
+    <div class="layout">
+      <div class="card"><div class="stage"><canvas id="cv3"></canvas></div></div>
+      <aside class="side">
+        <div class="card">
+          <h2>실험</h2>
+          <div class="row" style="margin-bottom:10px">
+            <button class="primary" id="tPlay">▶ 재생</button>
+            <button id="tReset">처음으로</button>
+          </div>
+          <div class="row" style="margin-bottom:12px">
+            <button id="t24">⏩ 24시간 뒤</button>
+            <button id="tMeet">⏩ 다시 남중할 때</button>
+          </div>
+          <div class="readout">
+            <div><span>지난 시간</span><b id="tClock">0시간 00분</b></div>
+            <div><span>지구가 자전한 각</span><b id="tEarth">0°</b></div>
+            <div><span>달이 공전한 각</span><b id="tMoon">0°</b></div>
+          </div>
+          <div class="big" id="tMsg" style="font-size:17px;margin-top:10px">재생을 눌러 보세요.</div>
+        </div>
+      </aside>
+    </div>
+    <div class="card explain">
+      <ul>
+        <li><b>남중</b>: 천체가 관측자의 정남쪽 하늘에 와서 가장 높이 뜬 때. 그림에서는 관측자(빨간 점)가 달을 똑바로 바라보는 순간입니다.</li>
+        <li>24시간 동안 지구는 한 바퀴(360°) 자전해 관측자가 제자리로 돌아오지만, 그동안 달도 같은 방향으로 약 12° 공전해 앞서 있습니다.</li>
+        <li>관측자가 이 12°를 더 따라가는 데 약 50분이 걸려서, 달은 <b>약 24시간 50분</b>마다 남중합니다. → 조석 주기는 그 절반인 약 12시간 25분</li>
+      </ul>
+    </div>
+  </section>
+
   <!-- 3. 퀴즈 -->
   <section>
     <h2 class="sec">3. 확인 퀴즈</h2>
@@ -253,6 +287,87 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
+
+/* ===== 2-1. 달의 남중 ===== */
+const W_E = 15;                    // 지구 자전 °/시간 (24시간에 360°)
+const W_M = 12/24;                 // 달 공전 °/시간 (하루 약 12°)
+const T_MEET = 360/(W_E - W_M);    // 다시 남중: 약 24.84시간
+const TS = { t:0, playing:false, stops:[24, T_MEET], flash:0 };
+const fmtHM = t => { const m = Math.round(t*60); return `${Math.floor(m/60)}시간 ${String(m%60).padStart(2,'0')}분`; };
+const st3 = TF.stage($('cv3'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const cx = w*0.45, cy = h*0.5, R = Math.min(h, w)*0.13, Lm = Math.min(h*0.42, w*0.4);
+  const ea = TS.t*W_E*D2R, ma = TS.t*W_M*D2R;
+  const P = (a, r) => [cx + r*Math.cos(-a), cy + r*Math.sin(-a)];
+  // 처음 방향(기준)
+  ctx.save(); ctx.strokeStyle = TF.css('--muted'); ctx.globalAlpha = 0.5; ctx.setLineDash([2,5]);
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(...P(0, Lm*1.1)); ctx.stroke(); ctx.restore();
+  // 달 궤도
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,6]); ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+  // 달 방향선
+  ctx.save(); ctx.strokeStyle = TF.css('--moon'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(...P(ma, Lm)); ctx.stroke(); ctx.restore();
+  // 관측자 방향선
+  ctx.save(); ctx.strokeStyle = TF.css('--cent'); ctx.lineWidth = 2; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(...P(ea, Lm*0.95)); ctx.stroke(); ctx.restore();
+  // 남은 각 표시 (24시간 이후)
+  const gap = ((ma - ea) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+  if (TS.t >= 23.5 && gap > 0.003 && gap < 0.6){
+    ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(cx, cy, R*2.1, -ea, -ma, true); ctx.stroke(); ctx.restore();
+    const [lx, ly] = P((ea + ma)/2, R*2.5);
+    TF.text(ctx, `${(gap/D2R).toFixed(1)}° 남음`, lx, ly, TF.css('--accent'), 'left', 13);
+  }
+  // 지구
+  ctx.save(); ctx.fillStyle = TF.css('--sea'); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.fill();
+  ctx.translate(cx, cy); ctx.rotate(-ea); ctx.fillStyle = TF.css('--earth');
+  ctx.beginPath(); ctx.ellipse(R*0.35, -R*0.1, R*0.38, R*0.26, 0.4, 0, 2*Math.PI); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
+  ctx.restore();
+  const [ox, oy] = P(ea, R); TF.dot(ctx, ox, oy, 7, TF.css('--cent'));
+  const [mx, my] = P(ma, Lm); TF.moon(ctx, mx, my, Math.max(9, R*0.3));
+  // 남중 표시
+  if (TS.flash > 0){
+    ctx.save(); ctx.globalAlpha = Math.min(1, TS.flash); ctx.strokeStyle = TF.css('--moon'); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(mx, my, Math.max(9, R*0.3) + 10, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+    TF.text(ctx, '남중!', mx, my - Math.max(9, R*0.3) - 16, TF.css('--moon'), 'center', 16);
+  }
+  // 시계
+  TF.text(ctx, fmtHM(TS.t), 12, 24, TF.css('--fg'), 'left', 18);
+  TF.text(ctx, '북극 위에서 본 모습 · 빨간 점: 관측자', 12, h - 10, TF.css('--muted'), 'left', 11);
+  $('tClock').textContent = fmtHM(TS.t);
+  $('tEarth').textContent = `${(TS.t*W_E).toFixed(0)}°`;
+  $('tMoon').textContent = `${(TS.t*W_M).toFixed(1)}°`;
+});
+function setMsg(){
+  let m = '재생을 눌러 보세요.';
+  if (TS.t > 0 && TS.t < 24) m = '지구가 자전하는 동안 달도 조금씩 공전합니다.';
+  if (Math.abs(TS.t - 24) < 0.02) m = '24시간: 지구는 한 바퀴 돌았지만, 달은 아직 약 12° 앞에 있어요!';
+  if (TS.t > 24.02 && TS.t < T_MEET - 0.01) m = '관측자가 달을 따라잡는 중…';
+  if (TS.t >= T_MEET - 0.01) m = '🌕 약 24시간 50분: 다시 남중! (+50분)';
+  $('tMsg').textContent = m;
+}
+function jump(t){ TS.t = t; TS.playing = false; $('tPlay').textContent = '▶ 재생'; TS.flash = Math.abs(t - T_MEET) < 0.01 ? 1.5 : 0; setMsg(); st3.redraw(); }
+$('tPlay').addEventListener('click', () => {
+  if (TS.t >= T_MEET - 0.01) TS.t = 0;
+  TS.playing = !TS.playing; $('tPlay').textContent = TS.playing ? '⏸ 멈춤' : '▶ 재생'; tLast = null;
+});
+$('tReset').addEventListener('click', () => jump(0));
+$('t24').addEventListener('click', () => jump(24));
+$('tMeet').addEventListener('click', () => jump(T_MEET));
+let tLast = null;
+function tLoop(ts){
+  if (TS.playing){
+    if (tLast !== null){
+      const prev = TS.t, speed = TS.t >= 24 ? 1.2 : 4;   // 1초에 4시간 (24시간 이후엔 천천히)
+      TS.t += (ts - tLast)/1000*speed;
+      for (const s of TS.stops) if (prev < s && TS.t >= s){ TS.t = s; TS.playing = false; $('tPlay').textContent = '▶ 재생'; if (s === T_MEET) TS.flash = 1.5; }
+      setMsg();
+    }
+    tLast = ts; st3.redraw();
+  } else if (TS.flash > 0){ TS.flash = Math.max(0.6, TS.flash); }
+  requestAnimationFrame(tLoop);
+}
+requestAnimationFrame(tLoop);
+setMsg();
 
 /* ===== 3. 퀴즈 ===== */
 const QUIZ = [
