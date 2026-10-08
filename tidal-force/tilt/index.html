@@ -13,6 +13,9 @@
   .bar span{font-family:ui-monospace,monospace;font-size:13px;margin-bottom:4px}
   .barlab{display:flex;gap:16px;font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
   .barlab div{flex:1}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;background:var(--bg)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
 </style>
 </head>
 <body>
@@ -37,13 +40,11 @@
       <div class="card">
         <h2>조건</h2>
         <div class="ctl">
-          <label>적도면과 달의 공전 궤도면이 어긋난 각 <b id="aV">23.5°</b></label>
-          <input type="range" id="a" min="0" max="28.5" step="0.5" value="23.5">
-          <div class="ticks"><span>0° (일치)</span><span>28.5°</span></div>
-        </div>
-        <div class="row" style="margin-bottom:12px">
-          <button data-a="0">일치한다면</button>
-          <button data-a="23.5">자전축 기울기 23.5°</button>
+          <label>지구 자전축 기울기</label>
+          <div class="seg">
+            <button class="on" data-a="23.5">23.5° (실제)</button>
+            <button data-a="0">0° (기울지 않았다면)</button>
+          </div>
         </div>
         <div class="ctl">
           <label>관측자의 위도 <b id="pV">35°N</b></label>
@@ -71,8 +72,8 @@
       <li>관측자는 같은 위도선을 따라 돌기 때문에, 한 번은 부푼 곳의 <b>한가운데 가까이</b>(❶), 한 번은 <b>가장자리</b>(❷)를 지나갑니다.</li>
       <li>그 결과 하루 두 번의 만조 높이가 달라지고, <b>조차도 서로 달라집니다</b>.</li>
     </ul>
-    <div class="key">"일치한다면" 버튼을 눌러 보세요. 적도면과 달의 공전 궤도면이 일치하면 ❶과 ❷의 높이가 같아져 하루 두 번의 조차가 비슷해집니다.</div>
-    <p class="note">각도의 범위: 지구 자전축 기울기(약 23.5°)에 달의 공전 궤도면 기울기(약 5°)가 더해지거나 빠져서, 이 각은 한 달 동안 0°에서 최대 약 28.5°까지 변합니다. 그림의 바닷물 부푼 정도는 크게 과장했습니다.</p>
+    <div class="key">"0° (기울지 않았다면)"을 눌러 보세요. 자전축이 기울지 않아 적도면과 달의 공전 궤도면이 일치하면 ❶과 ❷의 높이가 같아져 하루 두 번의 조차가 비슷해집니다.</div>
+    <p class="note">그림의 바닷물 부푼 정도는 크게 과장했습니다.</p>
   </div>
 
   <div class="next"><a href="../">← ③ 기조력</a><a href="../../tide/">⑤ 위도별 조석 형태로 →</a></div>
@@ -107,7 +108,7 @@ const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
   // 달의 공전 궤도면(달 방향)
   ctx.save(); ctx.strokeStyle = TF.css('--moon'); ctx.setLineDash([6,5]); ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(ex - R*1.9, ey); ctx.lineTo(mx, ey); ctx.stroke(); ctx.restore();
-  TF.text(ctx, '달의 공전 궤도면', mx - 10, ey - 12, TF.css('--muted'), 'right', 12);
+  TF.text(ctx, '달의 공전 궤도면', mx - 16, ey + 20, TF.css('--muted'), 'right', 12);
   TF.moon(ctx, mx, ey, Math.max(10, R*0.2));
 
   // 바닷물(조석 타원체, 달 방향으로 부풂)
@@ -169,9 +170,8 @@ const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
 });
 
 const $ = id => document.getElementById(id);
-$('a').addEventListener('input', e => { S.a = +e.target.value; $('aV').textContent = `${S.a}°`; st.redraw(); });
 $('p').addEventListener('input', e => { S.phi = +e.target.value; $('pV').textContent = `${S.phi}°N`; st.redraw(); });
-document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { S.a = +b.dataset.a; $('a').value = S.a; $('aV').textContent = `${S.a}°`; st.redraw(); }));
+document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { S.a = +b.dataset.a; document.querySelectorAll('[data-a]').forEach(x => x.classList.toggle('on', x === b)); st.redraw(); }));
 </script>
 </body>
 </html>

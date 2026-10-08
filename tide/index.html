@@ -49,6 +49,9 @@
          border-radius:8px;padding:6px 10px;cursor:pointer}
   button:hover{border-color:var(--accent)}
   button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
   /* 3D */
   #view{position:relative;width:100%;aspect-ratio:1/1;max-height:460px;border-radius:10px;overflow:hidden;
         background:radial-gradient(circle at 50% 40%,#1b2a44,#0b1220);touch-action:none;cursor:grab}
@@ -87,7 +90,7 @@
   </nav>
   <header>
     <h1>위도별 조석 형태 시뮬레이터</h1>
-    <p class="sub">평형조석론 · 관측자의 위도와, 달이 적도면에서 벗어난 정도에 따라 반일주조, 혼합조, 일주조가 어떻게 나타나는지 확인해 보세요.</p>
+    <p class="sub">평형조석론 · 관측자의 위도에 따라 반일주조, 혼합조, 일주조가 어떻게 나타나는지 확인해 보세요.</p>
   </header>
 
   <div class="layout">
@@ -100,9 +103,11 @@
           <div class="ticks"><span>0° 적도</span><span>45°</span><span>90° 극</span></div>
         </div>
         <div class="ctl">
-          <label>적도면과 달의 공전 궤도면이 어긋난 각 <b id="declV">20°</b></label>
-          <input type="range" id="decl" min="0" max="28.5" step="0.5" value="20">
-          <div class="ticks"><span>0° (일치)</span><span>최대 약 28.5°</span></div>
+          <label>지구 자전축 기울기</label>
+          <div class="seg">
+            <button class="on" data-tilt="23.5">23.5° (실제)</button>
+            <button data-tilt="0">0° (기울지 않았다면)</button>
+          </div>
         </div>
         <div class="ctl">
           <label>시각 (달의 남중 후) <b id="timeV">00:00</b></label>
@@ -116,12 +121,11 @@
       </div>
 
       <div class="card">
-        <h2>빠른 비교 (위도 · 어긋난 각)</h2>
+        <h2>빠른 비교 (관측자의 위도)</h2>
         <div class="row">
-          <button data-p="0,0">적도 · 0°</button>
-          <button data-p="35,0">35° · 0°</button>
-          <button data-p="35,20">35° · 20°</button>
-          <button data-p="70,25">70° · 25°</button>
+          <button data-p="0">적도 0°</button>
+          <button data-p="35">35°N (우리나라)</button>
+          <button data-p="70">70°N (고위도)</button>
         </div>
       </div>
     </aside>
@@ -155,11 +159,11 @@
         <h2>원리</h2>
         <p>달의 인력과 원심력의 합력인 <a href="../tidal-force/">기조력</a>으로 바닷물은 달 쪽과 그 반대쪽이 부풀어 오른 타원체 모양이 됩니다. 지구가 자전하면 관측 지점이 부푼 곳(만조)과 낮은 곳(간조)을 차례로 지나갑니다. 달도 공전하므로 달이 같은 위치에 다시 올 때까지 약 24시간 50분이 걸리고, 조석 주기는 그 절반인 약 12시간 25분입니다.</p>
         <ul>
-          <li><b>적도면과 달의 공전 궤도면이 일치</b>하면(0°) 타원체의 축이 적도면에 놓여, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
+          <li>자전축이 기울지 않아 <b>적도면과 달의 공전 궤도면이 일치</b>한다면 타원체의 축이 적도면에 놓여, 어느 위도에서나, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
           <li>지구 자전축이 기울어져 <b>달의 공전 궤도면과 적도면이 일치하지 않으면</b> 타원체가 비스듬히 놓여, 두 번의 만조·간조 때 해수면 높이가 달라집니다 → 조차가 다른 <b>혼합조</b> (<a href="../tidal-force/tilt/">④에서 자세히</a>)</li>
-          <li><b>고위도에서 어긋난 각이 크면</b> 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
+          <li><b>고위도</b>에서는 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
         </ul>
-        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 하루 동안 어긋난 각은 일정하다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
+        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 달의 공전 궤도면과 적도면이 자전축 기울기(23.5°)만큼 어긋나 있다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
       </div>
     </section>
   </div>
@@ -176,7 +180,7 @@ const T = 24 + 50/60;          // 태음일(시간)
 const A = 53.5;                // cm
 const D2R = Math.PI/180;
 
-const S = { lat:35, decl:20, t:0, playing:false };
+const S = { lat:35, decl:23.5, t:0, playing:false };
 
 const cosTheta = (lat, decl, t) => {
   const p = lat*D2R, d = decl*D2R, H = 2*Math.PI*t/T;
@@ -445,18 +449,21 @@ function refreshTime(){
   updateMarker();
 }
 function setSliderFromState(){
-  $('lat').value = S.lat; $('decl').value = S.decl; $('time').value = S.t;
-  $('latV').textContent = `${S.lat}°N`; $('declV').textContent = `${S.decl}°`;
+  $('lat').value = S.lat; $('time').value = S.t;
+  $('latV').textContent = `${S.lat}°N`;
 }
 
 $('lat').addEventListener('input', e => { S.lat = +e.target.value; $('latV').textContent = `${S.lat}°N`; recompute(); refreshTime(); });
-$('decl').addEventListener('input', e => { S.decl = +e.target.value; $('declV').textContent = `${S.decl}°`; recompute(); refreshTime(); });
+document.querySelectorAll('[data-tilt]').forEach(b => b.addEventListener('click', () => {
+  S.decl = +b.dataset.tilt;
+  document.querySelectorAll('[data-tilt]').forEach(x => x.classList.toggle('on', x === b));
+  recompute(); refreshTime();
+}));
 $('time').addEventListener('input', e => { S.t = +e.target.value; refreshTime(); });
 $('play').addEventListener('click', () => { S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 일시정지' : '▶ 재생'; last = null; });
 $('reset').addEventListener('click', () => { S.t = 0; $('time').value = 0; refreshTime(); });
 document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
-  const [la, de] = b.dataset.p.split(',').map(Number);
-  S.lat = la; S.decl = de; setSliderFromState(); recompute(); refreshTime();
+  S.lat = +b.dataset.p; setSliderFromState(); recompute(); refreshTime();
 }));
 
 // 다크/라이트 전환 시 그래프 색 갱신
