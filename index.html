@@ -32,6 +32,12 @@
   .card h3{font-size:17px;font-weight:700;margin-bottom:4px}
   .card p{font-size:14px;color:var(--muted)}
   .empty{border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--muted);font-size:14px}
+  .tabs{display:flex;gap:6px;border-bottom:2px solid var(--line);margin-bottom:8px;overflow-x:auto}
+  .tabs button{font:inherit;font-size:16px;font-weight:700;background:none;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;
+               border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+  .panel{display:none}
+  .panel.on{display:block}
   footer{margin-top:48px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -43,8 +49,15 @@
     <p class="sub">수업 시간에 바로 열어 보는 인터랙티브 자료 모음</p>
   </header>
 
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="earth">지구과학</button>
+    <button role="tab" data-tab="integrated">통합과학</button>
+    <button role="tab" data-tab="middle">중학교 과학</button>
+  </nav>
+
   <!-- 새 시뮬레이터를 추가할 때 아래 카드 형식을 복사해 쓰세요 -->
-  <h2>지구과학</h2>
+  <section class="panel" id="earth">
+  <h2>지구과학 · 해양 (조석)</h2>
   <div class="grid">
     <a class="card" href="./tidal-force/basics/">
       <span class="tag">해양 · 0</span>
@@ -59,7 +72,7 @@
     <a class="card" href="./tide/">
       <span class="tag">해양 · 2</span>
       <h3>위도별 조석 형태</h3>
-      <p>위도와 달 적위에 따른 반일주조·혼합조·일주조</p>
+      <p>관측자의 위도에 따른 반일주조·혼합조·일주조</p>
     </a>
     <!-- 새 카드 형식:
     <a class="card" href="./폴더명/">
@@ -69,13 +82,34 @@
     </a>
     -->
   </div>
+  </section>
 
+  <section class="panel" id="integrated">
   <h2>통합과학</h2>
   <div class="grid">
     <div class="empty">준비 중</div>
   </div>
+  </section>
+
+  <section class="panel" id="middle">
+  <h2>중학교 과학</h2>
+  <div class="grid">
+    <div class="empty">준비 중</div>
+  </div>
+  </section>
 
   <footer>easy-magma.github.io</footer>
 </div>
+<script>
+  // 탭 전환 (주소 끝 #earth / #integrated / #middle 로 바로 열기 가능)
+  const tabs = document.querySelectorAll('[data-tab]');
+  function show(id){
+    if (!document.getElementById(id)) id = 'earth';
+    tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === id));
+  }
+  tabs.forEach(b => b.addEventListener('click', () => { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); }));
+  show(location.hash.slice(1));
+</script>
 </body>
 </html>
