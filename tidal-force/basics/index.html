@@ -162,6 +162,7 @@
 </div>
 
 <script src="../common.js?v=5"></script>
+<script src="../north-earth.js?v=1"></script>
 <script>
 const D2R = Math.PI/180;
 const $ = id => document.getElementById(id);
@@ -239,23 +240,18 @@ const M = { mode:'both', playing:true, day:0 };
 const MOON_DAYS = 27.3;
 const st2 = TF.stage($('cv2'), (ctx, w, h) => {
   ctx.clearRect(0, 0, w, h);
-  const cx = w*0.5, cy = h*0.5, R = Math.min(h, w)*0.14, Lm = Math.min(h*0.4, w*0.38);
+  const cx = w*0.5, cy = h*0.5, R = Math.min(h, w)*0.2, Lm = Math.min(h*0.43, w*0.4);
   const spin = (M.mode !== 'orbit') ? M.day*2*Math.PI : 0;
   const orb = (M.mode !== 'spin') ? M.day/MOON_DAYS*2*Math.PI : 0;
   // 달 궤도
   ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,6]); ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
   // 지구 (북극에서 본 모습: 반시계 방향 자전)
-  ctx.save(); ctx.fillStyle = TF.css('--sea'); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.fill();
-  ctx.translate(cx, cy); ctx.rotate(-spin);
-  ctx.fillStyle = TF.css('--earth');
-  ctx.beginPath(); ctx.ellipse(R*0.35, -R*0.1, R*0.38, R*0.26, 0.4, 0, 2*Math.PI); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
-  ctx.restore();
+  TF.northEarth(ctx, cx, cy, R, -spin, { alignKorea:true });
   // 관측자
   const ox = cx + R*Math.cos(-spin), oy = cy + R*Math.sin(-spin);
-  TF.person(ctx, ox, oy, Math.cos(-spin), Math.sin(-spin), R*0.42, TF.css('--cent'));
-  TF.dot(ctx, cx, cy, 3, TF.css('--fg'));
-  TF.text(ctx, '북극', cx, cy - 8, TF.css('--fg'), 'center', 11);
+  TF.person(ctx, ox, oy, Math.cos(-spin), Math.sin(-spin), R*0.3, TF.css('--cent'));
+  TF.dot(ctx, cx, cy, 3, '#1f1a17');
+  TF.text(ctx, '북극', cx, cy - 8, '#1f1a17', 'center', 11);
   // 자전 방향 화살표
   if (M.mode !== 'orbit'){
     ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5;
@@ -272,7 +268,7 @@ const st2 = TF.stage($('cv2'), (ctx, w, h) => {
     ctx.save(); ctx.strokeStyle = TF.css('--grav'); ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
     ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, -(orb % (2*Math.PI)), true); ctx.stroke(); ctx.restore();
   }
-  TF.text(ctx, '빨간 사람: 관측자', 10, h - 10, TF.css('--muted'), 'left', 11);
+  TF.text(ctx, '빨간 사람: 우리나라의 관측자', 10, h - 10, TF.css('--muted'), 'left', 11);
   $('days').textContent = M.mode === 'orbit' ? '-' : `${Math.floor(M.day)} 바퀴`;
   $('dayTxt').textContent = `${M.day.toFixed(1)} 일`;
   $('moonTxt').textContent = M.mode === 'spin' ? '-' : `${Math.min(100, (M.day % MOON_DAYS)/MOON_DAYS*100).toFixed(0)} %`;
@@ -297,7 +293,7 @@ const TS = { t:0, playing:false, stops:[24, T_MEET], flash:0 };
 const fmtHM = t => { const m = Math.round(t*60); return `${Math.floor(m/60)}시간 ${String(m%60).padStart(2,'0')}분`; };
 const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   ctx.clearRect(0, 0, w, h);
-  const cx = w*0.45, cy = h*0.5, R = Math.min(h, w)*0.13, Lm = Math.min(h*0.42, w*0.4);
+  const cx = w*0.45, cy = h*0.5, R = Math.min(h, w)*0.18, Lm = Math.min(h*0.43, w*0.4);
   const ea = TS.t*W_E*D2R, ma = TS.t*W_M*D2R;
   const P = (a, r) => [cx + r*Math.cos(-a), cy + r*Math.sin(-a)];
   // 처음 방향(기준)
@@ -313,17 +309,13 @@ const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   const gap = ((ma - ea) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
   if (TS.t >= 23.5 && gap > 0.003 && gap < 0.6){
     ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.arc(cx, cy, R*2.1, -ma, -(ma - gap), false); ctx.stroke(); ctx.restore();
-    const [lx, ly] = P(ma - gap/2, R*2.5);
+    ctx.beginPath(); ctx.arc(cx, cy, R*1.45, -ma, -(ma - gap), false); ctx.stroke(); ctx.restore();
+    const [lx, ly] = P(ma - gap/2, R*1.55);
     TF.text(ctx, `${(gap/D2R).toFixed(1)}° 남음`, lx, ly, TF.css('--accent'), 'left', 13);
   }
   // 지구
-  ctx.save(); ctx.fillStyle = TF.css('--sea'); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.fill();
-  ctx.translate(cx, cy); ctx.rotate(-ea); ctx.fillStyle = TF.css('--earth');
-  ctx.beginPath(); ctx.ellipse(R*0.35, -R*0.1, R*0.38, R*0.26, 0.4, 0, 2*Math.PI); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
-  ctx.restore();
-  const [ox, oy] = P(ea, R); TF.person(ctx, ox, oy, Math.cos(-ea), Math.sin(-ea), R*0.45, TF.css('--cent'));
+  TF.northEarth(ctx, cx, cy, R, -ea, { alignKorea:true });
+  const [ox, oy] = P(ea, R); TF.person(ctx, ox, oy, Math.cos(-ea), Math.sin(-ea), R*0.32, TF.css('--cent'));
   const [mx, my] = P(ma, Lm); TF.moon(ctx, mx, my, Math.max(9, R*0.3));
   // 남중 표시
   if (TS.flash > 0){
@@ -333,7 +325,7 @@ const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   }
   // 시계
   TF.text(ctx, fmtHM(TS.t), 12, 24, TF.css('--fg'), 'left', 18);
-  TF.text(ctx, '북극 위에서 본 모습 · 빨간 사람: 관측자', 12, h - 10, TF.css('--muted'), 'left', 11);
+  TF.text(ctx, '북극 위에서 본 모습 · 빨간 사람: 우리나라의 관측자', 12, h - 10, TF.css('--muted'), 'left', 11);
   $('tClock').textContent = fmtHM(TS.t);
   $('tEarth').textContent = `${(TS.t*W_E).toFixed(0)}°`;
   $('tMoon').textContent = `${(TS.t*W_M).toFixed(1)}°`;
