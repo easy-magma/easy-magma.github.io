@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⓪ 기초 개념 · Easy Magma</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common.css?v=2">
+<style>
+  .zone{display:inline-block;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
+  .z-eq{background:#e8590c} .z-low{background:#f08c00} .z-mid{background:#2f9e44} .z-high{background:#1c7ed6}
+  .big{font-size:22px;font-weight:700;margin:4px 0 8px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;background:var(--bg)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
+  .terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:6px}
+  .term{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:14px}
+  .term b{display:block;font-size:16px;color:var(--accent)}
+  section{margin-top:22px}
+  section > h2.sec{font-size:20px;margin-bottom:10px}
+  /* 퀴즈 */
+  .q{font-size:17px;font-weight:700;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+  .opts button{font-size:15px;padding:10px;text-align:left}
+  .opts button.right{background:#2b8a3e;border-color:#2b8a3e;color:#fff}
+  .opts button.wrong{background:#c92a2a;border-color:#c92a2a;color:#fff}
+  .fb{min-height:24px;margin-top:10px;font-size:14px}
+  .qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;color:var(--muted)}
+  .qstars{font-size:20px;color:#f08c00;letter-spacing:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a class="on" href="../basics/">⓪ 기초 개념</a>
+    <a href="../gravity/">① 달의 인력</a>
+    <a href="../centrifugal/">② 원심력</a>
+    <a href="../">③ 기조력 (합력)</a>
+    <a href="../tilt/">④ 조차가 다른 까닭</a>
+    <a href="../../tide/">⑤ 위도별 조석 형태</a>
+  </nav>
+  <h1>⓪ 기초 개념: 위도, 자전과 공전</h1>
+  <p class="sub">조석을 배우기 전에 꼭 필요한 낱말들을 먼저 익혀 봅시다.</p>
+
+  <!-- 1. 위도 -->
+  <section>
+    <h2 class="sec">1. 위도와 적도</h2>
+    <div class="layout">
+      <div class="card"><div class="stage"><canvas id="cv1"></canvas></div></div>
+      <aside class="side">
+        <div class="card">
+          <h2>위도 바꿔 보기</h2>
+          <div class="ctl">
+            <label>위도 <b id="latV">북위 37.5°</b></label>
+            <input type="range" id="lat" min="-90" max="90" step="0.5" value="37.5">
+            <div class="ticks"><span>남극 90°S</span><span>적도 0°</span><span>북극 90°N</span></div>
+          </div>
+          <div class="row" style="margin-bottom:12px">
+            <button data-lat="0">적도</button>
+            <button data-lat="37.5">서울</button>
+            <button data-lat="64">아이슬란드</button>
+            <button data-lat="90">북극</button>
+          </div>
+          <div class="big" id="zoneTxt">-</div>
+          <label class="check"><input type="checkbox" id="bands" checked> 저위도·중위도·고위도 색칠</label>
+        </div>
+      </aside>
+    </div>
+    <div class="card explain">
+      <div class="terms">
+        <div class="term"><b>자전축</b>지구가 자전할 때 중심이 되는 축. 북극과 남극을 잇는다.</div>
+        <div class="term"><b>적도</b>북극과 남극의 한가운데를 지나는 선. 위도 0°이다. 적도가 놓인 평면이 <b style="display:inline;font-size:14px">적도면</b>이다.</div>
+        <div class="term"><b>위도</b>적도에서 남북으로 얼마나 떨어졌는지를 지구 중심에서 잰 각도. 북쪽은 북위(N), 남쪽은 남위(S), 0°~90°.</div>
+        <div class="term"><b>저위도 · 중위도 · 고위도</b>대략 0°~30°는 저위도, 30°~60°는 중위도, 60°~90°는 고위도로 나눈다. 우리나라는 중위도.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 자전과 공전 -->
+  <section>
+    <h2 class="sec">2. 자전과 공전</h2>
+    <div class="layout">
+      <div class="card"><div class="stage"><canvas id="cv2"></canvas></div></div>
+      <aside class="side">
+        <div class="card">
+          <h2>무엇을 볼까?</h2>
+          <div class="seg">
+            <button data-m="spin">자전</button>
+            <button data-m="orbit">공전</button>
+            <button class="on" data-m="both">둘 다</button>
+          </div>
+          <div class="row" style="margin-bottom:12px">
+            <button class="primary" id="play">⏸ 일시정지</button>
+          </div>
+          <div class="readout">
+            <div><span>지구 자전</span><b id="days">0 바퀴</b></div>
+            <div><span>지난 시간</span><b id="dayTxt">0 일</b></div>
+            <div><span>달의 공전</span><b id="moonTxt">0 %</b></div>
+          </div>
+          <p class="note" style="margin-top:8px">북극 위에서 내려다본 모습입니다. 실제 크기·거리 비율과 다릅니다.</p>
+        </div>
+      </aside>
+    </div>
+    <div class="card explain">
+      <div class="terms">
+        <div class="term"><b>자전</b>천체가 스스로 자전축을 중심으로 도는 운동. 지구는 하루에 한 바퀴, 서쪽에서 동쪽으로 돈다.</div>
+        <div class="term"><b>공전</b>한 천체가 다른 천체 주위를 도는 운동. 달은 지구 주위를 약 한 달(약 27.3일)에 한 바퀴 돈다.</div>
+        <div class="term"><b>왜 조석 주기는 하루가 아닐까?</b>지구가 한 바퀴 자전하는 동안 달도 공전으로 조금 앞서가서, 달이 같은 위치에 다시 오려면 약 50분이 더 걸린다 → 약 24시간 50분.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 퀴즈 -->
+  <section>
+    <h2 class="sec">3. 확인 퀴즈</h2>
+    <div class="card">
+      <div class="qhead"><span id="qnum">-</span><span class="qstars" id="qstars"></span></div>
+      <div class="q" id="q">-</div>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <div class="row" style="margin-top:10px"><button class="primary" id="qnext" style="display:none">다음 문제 →</button></div>
+    </div>
+  </section>
+
+  <div class="next"><span></span><a href="../gravity/">① 달의 인력으로 →</a></div>
+</div>
+
+<script src="../common.js?v=2"></script>
+<script>
+const D2R = Math.PI/180;
+const $ = id => document.getElementById(id);
+
+/* ===== 1. 위도 ===== */
+const L = { lat:37.5, bands:true };
+const zoneOf = la => {
+  const a = Math.abs(la);
+  if (a === 0) return { t:'적도 (위도 0°)', c:'z-eq' };
+  if (a < 30) return { t:'저위도', c:'z-low' };
+  if (a < 60) return { t:'중위도', c:'z-mid' };
+  return { t:'고위도', c:'z-high' };
+};
+const latName = la => la === 0 ? '0° (적도)' : `${la > 0 ? '북위' : '남위'} ${Math.abs(la)}°`;
+
+const st1 = TF.stage($('cv1'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const R = Math.min(h*0.38, w*0.25), cx = w*0.42, cy = h*0.5;
+  // 위도대 색칠
+  if (L.bands){
+    const band = (a1, a2, col) => {
+      ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.clip();
+      ctx.fillStyle = col; ctx.globalAlpha = 0.35;
+      ctx.fillRect(cx - R, cy - R*Math.sin(a2*D2R), 2*R, R*(Math.sin(a2*D2R) - Math.sin(a1*D2R)));
+      ctx.restore();
+    };
+    for (const s of [1, -1]){
+      const f = (a, b, c) => s > 0 ? band(a, b, c) : band(-b, -a, c);
+      f(0, 30, '#f08c00'); f(30, 60, '#2f9e44'); f(60, 90, '#1c7ed6');
+    }
+  }
+  ctx.save(); ctx.strokeStyle = TF.css('--muted'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+  // 30°, 60° 경계선
+  ctx.save(); ctx.strokeStyle = TF.css('--muted'); ctx.globalAlpha = 0.5; ctx.setLineDash([3,4]);
+  for (const a of [30, 60, -30, -60]){ const y = cy - R*Math.sin(a*D2R), x = R*Math.cos(a*D2R); ctx.beginPath(); ctx.moveTo(cx - x, y); ctx.lineTo(cx + x, y); ctx.stroke(); }
+  ctx.restore();
+  // 적도
+  ctx.save(); ctx.strokeStyle = '#e8590c'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.stroke(); ctx.restore();
+  TF.text(ctx, '적도 0°', cx - R - 8, cy + 4, '#e8590c', 'right', 13);
+  // 자전축
+  ctx.save(); ctx.strokeStyle = TF.css('--fg'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy - R*1.22); ctx.lineTo(cx, cy + R*1.22); ctx.stroke(); ctx.restore();
+  TF.text(ctx, '북극 (90°N)', cx, cy - R*1.27, TF.css('--fg'), 'center', 13);
+  TF.text(ctx, '남극 (90°S)', cx, cy + R*1.27 + 12, TF.css('--fg'), 'center', 13);
+  TF.text(ctx, '자전축', cx + 6, cy - R*1.08, TF.css('--muted'), 'left', 12);
+  // 선택 위도
+  const a = L.lat*D2R, px = cx + R*Math.cos(a), py = cy - R*Math.sin(a);
+  ctx.save(); ctx.strokeStyle = TF.css('--cent'); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - R*Math.cos(a), py); ctx.lineTo(px, py); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(cx, cy, R*0.28, -Math.max(a, 0), -Math.min(a, 0)); ctx.stroke(); ctx.restore();
+  if (Math.abs(L.lat) > 3) TF.text(ctx, `${Math.abs(L.lat)}°`, cx + R*0.34*Math.cos(a/2), cy - R*0.34*Math.sin(a/2) + 5, TF.css('--accent'), 'left', 14);
+  TF.dot(ctx, px, py, 7, TF.css('--cent'));
+  TF.text(ctx, latName(L.lat), px + 12, py + 5, TF.css('--fg'), 'left', 14);
+  // 범례
+  if (L.bands){
+    [['저위도 0°~30°','#f08c00'],['중위도 30°~60°','#2f9e44'],['고위도 60°~90°','#1c7ed6']].forEach(([t, c], i) => {
+      ctx.save(); ctx.fillStyle = c; ctx.globalAlpha = 0.7; ctx.fillRect(w - 128, 14 + i*22, 14, 14); ctx.restore();
+      TF.text(ctx, t, w - 108, 26 + i*22, TF.css('--fg'), 'left', 12);
+    });
+  }
+});
+function updLat(){
+  $('latV').textContent = latName(L.lat);
+  const z = zoneOf(L.lat);
+  $('zoneTxt').innerHTML = `${latName(L.lat)} → <span class="zone ${z.c}">${z.t}</span>`;
+  st1.redraw();
+}
+$('lat').addEventListener('input', e => { L.lat = +e.target.value; updLat(); });
+document.querySelectorAll('[data-lat]').forEach(b => b.addEventListener('click', () => { L.lat = +b.dataset.lat; $('lat').value = L.lat; updLat(); }));
+$('bands').addEventListener('change', e => { L.bands = e.target.checked; st1.redraw(); });
+updLat();
+
+/* ===== 2. 자전과 공전 ===== */
+const M = { mode:'both', playing:true, day:0 };
+const MOON_DAYS = 27.3;
+const st2 = TF.stage($('cv2'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const cx = w*0.5, cy = h*0.5, R = Math.min(h, w)*0.14, Lm = Math.min(h*0.4, w*0.38);
+  const spin = (M.mode !== 'orbit') ? M.day*2*Math.PI : 0;
+  const orb = (M.mode !== 'spin') ? M.day/MOON_DAYS*2*Math.PI : 0;
+  // 달 궤도
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,6]); ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+  // 지구 (북극에서 본 모습: 반시계 방향 자전)
+  ctx.save(); ctx.fillStyle = TF.css('--sea'); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.fill();
+  ctx.translate(cx, cy); ctx.rotate(-spin);
+  ctx.fillStyle = TF.css('--earth');
+  ctx.beginPath(); ctx.ellipse(R*0.35, -R*0.1, R*0.38, R*0.26, 0.4, 0, 2*Math.PI); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
+  ctx.restore();
+  // 관측자
+  const ox = cx + R*Math.cos(-spin)*1.0, oy = cy + R*Math.sin(-spin)*1.0;
+  TF.dot(ctx, ox, oy, 6, TF.css('--cent'));
+  TF.dot(ctx, cx, cy, 3, TF.css('--fg'));
+  TF.text(ctx, '북극', cx, cy - 8, TF.css('--fg'), 'center', 11);
+  // 자전 방향 화살표
+  if (M.mode !== 'orbit'){
+    ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(cx, cy, R*1.25, -0.2, -1.4, true); ctx.stroke(); ctx.restore();
+    const ex = cx + R*1.25*Math.cos(-1.4), ey = cy + R*1.25*Math.sin(-1.4);
+    TF.arrow(ctx, ex + 6, ey + 2, ex - 2, ey - 1, TF.css('--accent'), 2.5);
+    TF.text(ctx, '자전', cx + R*1.35, cy - R*0.9, TF.css('--accent'), 'left', 13);
+  }
+  // 달
+  const mx = cx + Lm*Math.cos(-orb), my = cy + Lm*Math.sin(-orb);
+  TF.moon(ctx, mx, my, Math.max(9, R*0.27));
+  if (M.mode !== 'spin'){
+    TF.text(ctx, '공전', mx + 14, my - 10, TF.css('--grav'), 'left', 13);
+    ctx.save(); ctx.strokeStyle = TF.css('--grav'); ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, -(orb % (2*Math.PI)), true); ctx.stroke(); ctx.restore();
+  }
+  TF.text(ctx, '빨간 점: 관측자', 10, h - 10, TF.css('--muted'), 'left', 11);
+  $('days').textContent = M.mode === 'orbit' ? '-' : `${Math.floor(M.day)} 바퀴`;
+  $('dayTxt').textContent = `${M.day.toFixed(1)} 일`;
+  $('moonTxt').textContent = M.mode === 'spin' ? '-' : `${Math.min(100, (M.day % MOON_DAYS)/MOON_DAYS*100).toFixed(0)} %`;
+});
+document.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => {
+  M.mode = b.dataset.m; M.day = 0;
+  document.querySelectorAll('[data-m]').forEach(x => x.classList.toggle('on', x === b)); st2.redraw();
+}));
+$('play').addEventListener('click', () => { M.playing = !M.playing; $('play').textContent = M.playing ? '⏸ 일시정지' : '▶ 재생'; last = null; });
+let last = null;
+function loop(ts){
+  if (M.playing){ if (last !== null) M.day += (ts - last)/1000 * 0.6; last = ts; st2.redraw(); }  // 1초 = 0.6일
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ===== 3. 퀴즈 ===== */
+const QUIZ = [
+  { q:'적도의 위도는?', o:['0°','30°','60°','90°'], a:0, e:'적도는 위도의 기준선으로 0°입니다.' },
+  { q:'우리나라(서울, 약 북위 37.5°)는 어디에 속할까?', o:['저위도','중위도','고위도','적도'], a:1, e:'30°~60°는 중위도입니다.' },
+  { q:'북극의 위도는?', o:['0°','45°N','90°N','180°N'], a:2, e:'위도는 최대 90°까지입니다.' },
+  { q:'지구가 자전축을 중심으로 스스로 도는 운동은?', o:['공전','자전','조석','회전 궤도'], a:1, e:'스스로 도는 것은 자전, 다른 천체 주위를 도는 것은 공전입니다.' },
+  { q:'달이 지구 주위를 도는 운동은?', o:['자전','공전','조석','기조력'], a:1, e:'달은 약 한 달에 한 번 지구 주위를 공전합니다.' },
+  { q:'지구는 하루에 몇 바퀴 자전할까?', o:['½ 바퀴','1 바퀴','2 바퀴','27.3 바퀴'], a:1, e:'지구는 하루에 한 바퀴 자전합니다.' },
+  { q:'달이 다시 같은 위치에 오는 데 하루(24시간)보다 오래 걸리는 까닭은?', o:['지구가 공전하지 않아서','달도 그동안 공전해서','달이 자전하지 않아서','적도가 기울어서'], a:1, e:'지구가 한 바퀴 자전하는 동안 달도 공전하여 앞서가므로 약 50분이 더 걸립니다.' },
+];
+const Q = { i:0, score:0, done:false };
+function showQ(){
+  const it = QUIZ[Q.i];
+  $('qnum').textContent = `문제 ${Q.i + 1} / ${QUIZ.length}`;
+  $('qstars').textContent = '★'.repeat(Q.score) + '☆'.repeat(QUIZ.length - Q.score);
+  $('q').textContent = it.q; $('fb').textContent = ''; $('qnext').style.display = 'none';
+  $('opts').innerHTML = it.o.map((t, k) => `<button data-k="${k}">${'①②③④'[k]} ${t}</button>`).join('');
+  let tried = false;
+  document.querySelectorAll('#opts button').forEach(b => b.addEventListener('click', () => {
+    const k = +b.dataset.k;
+    if (k === it.a){
+      b.classList.add('right'); if (!tried) Q.score++;
+      $('fb').innerHTML = `⭕ 정답! ${it.e}`;
+      document.querySelectorAll('#opts button').forEach(x => x.disabled = true);
+      $('qstars').textContent = '★'.repeat(Q.score) + '☆'.repeat(QUIZ.length - Q.score);
+      $('qnext').style.display = ''; $('qnext').textContent = Q.i < QUIZ.length - 1 ? '다음 문제 →' : '결과 보기';
+    } else { b.classList.add('wrong'); b.disabled = true; tried = true; $('fb').textContent = '❌ 다시 생각해 보세요.'; }
+  }));
+}
+$('qnext').addEventListener('click', () => {
+  if (Q.i < QUIZ.length - 1){ Q.i++; showQ(); return; }
+  const n = Q.score, all = QUIZ.length;
+  $('qnum').textContent = '결과';
+  $('q').textContent = n === all ? '🏆 만점! 이제 조석을 배울 준비 완료!' : `${all}문제 중 ${n}문제를 한 번에 맞혔어요.`;
+  $('opts').innerHTML = ''; $('fb').innerHTML = n === all ? '<a href="../gravity/">① 달의 인력으로 가기 →</a>' : '틀린 개념은 위의 그림으로 한 번 더 확인해 보세요.';
+  $('qnext').textContent = '다시 풀기'; $('qnext').onclick = () => location.reload();
+});
+showQ();
+</script>
+</body>
+</html>
