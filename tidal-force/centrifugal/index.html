@@ -37,8 +37,8 @@
       <div class="card">
         <h2>운동 방식</h2>
         <div class="seg">
-          <button class="on" data-mode="revolve">실제: 평행 이동</button>
-          <button data-mode="rotate">비교: 회전</button>
+          <button class="on" data-mode="revolve">✅ 실제: 평행 이동</button>
+          <button data-mode="rotate">❌ 오개념: 회전</button>
         </div>
         <div class="modeNote" id="modeNote"></div>
         <div class="row" style="margin-bottom:12px">
@@ -67,7 +67,7 @@
       <li>평행 이동이므로 지구의 <b>모든 지점이 같은 크기의 원</b>을 같은 주기로 그립니다. 원의 중심만 지점마다 다를 뿐입니다. → "궤적을 한 곳에 겹쳐 보기"로 확인</li>
       <li>같은 크기의 원을 같은 주기로 돌면 원심력도 같습니다. 그래서 지구의 원심력은 <b>지표면 어디서나 크기와 방향이 같고</b>, 방향은 항상 <b>달의 반대쪽</b>입니다.</li>
     </ul>
-    <div class="key">흔한 오해: "공통 질량 중심에서 먼 곳일수록 원심력이 크지 않나?" → 그것은 지구가 <b>회전</b>할 때의 이야기입니다. "비교: 회전"을 눌러 보면 궤적의 크기와 원심력이 지점마다 달라집니다. 실제 지구의 공전 운동은 <b>평행 이동</b>이라서 모든 지점이 같습니다.</div>
+    <div class="key"><b>❌ 오개념</b>: "공통 질량 중심에서 먼 곳일수록 원심력이 크지 않나?" → 그것은 지구가 <b>회전</b>할 때의 이야기입니다. "❌ 오개념: 회전"을 눌러 보면 궤적의 크기와 원심력이 지점마다 달라집니다. 실제 지구의 공전 운동은 <b>평행 이동</b>이라서 모든 지점이 같습니다.</div>
 
     <div class="activity">
       <b class="t">✋ 직접 해 보기: 공책 실험</b>
@@ -94,8 +94,8 @@ const pts = TF.points(12);
 const tracked = [ {x:0,y:0}, {x:1,y:0}, {x:0,y:1}, {x:-1,y:0}, {x:0,y:-1} ];
 const trackColors = ['#e8590c','#2f9e44','#1c7ed6','#ae3ec9','#f08c00'];
 const NOTES = {
-  revolve:'지구가 방향을 유지한 채 원을 그리며 움직입니다. 다섯 지점의 궤적 크기가 모두 같습니다.',
-  rotate:'만약 지구가 공통 질량 중심을 축으로 빙글 <b>회전</b>한다면? 중심에서 먼 지점일수록 큰 원을 그리고 원심력도 커집니다. (실제와 다른 비교용)'
+  revolve:'<b style="color:var(--semi, #2b8a3e)">✅ 실제</b> 지구가 방향을 유지한 채 원을 그리며 움직입니다. 다섯 지점의 궤적 크기가 모두 같습니다.',
+  rotate:'<b style="color:var(--cent)">❌ 오개념</b> 지구가 공통 질량 중심을 축으로 빙글 <b>회전</b>한다고 생각하면, 먼 지점일수록 큰 원을 그리고 원심력도 커지는 것처럼 보입니다. 하지만 실제 지구는 이렇게 움직이지 않습니다.'
 };
 
 /* 지점 o(지구 반지름 단위)의 화면 위치 */
@@ -187,7 +187,13 @@ const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
   leg(y => { ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(22, y - 6); ctx.lineTo(22, y + 6); ctx.moveTo(16, y); ctx.lineTo(28, y); ctx.stroke(); ctx.restore(); }, '공통 질량 중심');
   if (S.force) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--cent'), 2.5), S.mode === 'revolve' ? '원심력 (모두 같음)' : '원심력 (지점마다 다름)');
   if (S.grav) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--grav'), 2.5), '지구 중심의 달 인력');
-  if (S.mode === 'rotate') TF.text(ctx, '비교용: 실제 지구의 운동이 아님', 14, ly + 6, TF.css('--cent'), 'left', 12);
+  if (S.mode === 'rotate'){
+    // 오개념 표시
+    ctx.save(); ctx.strokeStyle = TF.css('--cent'); ctx.lineWidth = 3; ctx.strokeRect(2, 2, w - 4, h - 4);
+    const tw = 150, tx = w/2 - tw/2;
+    ctx.fillStyle = TF.css('--cent'); ctx.beginPath(); ctx.roundRect(tx, 8, tw, 26, 13); ctx.fill(); ctx.restore();
+    TF.text(ctx, '❌ 오개념 (실제와 다름)', w/2, 26, '#fff', 'center', 13);
+  }
   TF.text(ctx, '그림은 축척이 아님', 10, h - 10, TF.css('--muted'), 'left', 11);
 });
 
