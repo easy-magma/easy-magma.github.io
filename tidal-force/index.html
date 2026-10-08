@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>③ 기조력 · Easy Magma</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a href="gravity/">① 달의 인력</a>
+    <a href="centrifugal/">② 원심력</a>
+    <a class="on" href="./">③ 기조력 (합력)</a>
+    <a href="../tide/">④ 위도별 조석 형태</a>
+  </nav>
+  <h1>③ 기조력 = 달의 인력 + 원심력</h1>
+  <p class="sub">조석 현상을 일으키는 힘을 기조력이라고 합니다. 기조력은 달이 지구에 작용하는 인력(①)과 공통 질량 중심을 회전하는 운동으로 생긴 지구의 원심력(②)의 합력입니다.</p>
+
+  <div class="layout">
+    <div class="card">
+      <div class="stage"><canvas id="cv"></canvas></div>
+      <p class="note" style="margin-top:8px">지구 위의 점을 누르면 그 지점에서 두 힘을 더하는 과정을 보여 줍니다.</p>
+    </div>
+    <aside class="side">
+      <div class="card">
+        <h2>표시할 힘</h2>
+        <label class="check"><input type="checkbox" id="g"> <span class="sw" style="background:var(--grav)"></span> 달의 인력</label>
+        <label class="check"><input type="checkbox" id="c"> <span class="sw" style="background:var(--cent)"></span> 원심력</label>
+        <label class="check"><input type="checkbox" id="t" checked> <span class="sw" style="background:var(--tide)"></span> 기조력 (합력)</label>
+        <label class="check"><input type="checkbox" id="e" checked> 바닷물 모양 (조석 타원체)</label>
+      </div>
+      <div class="card">
+        <h2>조건</h2>
+        <div class="ctl">
+          <label>지구–달 거리 <b id="dV">6 R</b></label>
+          <input type="range" id="d" min="3" max="60" step="1" value="6">
+          <div class="ticks"><span>3 R (과장)</span><span>60 R (실제)</span></div>
+        </div>
+        <p class="note" id="scaleNote"></p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="card explain">
+    <h2>정리</h2>
+    <ul>
+      <li><b>달에 가까운 지표면(A)</b>: 달의 인력 &gt; 원심력 → 달 쪽으로 기조력 → 해수면 높아짐</li>
+      <li><b>달에서 먼 지표면(B)</b>: 원심력 &gt; 달의 인력 → 달의 반대쪽으로 기조력 → 해수면 높아짐</li>
+      <li><b>지구 중심(O)</b>: 인력 = 원심력 → 기조력 0</li>
+      <li><b>C, D를 지나는 선상의 지점</b>: 기조력이 <b>지구 중심 방향</b>으로 작용 → 해수면 낮아짐</li>
+    </ul>
+    <div class="key">그래서 바닷물은 <b>달 쪽과 그 반대쪽 두 곳</b>이 부풀어 오르고(만조), 그 사이 두 곳은 낮아집니다(간조). 지구가 자전하면 한 지점은 하루에 두 번씩 만조와 간조를 겪습니다.</div>
+    <p class="note">기조력의 크기는 천체의 질량에 비례하고 거리의 세제곱에 반비례합니다(T ∝ M / r³). 태양의 질량은 달의 약 2,800만 배이지만 거리가 약 387배 멀어서, 태양의 기조력은 달 기조력의 약 절반입니다.</p>
+  </div>
+
+  <div class="next"><a href="centrifugal/">← ② 원심력</a><a href="../tide/">④ 위도별 조석 형태로 →</a></div>
+</div>
+
+<script src="common.js"></script>
+<script>
+const S = { D:6, g:false, c:false, t:true, e:true, sel:1 };
+const pts = TF.points(12);
+const names = { 0:'O', 1:'A', 4:'C', 7:'B', 10:'D' };
+let geo = null;
+
+const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const L = TF.layout(w, h), toX = x => L.ex + x*L.R, toY = y => L.ey - y*L.R;
+  const L0 = L.R*0.55;
+  geo = { L, toX, toY };
+
+  // 기조력 화살표 배율: 가장 긴 화살표 ≈ 0.6 R
+  const tmax = Math.max(...pts.map(p => Math.hypot(TF.tidal(p, S.D).x, TF.tidal(p, S.D).y)));
+  const kT = L.R*0.6 / tmax;
+
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,5]);
+  ctx.beginPath(); ctx.moveTo(L.ex - L.R*1.7, L.ey); ctx.lineTo(L.mx, L.my); ctx.stroke(); ctx.restore();
+
+  TF.earth(ctx, L.ex, L.ey, L.R);
+  if (S.e){
+    ctx.save(); ctx.fillStyle = TF.css('--sea'); ctx.globalAlpha = 0.45; ctx.strokeStyle = TF.css('--sea'); ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 180; i++){
+      const a = 2*Math.PI*i/180, c = Math.cos(a), r = L.R*(1.0 + 0.28*c*c);
+      const x = L.ex + r*Math.cos(a), y = L.ey - r*Math.sin(a);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.fillStyle = TF.css('--earth'); ctx.beginPath(); ctx.arc(L.ex, L.ey, L.R*0.96, 0, 2*Math.PI); ctx.fill(); ctx.restore();
+  }
+  TF.moon(ctx, L.mx, L.my, L.mr, `달 (거리 ${S.D} R)`);
+
+  pts.forEach((p, i) => {
+    const x = toX(p.x), y = toY(p.y), g = TF.gravity(p, S.D), c = TF.centrifugal(), t = TF.tidal(p, S.D);
+    if (S.g) TF.arrow(ctx, x, y, x + g.x*L0, y - g.y*L0, TF.css('--grav'), 2);
+    if (S.c) TF.arrow(ctx, x, y, x + c.x*L0, y - c.y*L0, TF.css('--cent'), 2);
+    if (S.t) TF.arrow(ctx, x, y, x + t.x*kT, y - t.y*kT, TF.css('--tide'), 3);
+    TF.dot(ctx, x, y, i === S.sel ? 6 : 3.5, i === S.sel ? TF.css('--accent') : TF.css('--fg'));
+    if (names[i] !== undefined){
+      const ox = p.center ? -8 : p.x*16 - 6, oy = p.center ? -10 : -p.y*16 + 4;
+      TF.text(ctx, names[i], x + ox, y + oy, TF.css('--fg'), 'right', 13);
+    }
+  });
+
+  // 선택한 지점: 힘의 합성 (오른쪽 아래 확대 창)
+  const p = pts[S.sel], g = TF.gravity(p, S.D), c = TF.centrifugal(), t = TF.tidal(p, S.D);
+  const bw = Math.min(200, w*0.32), bh = Math.min(140, h*0.36), bx0 = w - bw - 10, by0 = h - bh - 10;
+  ctx.save(); ctx.fillStyle = TF.css('--card'); ctx.strokeStyle = TF.css('--line'); ctx.globalAlpha = 0.95;
+  ctx.beginPath(); ctx.roundRect(bx0, by0, bw, bh, 10); ctx.fill(); ctx.globalAlpha = 1; ctx.stroke(); ctx.restore();
+  TF.text(ctx, `선택 지점 ${names[S.sel] ?? ''} : 힘의 합성`, bx0 + 10, by0 + 18, TF.css('--muted'), 'left', 11);
+  const s = bw*0.32, ox = bx0 + bw/2, oy = by0 + bh*0.58;
+  TF.arrow(ctx, ox, oy, ox + g.x*s, oy - g.y*s, TF.css('--grav'), 2.5);
+  TF.arrow(ctx, ox + g.x*s, oy - g.y*s, ox + (g.x + c.x)*s, oy - (g.y + c.y)*s, TF.css('--cent'), 2.5);
+  const tl = Math.hypot(t.x, t.y)*s;
+  if (tl > 1) TF.arrow(ctx, ox, oy, ox + t.x*s, oy - t.y*s, TF.css('--tide'), 3);
+  TF.dot(ctx, ox, oy, 3, TF.css('--fg'));
+  TF.text(ctx, tl > 1 ? '인력 + 원심력 = 기조력' : '두 힘이 상쇄 → 기조력 0', bx0 + 10, by0 + bh - 10, TF.css('--fg'), 'left', 11);
+
+  // 범례
+  let ly = 20;
+  const leg = (on, col, label) => { if (!on) return; TF.arrow(ctx, 14, ly, 44, ly, col, 2.5); TF.text(ctx, label, 52, ly + 4, TF.css('--fg')); ly += 20; };
+  leg(S.g, TF.css('--grav'), '달의 인력');
+  leg(S.c, TF.css('--cent'), '원심력');
+  leg(S.t, TF.css('--tide'), `기조력 (약 ${Math.round(kT/L0)}배 확대)`);
+
+  document.getElementById('scaleNote').textContent =
+    `이 거리에서 기조력은 인력의 최대 ${(tmax*100).toFixed(1)}% 정도로 작아서, 그림에서는 약 ${Math.round(kT/L0)}배 확대했습니다. 바닷물 모양도 크게 과장했습니다.`;
+});
+
+const $ = id => document.getElementById(id);
+['g','c','t','e'].forEach(k => $(k).addEventListener('change', ev => { S[k] = ev.target.checked; st.redraw(); }));
+$('d').addEventListener('input', ev => { S.D = +ev.target.value; $('dV').textContent = `${S.D} R`; st.redraw(); });
+$('cv').addEventListener('click', ev => {
+  if (!geo) return;
+  const r = ev.target.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
+  let best = -1, bd = 1e9;
+  pts.forEach((p, i) => { const d = Math.hypot(geo.toX(p.x) - mx, geo.toY(p.y) - my); if (d < bd){ bd = d; best = i; } });
+  if (bd < 30){ S.sel = best; st.redraw(); }
+});
+</script>
+</body>
+</html>

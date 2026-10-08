@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>① 달의 인력 · 기조력 · Easy Magma</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a class="on" href="../gravity/">① 달의 인력</a>
+    <a href="../centrifugal/">② 원심력</a>
+    <a href="../">③ 기조력 (합력)</a>
+    <a href="../../tide/">④ 위도별 조석 형태</a>
+  </nav>
+  <h1>① 달의 인력: 지구의 지점마다 다르다</h1>
+  <p class="sub">달은 지구의 모든 지점을 끌어당기지만, 가까운 곳일수록 더 세게 당깁니다.</p>
+
+  <div class="layout">
+    <div class="card">
+      <div class="stage"><canvas id="cv"></canvas></div>
+    </div>
+    <aside class="side">
+      <div class="card">
+        <h2>조건</h2>
+        <div class="ctl">
+          <label>지구–달 거리 <b id="dV">6 R</b></label>
+          <input type="range" id="d" min="3" max="60" step="1" value="6">
+          <div class="ticks"><span>3 R (과장)</span><span>60 R (실제)</span></div>
+        </div>
+        <div class="row" style="margin-bottom:12px">
+          <button data-d="6">과장해서 보기</button>
+          <button data-d="60">실제 거리</button>
+        </div>
+        <label class="check"><input type="checkbox" id="ref"> 지구 중심의 인력과 비교 (점선)</label>
+        <p class="note">R = 지구 반지름. 실제 지구–달 거리는 약 60 R입니다. 화면의 달 위치와 크기는 축척이 아닙니다.</p>
+      </div>
+      <div class="card readout">
+        <h2>인력의 크기 (지구 중심 = 100)</h2>
+        <div><span>달 쪽 지점 (A)</span><b id="near">-</b></div>
+        <div><span>지구 중심 (O)</span><b>100.00</b></div>
+        <div><span>반대쪽 지점 (B)</span><b id="far">-</b></div>
+        <div><span>A와 B의 차이</span><b id="diff">-</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="card explain">
+    <h2>정리</h2>
+    <ul>
+      <li>만유인력은 거리의 제곱에 반비례합니다: F ∝ 1 / r²</li>
+      <li>그래서 달에 가까운 쪽(A)은 더 세게, 먼 쪽(B)은 더 약하게 끌려갑니다.</li>
+      <li>인력의 <b>방향</b>은 모두 <b>달의 중심</b>을 향하므로, 지점마다 방향도 조금씩 다릅니다.</li>
+    </ul>
+    <div class="key">실제 거리(60 R)에서 A와 B의 인력 차이는 약 7%입니다. 이 작은 차이가 조석을 만드는 출발점입니다.</div>
+    <p class="note">인력만 있다면 지구 전체가 달 쪽으로 끌려가야 합니다. 그런데 지구는 달에 떨어지지 않습니다. 왜일까요? → ② 원심력</p>
+  </div>
+
+  <div class="next"><span></span><a href="../centrifugal/">② 원심력으로 →</a></div>
+</div>
+
+<script src="../common.js"></script>
+<script>
+const S = { D:6, ref:false };
+const pts = TF.points(12);
+
+const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const L = TF.layout(w, h), toX = x => L.ex + x*L.R, toY = y => L.ey - y*L.R;
+  const L0 = L.R*0.55;  // 지구 중심 인력 = L0 픽셀
+
+  // 달 방향 보조선
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,5]);
+  ctx.beginPath(); ctx.moveTo(L.ex - L.R*1.6, L.ey); ctx.lineTo(L.mx, L.my); ctx.stroke(); ctx.restore();
+
+  TF.earth(ctx, L.ex, L.ey, L.R);
+  TF.moon(ctx, L.mx, L.my, L.mr, `달 (거리 ${S.D} R)`);
+
+  const grav = TF.css('--grav');
+  for (const p of pts){
+    const g = TF.gravity(p, S.D), x = toX(p.x), y = toY(p.y);
+    if (S.ref) TF.arrow(ctx, x, y, x + L0, y, TF.css('--muted') + '88', 1.5);
+    TF.arrow(ctx, x, y, x + g.x*L0, y - g.y*L0, grav, p.center ? 3.5 : 2.5);
+    TF.dot(ctx, x, y, 3, TF.css('--fg'));
+  }
+  TF.text(ctx, 'A', toX(1) - 6, toY(0) - 10, TF.css('--fg'), 'right', 14);
+  TF.text(ctx, 'O', toX(0) - 6, toY(0) - 10, TF.css('--fg'), 'right', 14);
+  TF.text(ctx, 'B', toX(-1) - 8, toY(0) - 10, TF.css('--fg'), 'right', 14);
+
+  // 범례
+  TF.arrow(ctx, 14, 20, 44, 20, grav, 2.5); TF.text(ctx, '달의 인력', 52, 24, TF.css('--fg'));
+  if (S.ref){ TF.arrow(ctx, 14, 40, 44, 40, TF.css('--muted'), 1.5); TF.text(ctx, '지구 중심의 인력 (비교용)', 52, 44, TF.css('--fg')); }
+});
+
+function update(){
+  document.getElementById('dV').textContent = `${S.D} R`;
+  const near = 100*S.D**2/(S.D - 1)**2, far = 100*S.D**2/(S.D + 1)**2;
+  document.getElementById('near').textContent = near.toFixed(2);
+  document.getElementById('far').textContent = far.toFixed(2);
+  document.getElementById('diff').textContent = `${(near - far).toFixed(2)} (${((near - far)/100*100).toFixed(1)}%)`;
+  st.redraw();
+}
+document.getElementById('d').addEventListener('input', e => { S.D = +e.target.value; update(); });
+document.getElementById('ref').addEventListener('change', e => { S.ref = e.target.checked; update(); });
+document.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { S.D = +b.dataset.d; document.getElementById('d').value = S.D; update(); }));
+update();
+</script>
+</body>
+</html>

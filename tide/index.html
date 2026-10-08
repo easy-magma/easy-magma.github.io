@@ -119,7 +119,7 @@
       <div class="card">
         <h2>3D 모형 (지구 고정 시점에서 본 조석 타원체)</h2>
         <div id="view">
-          <div class="legend3d">달 방향 <span class="dot" style="background:#ffe08a"></span><br>관측 지점 <span class="dot" style="background:#ff6b6b"></span></div>
+          <div class="legend3d">달 방향 <span class="dot" style="background:#ffe08a"></span><br>관측자 <span class="dot" style="background:#ff6b6b"></span><br>관측 지점 해수면 <span class="dot" style="background:#e7f5ff"></span></div>
           <div class="hint">드래그해서 돌려보기</div>
         </div>
       </div>
@@ -136,19 +136,19 @@
           <div class="stat"><div class="k">현재 해수면</div><div class="v" id="now">-</div></div>
           <div class="stat"><div class="k">만조 (시각 · 높이)</div><div class="v" id="highs">-</div></div>
           <div class="stat"><div class="k">간조 (시각 · 높이)</div><div class="v" id="lows">-</div></div>
-          <div class="stat"><div class="k">조차 · 일조부등</div><div class="v" id="range">-</div></div>
+          <div class="stat"><div class="k">조차</div><div class="v" id="range">-</div></div>
         </div>
       </div>
 
       <div class="card wide explain">
         <h2>원리</h2>
-        <p>달의 인력과 원심력의 차이(기조력)로 바닷물은 달 쪽과 반대쪽으로 부풀어 오른 타원체 모양이 됩니다. 지구가 자전하면 관측 지점이 이 부푼 곳(만조)과 꺼진 곳(간조)을 차례로 지나갑니다.</p>
+        <p>달의 인력과 원심력의 합력인 <a href="../tidal-force/">기조력</a>으로 바닷물은 달 쪽과 그 반대쪽이 부풀어 오른 타원체 모양이 됩니다. 지구가 자전하면 관측 지점이 부푼 곳(만조)과 낮은 곳(간조)을 차례로 지나갑니다. 달도 공전하므로 달이 같은 위치에 다시 올 때까지 약 24시간 50분이 걸리고, 조석 주기는 그 절반인 약 12시간 25분입니다.</p>
         <ul>
-          <li><b>달의 적위가 0°</b>이면 타원체의 축이 적도면에 놓여, 어느 위도에서나 두 번의 만조 높이가 같습니다 → <b>반일주조</b></li>
-          <li><b>적위가 커지면</b> 축이 기울어, 중위도에서는 하루 두 번의 만조 높이가 달라집니다(일조부등) → <b>혼합조</b></li>
-          <li><b>고위도에서 적위가 크면</b> 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번만 만조가 됩니다 → <b>일주조</b></li>
+          <li><b>달의 적위가 0°</b>이면 타원체의 축이 적도면에 놓여, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
+          <li>달의 공전 궤도면과 지구의 적도면이 일치하지 않아 <b>적위가 생기면</b> 축이 기울어, 두 번의 만조·간조 때 해수면 높이가 달라집니다 → 조차가 다른 <b>혼합조</b></li>
+          <li><b>고위도에서 적위가 크면</b> 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
         </ul>
-        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다(태양 조석, 해안 지형, 바다의 공명 효과는 제외). 실제 조차는 지형에 따라 수 m까지 커집니다. 하루 동안 달의 적위는 일정하다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
+        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 하루 동안 달의 적위는 일정하다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
       </div>
     </section>
   </div>
@@ -190,13 +190,26 @@ function extrema(xs, ys){
   }
   return { highs, lows };
 }
-function classify(highs, range){
-  if (range < 0.5 || highs.length === 0) return { name:'조석 거의 없음', cls:'none', ineq:0 };
-  if (highs.length === 1) return { name:'일주조', cls:'diurnal', ineq:1 };
-  const hs = highs.map(o => o.h).sort((a,b) => b-a);
-  const ineq = (hs[0] - hs[1]) / range;
-  if (ineq < 0.1) return { name:'반일주조', cls:'semi', ineq };
-  return { name:'혼합조', cls:'mixed', ineq };
+/* 조차: 연속되는 만조와 간조 사이의 해수면 높이 차 */
+function ranges(ex){
+  const ev = [...ex.highs.map(o => ({ ...o, k:'H' })), ...ex.lows.map(o => ({ ...o, k:'L' }))].sort((a,b) => a.t - b.t);
+  const out = [];
+  for (let i = 0; i < ev.length; i++){
+    const a = ev[i], b = ev[(i+1) % ev.length];
+    if (a.k !== b.k) out.push({ from:a, to:b, r:Math.abs(a.h - b.h) });
+  }
+  return out;
+}
+/* 교과서 기준: 일주조(만조·간조 1회) / 반일주조(2회, 조차 비슷) / 혼합조(2회, 조차 다름) */
+function classify(ex, range){
+  if (range < 0.5 || ex.highs.length === 0) return { name:'조석 거의 없음', cls:'none' };
+  if (ex.highs.length === 1) return { name:'일주조', cls:'diurnal' };
+  const rs = ranges(ex).map(o => o.r);
+  const spread = (Math.max(...rs) - Math.min(...rs)) / Math.max(...rs);
+  return spread < 0.1 ? { name:'반일주조', cls:'semi' } : { name:'혼합조', cls:'mixed' };
+}
+function tideRanges(ex){
+  return ranges(ex).map(o => `${fmtT(o.from.t)}→${fmtT(o.to.t)} ${o.r.toFixed(1)} cm`).join('\n');
 }
 const fmtT = t => { let m = Math.round(t*60) % Math.round(T*60); const h = Math.floor(m/60); m = m%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
 const fmtH = h => `${h >= 0 ? '+' : ''}${h.toFixed(1)} cm`;
@@ -277,13 +290,13 @@ function updateWater(){
   }
   waterGeo.attributes.position.needsUpdate = true;
   waterGeo.computeVertexNormals();
-  moon.position.copy(moonDir).multiplyScalar(2.6);
-  moonLine.geometry.setFromPoints([moonDir.clone().multiplyScalar(-2.2), moonDir.clone().multiplyScalar(2.45)]);
+  moon.position.copy(moonDir).multiplyScalar(2.05);
+  moonLine.geometry.setFromPoints([moonDir.clone().multiplyScalar(-1.75), moonDir.clone().multiplyScalar(1.9)]);
   moonLine.computeLineDistances();
 }
 
 // 달
-const moon = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 24), new THREE.MeshBasicMaterial({ color:0xffe08a }));
+const moon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 24), new THREE.MeshBasicMaterial({ color:0xffe08a }));
 world.add(moon);
 const moonLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color:0xffe08a, dashSize:0.08, gapSize:0.06, transparent:true, opacity:0.8 }));
 world.add(moonLine);
@@ -291,10 +304,26 @@ world.add(moonLine);
 // 관측 위도선 + 관측 지점
 const latRing = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xff8787, transparent:true, opacity:0.9 }));
 world.add(latRing);
-const marker = new THREE.Mesh(new THREE.SphereGeometry(0.055, 20, 16), new THREE.MeshBasicMaterial({ color:0xff6b6b }));
-world.add(marker);
-const stick = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xff6b6b }));
-world.add(stick);
+// 사람 모양 (발 = 원점, 머리 = +y)
+function makePerson(){
+  const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color:0xff6b6b });
+  const part = (geo, x, y, z, rz = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.z = rz; g.add(o); };
+  const limb = (len, r) => new THREE.CylinderGeometry(r, r, len, 10);
+  part(limb(0.11, 0.011), -0.018, 0.055, 0, 0.12);   // 다리
+  part(limb(0.11, 0.011),  0.018, 0.055, 0, -0.12);
+  part(new THREE.CylinderGeometry(0.026, 0.022, 0.1, 12), 0, 0.16, 0);  // 몸통
+  part(limb(0.09, 0.009), -0.042, 0.17, 0, 0.45);    // 팔
+  part(limb(0.09, 0.009),  0.042, 0.17, 0, -0.45);
+  part(new THREE.SphereGeometry(0.027, 16, 12), 0, 0.24, 0);            // 머리
+  g.scale.setScalar(1.25);
+  return g;
+}
+const person = makePerson();
+world.add(person);
+// 관측 지점의 해수면 높이 고리
+const level = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.008, 8, 40), new THREE.MeshBasicMaterial({ color:0xe7f5ff }));
+world.add(level);
+const UP = new THREE.Vector3(0, 1, 0);
 
 function updateLatRing(){
   const p = S.lat*D2R;
@@ -307,8 +336,11 @@ function updateMarker(){
   const dir = new THREE.Vector3(Math.cos(p)*Math.cos(H), Math.sin(p), -Math.cos(p)*Math.sin(H));
   const c = dir.dot(moonDir);
   const r = waterR(c);
-  marker.position.copy(dir).multiplyScalar(r);
-  stick.geometry.setFromPoints([dir.clone().multiplyScalar(0.94), dir.clone().multiplyScalar(r)]);
+  const q = new THREE.Quaternion().setFromUnitVectors(UP, dir);
+  person.quaternion.copy(q);
+  person.position.copy(dir).multiplyScalar(0.94);
+  level.quaternion.copy(q).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), Math.PI/2));
+  level.position.copy(dir).multiplyScalar(r);
 }
 
 function makeLabel(text, color){
@@ -379,7 +411,7 @@ function recompute(){
   const { xs, ys } = series();
   const ex = extrema(xs, ys);
   const max = Math.max(...ys), min = Math.min(...ys), range = max - min;
-  cache = { ex, range, cls:classify(ex.highs, range) };
+  cache = { ex, range, cls:classify(ex, range) };
   chart.data.datasets[0].data = xs.map((x,i) => ({ x, y:ys[i] }));
   chart.data.datasets[1].data = range < 0.5 ? [] : ex.highs.map(o => ({ x:o.t, y:o.h }));
   chart.data.datasets[2].data = range < 0.5 ? [] : ex.lows.map(o => ({ x:o.t, y:o.h }));
@@ -390,7 +422,7 @@ function recompute(){
   $('highs').textContent = list(ex.highs);
   $('lows').textContent = list(ex.lows);
   $('range').textContent = range < 0.5 ? '-' :
-    `조차 ${range.toFixed(1)} cm\n` + (c.cls === 'diurnal' ? '만조 1회' : `두 만조 차 ${(c.ineq*range).toFixed(1)} cm`);
+    tideRanges(ex);
   updateWater(); updateLatRing();
 }
 function refreshTime(){

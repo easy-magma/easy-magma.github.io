@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>② 원심력 · 기조력 · Easy Magma</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a href="../gravity/">① 달의 인력</a>
+    <a class="on" href="../centrifugal/">② 원심력</a>
+    <a href="../">③ 기조력 (합력)</a>
+    <a href="../../tide/">④ 위도별 조석 형태</a>
+  </nav>
+  <h1>② 원심력: 지구의 모든 지점에서 같다</h1>
+  <p class="sub">지구와 달은 공통 질량 중심을 중심으로 회전합니다. 이 회전 운동으로 생긴 관성력이 원심력입니다.</p>
+
+  <div class="layout">
+    <div class="card">
+      <div class="stage"><canvas id="cv"></canvas></div>
+    </div>
+    <aside class="side">
+      <div class="card">
+        <h2>보기 설정</h2>
+        <div class="row" style="margin-bottom:12px">
+          <button class="primary" id="play">⏸ 일시정지</button>
+        </div>
+        <label class="check"><input type="checkbox" id="trail" checked> 지점별 공전 궤도</label>
+        <label class="check"><input type="checkbox" id="force" checked> <span class="sw" style="background:var(--cent)"></span> 원심력</label>
+        <label class="check"><input type="checkbox" id="grav"> <span class="sw" style="background:var(--grav)"></span> 지구 중심의 달 인력</label>
+        <p class="note">기조력을 설명하기 위해 지구의 <b>자전은 빼고</b> 공전 운동만 보여 줍니다. 지구 위의 십자 표시가 항상 같은 방향을 유지하는 것을 확인하세요.</p>
+      </div>
+      <div class="card readout">
+        <h2>공통 질량 중심</h2>
+        <div><span>위치</span><b>지구 안쪽</b></div>
+        <div><span>지표면에서 깊이</span><b>약 1,650 km</b></div>
+        <div><span>지구 중심에서 거리</span><b>약 4,700 km</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="card explain">
+    <h2>정리</h2>
+    <ul>
+      <li>지구의 질량이 달보다 매우 크므로, 공통 질량 중심(+)은 지구 안쪽 약 1,650 km에 있습니다.</li>
+      <li>지구는 공통 질량 중심을 중심으로 회전합니다. 이때 지구는 방향을 바꾸지 않고 평행 이동합니다.</li>
+      <li>그래서 지구의 <b>모든 지점이 같은 크기의 원</b>을 같은 주기로 돌고, 지구의 원심력은 <b>지표면 어디서나 같은 크기</b>이며 방향도 같습니다.</li>
+      <li>원심력의 방향은 항상 <b>달의 반대쪽</b>입니다.</li>
+    </ul>
+    <div class="key">원심력의 크기는 <b>지구 중심이 받는 달의 인력과 같고 방향은 반대</b>입니다. 그래서 지구 중심에서는 두 힘이 평형을 이루고, 지구는 달에 떨어지지 않습니다.</div>
+    <p class="note">주의: 여기서 말하는 원심력은 지구 <b>자전</b>에 의한 원심력이 아니라, 지구–달 <b>공전</b>에 의한 원심력입니다. 그렇다면 지구 중심이 아닌 다른 지점에서는 두 힘이 어떻게 될까요? → ③ 기조력</p>
+  </div>
+
+  <div class="next"><a href="../gravity/">← ① 달의 인력</a><a href="../">③ 기조력으로 →</a></div>
+</div>
+
+<script src="../common.js"></script>
+<script>
+const S = { theta:0, playing:true, trail:true, force:true, grav:false };
+const RB = 0.74;          // 공통 질량 중심: 지구 중심에서 약 0.74 R (지표면 아래 약 1,650 km)
+const pts = TF.points(12);
+const tracked = [ {x:0,y:0}, {x:1,y:0}, {x:0,y:1}, {x:-1,y:0}, {x:0,y:-1} ];
+const trackColors = ['#e8590c','#2f9e44','#1c7ed6','#ae3ec9','#f08c00'];
+
+const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const bx = w*0.5, by = h*0.5;
+  const R = Math.min(h*0.2, w*0.13);
+  const Lm = Math.min(h*0.44, w*0.4);          // 달 궤도(축척 아님)
+  const ux = Math.cos(S.theta), uy = Math.sin(S.theta);   // 달 방향
+  const ex = bx - RB*R*ux, ey = by + RB*R*uy;            // 지구 중심
+  const toX = x => ex + x*R, toY = y => ey - y*R;
+  const L0 = R*0.55;
+
+  // 달 궤도
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,6]);
+  ctx.beginPath(); ctx.arc(bx, by, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+
+  // 각 지점의 공전 궤도 (모두 반지름 같음)
+  if (S.trail){
+    tracked.forEach((p, i) => {
+      ctx.save(); ctx.strokeStyle = trackColors[i]; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(bx + p.x*R, by - p.y*R, RB*R, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+    });
+  }
+
+  TF.earth(ctx, ex, ey, R);
+  // 방향 유지 표시(십자)
+  ctx.save(); ctx.strokeStyle = TF.css('--fg'); ctx.globalAlpha = 0.35; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(ex - R*0.96, ey); ctx.lineTo(ex + R*0.96, ey); ctx.moveTo(ex, ey - R*0.96); ctx.lineTo(ex, ey + R*0.96); ctx.stroke(); ctx.restore();
+
+  // 공통질량중심
+  ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(bx - 7, by); ctx.lineTo(bx + 7, by); ctx.moveTo(bx, by - 7); ctx.lineTo(bx, by + 7); ctx.stroke(); ctx.restore();
+
+  if (S.force){
+    for (const p of pts){
+      const x = toX(p.x), y = toY(p.y);
+      TF.arrow(ctx, x, y, x - ux*L0, y + uy*L0, TF.css('--cent'), p.center ? 3.5 : 2.5);
+    }
+  }
+  if (S.grav) TF.arrow(ctx, ex, ey, ex + ux*L0, ey - uy*L0, TF.css('--grav'), 3.5);
+  tracked.forEach((p, i) => TF.dot(ctx, toX(p.x), toY(p.y), 4.5, trackColors[i]));
+
+  TF.moon(ctx, bx + Lm*ux, by - Lm*uy, Math.max(10, R*0.27));
+
+  // 범례
+  let ly = 20;
+  const leg = (draw, label) => { draw(ly); TF.text(ctx, label, 52, ly + 4, TF.css('--fg')); ly += 20; };
+  leg(y => { ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(22, y - 6); ctx.lineTo(22, y + 6); ctx.moveTo(16, y); ctx.lineTo(28, y); ctx.stroke(); ctx.restore(); }, '공통 질량 중심');
+  if (S.force) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--cent'), 2.5), '원심력');
+  if (S.grav) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--grav'), 2.5), '지구 중심의 달 인력');
+  TF.text(ctx, '그림은 축척이 아님', w - 10, h - 10, TF.css('--muted'), 'right', 11);
+});
+
+const $ = id => document.getElementById(id);
+$('play').addEventListener('click', () => { S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 일시정지' : '▶ 재생'; last = null; });
+['trail','force','grav'].forEach(k => $(k).addEventListener('change', e => { S[k] = e.target.checked; st.redraw(); }));
+
+let last = null;
+function loop(ts){
+  if (S.playing){
+    if (last !== null) S.theta = (S.theta + (ts - last)/1000 * 2*Math.PI/14) % (2*Math.PI);
+    last = ts; st.redraw();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
