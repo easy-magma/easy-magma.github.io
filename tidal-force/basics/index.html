@@ -39,46 +39,12 @@
     <a href="../tilt/">④ 조차가 다른 까닭</a>
     <a href="../../tide/">⑤ 위도별 조석 형태</a>
   </nav>
-  <h1>⓪ 기초 개념: 위도, 자전과 공전</h1>
+  <h1>⓪ 기초 개념: 자전과 공전, 위도</h1>
   <p class="sub">조석을 배우기 전에 꼭 필요한 낱말들을 먼저 익혀 봅시다.</p>
 
-  <!-- 1. 위도 -->
+  <!-- 1. 자전과 공전 -->
   <section>
-    <h2 class="sec">1. 위도와 적도</h2>
-    <div class="layout">
-      <div class="card"><div class="stage"><canvas id="cv1"></canvas></div></div>
-      <aside class="side">
-        <div class="card">
-          <h2>위도 바꿔 보기</h2>
-          <div class="ctl">
-            <label>위도 <b id="latV">북위 37.5°</b></label>
-            <input type="range" id="lat" min="-90" max="90" step="0.5" value="37.5">
-            <div class="ticks"><span>남극 90°S</span><span>적도 0°</span><span>북극 90°N</span></div>
-          </div>
-          <div class="row" style="margin-bottom:12px">
-            <button data-lat="0">적도</button>
-            <button data-lat="37.5">서울</button>
-            <button data-lat="64">아이슬란드</button>
-            <button data-lat="90">북극</button>
-          </div>
-          <div class="big" id="zoneTxt">-</div>
-          <label class="check"><input type="checkbox" id="bands" checked> 저위도·중위도·고위도 색칠</label>
-        </div>
-      </aside>
-    </div>
-    <div class="card explain">
-      <div class="terms">
-        <div class="term"><b>자전축</b>지구가 자전할 때 중심이 되는 축. 북극과 남극을 잇는다.</div>
-        <div class="term"><b>적도</b>북극과 남극의 한가운데를 지나는 선. 위도 0°이다. 적도가 놓인 평면이 <b style="display:inline;font-size:14px">적도면</b>이다.</div>
-        <div class="term"><b>위도</b>적도에서 남북으로 얼마나 떨어졌는지를 지구 중심에서 잰 각도. 북쪽은 북위(N), 남쪽은 남위(S), 0°~90°.</div>
-        <div class="term"><b>저위도 · 중위도 · 고위도</b>대략 0°~30°는 저위도, 30°~60°는 중위도, 60°~90°는 고위도로 나눈다. 우리나라는 중위도.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. 자전과 공전 -->
-  <section>
-    <h2 class="sec">2. 자전과 공전</h2>
+    <h2 class="sec">1. 지구의 자전과 달의 공전</h2>
     <div class="layout">
       <div class="card"><div class="stage"><canvas id="cv2"></canvas></div></div>
       <aside class="side">
@@ -104,15 +70,49 @@
     <div class="card explain">
       <div class="terms">
         <div class="term"><b>자전</b>천체가 스스로 자전축을 중심으로 도는 운동. 지구는 하루에 한 바퀴, 서쪽에서 동쪽으로 돈다.</div>
+        <div class="term"><b>자전축</b>지구가 자전할 때 중심이 되는 축. 북극과 남극을 잇는다.</div>
         <div class="term"><b>공전</b>한 천체가 다른 천체 주위를 도는 운동. 달은 지구 주위를 약 한 달(약 27.3일)에 한 바퀴 돈다.</div>
         <div class="term"><b>왜 조석 주기는 하루가 아닐까?</b>지구가 한 바퀴 자전하는 동안 달도 공전으로 조금 앞서가서, 달이 같은 위치에 다시 오려면 약 50분이 더 걸린다 → 약 24시간 50분.</div>
       </div>
     </div>
   </section>
 
-  <!-- 2-1. 달의 남중 -->
+  <!-- 2. 위도 -->
   <section>
-    <h2 class="sec">2-1. 달이 다시 남중하기까지</h2>
+    <h2 class="sec">2. 위도와 적도</h2>
+    <div class="layout">
+      <div class="card"><div class="stage"><canvas id="cv1"></canvas></div></div>
+      <aside class="side">
+        <div class="card">
+          <h2>위도 바꿔 보기</h2>
+          <div class="ctl">
+            <label>위도 <b id="latV">북위 37.5°</b></label>
+            <input type="range" id="lat" min="-90" max="90" step="0.5" value="37.5">
+            <div class="ticks"><span>남극 90°S</span><span>적도 0°</span><span>북극 90°N</span></div>
+          </div>
+          <div class="row" style="margin-bottom:12px">
+            <button data-lat="0">적도</button>
+            <button data-lat="37.5">서울</button>
+            <button data-lat="64">아이슬란드</button>
+            <button data-lat="90">북극</button>
+          </div>
+          <div class="big" id="zoneTxt">-</div>
+          <label class="check"><input type="checkbox" id="bands" checked> 저위도·중위도·고위도 색칠</label>
+        </div>
+      </aside>
+    </div>
+    <div class="card explain">
+      <div class="terms">
+        <div class="term"><b>적도</b>자전축의 양 끝인 북극과 남극의 한가운데를 지나는 선. 위도 0°이다. 적도가 놓인 평면이 <b style="display:inline;font-size:14px">적도면</b>이다.</div>
+        <div class="term"><b>위도</b>적도에서 남북으로 얼마나 떨어졌는지를 지구 중심에서 잰 각도. 북쪽은 북위(N), 남쪽은 남위(S), 0°~90°.</div>
+        <div class="term"><b>저위도 · 중위도 · 고위도</b>대략 0°~30°는 저위도, 30°~60°는 중위도, 60°~90°는 고위도로 나눈다. 우리나라는 중위도.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 달의 남중 -->
+  <section>
+    <h2 class="sec">3. 달이 다시 남중하기까지</h2>
     <div class="layout">
       <div class="card"><div class="stage"><canvas id="cv3"></canvas></div></div>
       <aside class="side">
@@ -146,9 +146,9 @@
     </div>
   </section>
 
-  <!-- 3. 퀴즈 -->
+  <!-- 4. 퀴즈 -->
   <section>
-    <h2 class="sec">3. 확인 퀴즈</h2>
+    <h2 class="sec">4. 확인 퀴즈</h2>
     <div class="card">
       <div class="qhead"><span id="qnum">-</span><span class="qstars" id="qstars"></span></div>
       <div class="q" id="q">-</div>
@@ -372,12 +372,12 @@ setMsg();
 
 /* ===== 3. 퀴즈 ===== */
 const QUIZ = [
-  { q:'적도의 위도는?', o:['0°','30°','60°','90°'], a:0, e:'적도는 위도의 기준선으로 0°입니다.' },
-  { q:'우리나라(서울, 약 북위 37.5°)는 어디에 속할까?', o:['저위도','중위도','고위도','적도'], a:1, e:'30°~60°는 중위도입니다.' },
-  { q:'북극의 위도는?', o:['0°','45°N','90°N','180°N'], a:2, e:'위도는 최대 90°까지입니다.' },
   { q:'지구가 자전축을 중심으로 스스로 도는 운동은?', o:['공전','자전','조석','회전 궤도'], a:1, e:'스스로 도는 것은 자전, 다른 천체 주위를 도는 것은 공전입니다.' },
   { q:'달이 지구 주위를 도는 운동은?', o:['자전','공전','조석','기조력'], a:1, e:'달은 약 한 달에 한 번 지구 주위를 공전합니다.' },
   { q:'지구는 하루에 몇 바퀴 자전할까?', o:['½ 바퀴','1 바퀴','2 바퀴','27.3 바퀴'], a:1, e:'지구는 하루에 한 바퀴 자전합니다.' },
+  { q:'적도의 위도는?', o:['0°','30°','60°','90°'], a:0, e:'적도는 위도의 기준선으로 0°입니다.' },
+  { q:'우리나라(서울, 약 북위 37.5°)는 어디에 속할까?', o:['저위도','중위도','고위도','적도'], a:1, e:'30°~60°는 중위도입니다.' },
+  { q:'북극의 위도는?', o:['0°','45°N','90°N','180°N'], a:2, e:'위도는 최대 90°까지입니다.' },
   { q:'달이 다시 같은 위치에 오는 데 하루(24시간)보다 오래 걸리는 까닭은?', o:['지구가 공전하지 않아서','달도 그동안 공전해서','달이 자전하지 않아서','적도가 기울어서'], a:1, e:'지구가 한 바퀴 자전하는 동안 달도 공전하여 앞서가므로 약 50분이 더 걸립니다.' },
 ];
 const Q = { i:0, score:0, done:false };
