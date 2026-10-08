@@ -93,3 +93,15 @@ TF.dot = (ctx, x, y, r, color) => { ctx.save(); ctx.fillStyle = color; ctx.begin
 TF.text = (ctx, s, x, y, color, align = 'left', size = 12) => {
   ctx.save(); ctx.fillStyle = color; ctx.font = `${size}px "Noto Sans KR", sans-serif`; ctx.textAlign = align; ctx.fillText(s, x, y); ctx.restore();
 };
+
+/* 사람(관측자) 모양: 발 (x, y), 머리 방향 단위벡터 (nx, ny) — 화면 좌표 */
+TF.person = (ctx, x, y, nx, ny, size, color) => {
+  const tx = -ny, ty = nx, P = (u, v) => [x + nx*u*size + tx*v*size, y + ny*u*size + ty*v*size];
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = Math.max(2, size*0.13); ctx.lineCap = 'round';
+  const line = (a, b) => { ctx.beginPath(); ctx.moveTo(...P(...a)); ctx.lineTo(...P(...b)); ctx.stroke(); };
+  line([0, -0.2], [0.45, 0]); line([0, 0.2], [0.45, 0]);
+  line([0.45, 0], [0.85, 0]);
+  line([0.72, -0.28], [0.62, 0]); line([0.72, 0.28], [0.62, 0]);
+  const [hx, hy] = P(1.0, 0); ctx.beginPath(); ctx.arc(hx, hy, size*0.16, 0, 2*Math.PI); ctx.fill();
+  ctx.restore();
+};

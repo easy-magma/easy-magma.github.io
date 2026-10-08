@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⓪ 기초 개념 · Easy Magma</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../common.css?v=2">
+<link rel="stylesheet" href="../common.css?v=3">
 <style>
   .zone{display:inline-block;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
   .z-eq{background:#e8590c} .z-low{background:#f08c00} .z-mid{background:#2f9e44} .z-high{background:#1c7ed6}
@@ -138,7 +138,7 @@
     </div>
     <div class="card explain">
       <ul>
-        <li><b>남중</b>: 천체가 관측자의 정남쪽 하늘에 와서 가장 높이 뜬 때. 그림에서는 관측자(빨간 점)가 달을 똑바로 바라보는 순간입니다.</li>
+        <li><b>남중</b>: 천체가 관측자의 정남쪽 하늘에 와서 가장 높이 뜬 때. 그림에서는 관측자(빨간 사람)가 달을 똑바로 바라보는 순간입니다.</li>
         <li>24시간 동안 지구는 한 바퀴(360°) 자전해 관측자가 제자리로 돌아오지만, 그동안 달도 같은 방향으로 약 12° 공전해 앞서 있습니다.</li>
         <li>관측자가 이 12°를 더 따라가는 데 약 50분이 걸려서, 달은 <b>약 24시간 50분</b>마다 남중합니다. → 조석 주기는 그 절반인 약 12시간 25분</li>
       </ul>
@@ -160,7 +160,7 @@
   <div class="next"><span></span><a href="../gravity/">① 달의 인력으로 →</a></div>
 </div>
 
-<script src="../common.js?v=2"></script>
+<script src="../common.js?v=3"></script>
 <script>
 const D2R = Math.PI/180;
 const $ = id => document.getElementById(id);
@@ -251,8 +251,8 @@ const st2 = TF.stage($('cv2'), (ctx, w, h) => {
   ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
   ctx.restore();
   // 관측자
-  const ox = cx + R*Math.cos(-spin)*1.0, oy = cy + R*Math.sin(-spin)*1.0;
-  TF.dot(ctx, ox, oy, 6, TF.css('--cent'));
+  const ox = cx + R*Math.cos(-spin), oy = cy + R*Math.sin(-spin);
+  TF.person(ctx, ox, oy, Math.cos(-spin), Math.sin(-spin), R*0.42, TF.css('--cent'));
   TF.dot(ctx, cx, cy, 3, TF.css('--fg'));
   TF.text(ctx, '북극', cx, cy - 8, TF.css('--fg'), 'center', 11);
   // 자전 방향 화살표
@@ -271,7 +271,7 @@ const st2 = TF.stage($('cv2'), (ctx, w, h) => {
     ctx.save(); ctx.strokeStyle = TF.css('--grav'); ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
     ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, -(orb % (2*Math.PI)), true); ctx.stroke(); ctx.restore();
   }
-  TF.text(ctx, '빨간 점: 관측자', 10, h - 10, TF.css('--muted'), 'left', 11);
+  TF.text(ctx, '빨간 사람: 관측자', 10, h - 10, TF.css('--muted'), 'left', 11);
   $('days').textContent = M.mode === 'orbit' ? '-' : `${Math.floor(M.day)} 바퀴`;
   $('dayTxt').textContent = `${M.day.toFixed(1)} 일`;
   $('moonTxt').textContent = M.mode === 'spin' ? '-' : `${Math.min(100, (M.day % MOON_DAYS)/MOON_DAYS*100).toFixed(0)} %`;
@@ -322,7 +322,7 @@ const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   ctx.beginPath(); ctx.ellipse(R*0.35, -R*0.1, R*0.38, R*0.26, 0.4, 0, 2*Math.PI); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-R*0.4, R*0.35, R*0.25, R*0.18, -0.3, 0, 2*Math.PI); ctx.fill();
   ctx.restore();
-  const [ox, oy] = P(ea, R); TF.dot(ctx, ox, oy, 7, TF.css('--cent'));
+  const [ox, oy] = P(ea, R); TF.person(ctx, ox, oy, Math.cos(-ea), Math.sin(-ea), R*0.45, TF.css('--cent'));
   const [mx, my] = P(ma, Lm); TF.moon(ctx, mx, my, Math.max(9, R*0.3));
   // 남중 표시
   if (TS.flash > 0){
@@ -332,7 +332,7 @@ const st3 = TF.stage($('cv3'), (ctx, w, h) => {
   }
   // 시계
   TF.text(ctx, fmtHM(TS.t), 12, 24, TF.css('--fg'), 'left', 18);
-  TF.text(ctx, '북극 위에서 본 모습 · 빨간 점: 관측자', 12, h - 10, TF.css('--muted'), 'left', 11);
+  TF.text(ctx, '북극 위에서 본 모습 · 빨간 사람: 관측자', 12, h - 10, TF.css('--muted'), 'left', 11);
   $('tClock').textContent = fmtHM(TS.t);
   $('tEarth').textContent = `${(TS.t*W_E).toFixed(0)}°`;
   $('tMoon').textContent = `${(TS.t*W_M).toFixed(1)}°`;
