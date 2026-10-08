@@ -6,6 +6,15 @@
 <title>② 원심력 · 기조력 · Easy Magma</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../common.css">
+<style>
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;background:var(--bg)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
+  .modeNote{font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:12px}
+  .activity{border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:12px 0}
+  .activity b.t{display:block;color:var(--accent);margin-bottom:4px}
+  .activity ol{padding-left:20px}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -25,14 +34,20 @@
     </div>
     <aside class="side">
       <div class="card">
-        <h2>보기 설정</h2>
+        <h2>운동 방식</h2>
+        <div class="seg">
+          <button class="on" data-mode="revolve">실제: 평행 이동</button>
+          <button data-mode="rotate">비교: 회전</button>
+        </div>
+        <div class="modeNote" id="modeNote"></div>
         <div class="row" style="margin-bottom:12px">
           <button class="primary" id="play">⏸ 일시정지</button>
+          <button id="restart">궤적 다시 그리기</button>
         </div>
-        <label class="check"><input type="checkbox" id="trail" checked> 지점별 공전 궤도</label>
+        <label class="check"><input type="checkbox" id="trail" checked> 다섯 지점의 궤적</label>
+        <label class="check"><input type="checkbox" id="stack"> 궤적을 한 곳에 겹쳐 보기</label>
         <label class="check"><input type="checkbox" id="force" checked> <span class="sw" style="background:var(--cent)"></span> 원심력</label>
         <label class="check"><input type="checkbox" id="grav"> <span class="sw" style="background:var(--grav)"></span> 지구 중심의 달 인력</label>
-        <p class="note">기조력을 설명하기 위해 지구의 <b>자전은 빼고</b> 공전 운동만 보여 줍니다. 지구 위의 십자 표시가 항상 같은 방향을 유지하는 것을 확인하세요.</p>
       </div>
       <div class="card readout">
         <h2>공통 질량 중심</h2>
@@ -47,12 +62,24 @@
     <h2>정리</h2>
     <ul>
       <li>지구의 질량이 달보다 매우 크므로, 공통 질량 중심(+)은 지구 안쪽 약 1,650 km에 있습니다.</li>
-      <li>지구는 공통 질량 중심을 중심으로 회전합니다. 이때 지구는 방향을 바꾸지 않고 평행 이동합니다.</li>
-      <li>그래서 지구의 <b>모든 지점이 같은 크기의 원</b>을 같은 주기로 돌고, 지구의 원심력은 <b>지표면 어디서나 같은 크기</b>이며 방향도 같습니다.</li>
-      <li>원심력의 방향은 항상 <b>달의 반대쪽</b>입니다.</li>
+      <li>지구는 이 점을 중심으로 회전하지만, 지구 자체가 빙글 돌아가는 것이 아니라 <b>방향을 유지한 채 원을 그리며 평행 이동</b>합니다. (지구 위 십자 표시를 보세요.)</li>
+      <li>평행 이동이므로 지구의 <b>모든 지점이 같은 크기의 원</b>을 같은 주기로 그립니다. 원의 중심만 지점마다 다를 뿐입니다. → "궤적을 한 곳에 겹쳐 보기"로 확인</li>
+      <li>같은 크기의 원을 같은 주기로 돌면 원심력도 같습니다. 그래서 지구의 원심력은 <b>지표면 어디서나 크기와 방향이 같고</b>, 방향은 항상 <b>달의 반대쪽</b>입니다.</li>
     </ul>
-    <div class="key">원심력의 크기는 <b>지구 중심이 받는 달의 인력과 같고 방향은 반대</b>입니다. 그래서 지구 중심에서는 두 힘이 평형을 이루고, 지구는 달에 떨어지지 않습니다.</div>
-    <p class="note">주의: 여기서 말하는 원심력은 지구 <b>자전</b>에 의한 원심력이 아니라, 지구–달 <b>공전</b>에 의한 원심력입니다. 그렇다면 지구 중심이 아닌 다른 지점에서는 두 힘이 어떻게 될까요? → ③ 기조력</p>
+    <div class="key">흔한 오해: "공통 질량 중심에서 먼 곳일수록 원심력이 크지 않나?" → 그것은 지구가 <b>회전</b>할 때의 이야기입니다. "비교: 회전"을 눌러 보면 궤적의 크기와 원심력이 지점마다 달라집니다. 실제 지구의 공전 운동은 <b>평행 이동</b>이라서 모든 지점이 같습니다.</div>
+
+    <div class="activity">
+      <b class="t">✋ 직접 해 보기: 공책 실험</b>
+      <ol>
+        <li>책상 위에 공책을 놓고 네 모서리에 서로 다른 색으로 점을 찍는다.</li>
+        <li>공책을 <b>돌리지 않고</b>(글씨 방향 유지) 손바닥으로 밀어 작은 원을 그리며 움직인다.</li>
+        <li>네 점이 그리는 원의 크기를 비교해 본다. → 모두 같다!</li>
+        <li>이번에는 공책의 한 점을 손가락으로 누르고 <b>돌려</b> 본다. → 누른 점에서 먼 모서리일수록 큰 원을 그린다.</li>
+      </ol>
+    </div>
+
+    <div class="key">원심력의 크기는 <b>지구 중심이 받는 달의 인력과 같고 방향은 반대</b>입니다. 그래서 지구 중심에서는 두 힘이 평형을 이룹니다.</div>
+    <p class="note">주의: 여기서 말하는 원심력은 지구 <b>자전</b>에 의한 원심력이 아니라, 지구와 달의 공통 질량 중심을 도는 운동에 의한 원심력입니다. 그렇다면 지구 중심이 아닌 다른 지점에서는 두 힘이 어떻게 될까요? → ③ 기조력</p>
   </div>
 
   <div class="next"><a href="../gravity/">← ① 달의 인력</a><a href="../">③ 기조력으로 →</a></div>
@@ -60,75 +87,134 @@
 
 <script src="../common.js"></script>
 <script>
-const S = { theta:0, playing:true, trail:true, force:true, grav:false };
-const RB = 0.74;          // 공통 질량 중심: 지구 중심에서 약 0.74 R (지표면 아래 약 1,650 km)
+const S = { theta:0, theta0:0, playing:true, mode:'revolve', trail:true, stack:false, force:true, grav:false };
+const RB = 0.74;   // 공통 질량 중심: 지구 중심에서 약 0.74 R
 const pts = TF.points(12);
 const tracked = [ {x:0,y:0}, {x:1,y:0}, {x:0,y:1}, {x:-1,y:0}, {x:0,y:-1} ];
 const trackColors = ['#e8590c','#2f9e44','#1c7ed6','#ae3ec9','#f08c00'];
+const NOTES = {
+  revolve:'지구가 방향을 유지한 채 원을 그리며 움직입니다. 다섯 지점의 궤적 크기가 모두 같습니다.',
+  rotate:'만약 지구가 공통 질량 중심을 축으로 빙글 <b>회전</b>한다면? 중심에서 먼 지점일수록 큰 원을 그리고 원심력도 커집니다. (실제와 다른 비교용)'
+};
+
+/* 지점 o(지구 반지름 단위)의 화면 위치 */
+function pos(o, th, g){
+  if (S.mode === 'revolve'){
+    // 지구 중심 = B − RB·u (u: 달 방향), 지구 방향은 고정
+    return { x: g.bx - RB*g.R*Math.cos(th) + o.x*g.R, y: g.by + RB*g.R*Math.sin(th) - o.y*g.R };
+  }
+  // 회전: 지구 전체가 B를 축으로 회전 (θ=0일 때 지구 중심은 B의 왼쪽)
+  const lx = -RB + o.x, ly = o.y, c = Math.cos(th), s = Math.sin(th);
+  return { x: g.bx + (lx*c - ly*s)*g.R, y: g.by - (lx*s + ly*c)*g.R };
+}
 
 const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
   ctx.clearRect(0, 0, w, h);
-  const bx = w*0.5, by = h*0.5;
-  const R = Math.min(h*0.2, w*0.13);
-  const Lm = Math.min(h*0.44, w*0.4);          // 달 궤도(축척 아님)
-  const ux = Math.cos(S.theta), uy = Math.sin(S.theta);   // 달 방향
-  const ex = bx - RB*R*ux, ey = by + RB*R*uy;            // 지구 중심
-  const toX = x => ex + x*R, toY = y => ey - y*R;
-  const L0 = R*0.55;
+  const g = { bx:w*0.5, by:h*0.5, R:Math.min(h*0.2, w*0.13) };
+  const Lm = Math.min(h*0.44, w*0.4);
+  const ux = Math.cos(S.theta), uy = Math.sin(S.theta);
+  const L0 = g.R*0.55;
+  const E = pos({x:0,y:0}, S.theta, g);
 
   // 달 궤도
   ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.setLineDash([4,6]);
-  ctx.beginPath(); ctx.arc(bx, by, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.arc(g.bx, g.by, Lm, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
 
-  // 각 지점의 공전 궤도 (모두 반지름 같음)
+  // 궤적: 시작부터 지금까지 그린 만큼
   if (S.trail){
-    tracked.forEach((p, i) => {
-      ctx.save(); ctx.strokeStyle = trackColors[i]; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(bx + p.x*R, by - p.y*R, RB*R, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+    const sweep = S.full ? 2*Math.PI : Math.max(0, S.theta - S.theta0);
+    tracked.forEach((o, i) => {
+      ctx.save(); ctx.strokeStyle = trackColors[i]; ctx.lineWidth = 2; ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      const n = 90;
+      for (let k = 0; k <= n; k++){
+        const p = pos(o, S.theta - sweep*(1 - k/n), g);
+        k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
+      }
+      ctx.stroke(); ctx.restore();
     });
   }
 
-  TF.earth(ctx, ex, ey, R);
-  // 방향 유지 표시(십자)
+  // 지구
+  TF.earth(ctx, E.x, E.y, g.R);
+  // 방향 표시(십자): 회전 모드에서는 함께 돌아감
+  const ax = pos({x:0.96,y:0}, S.theta, g), bxp = pos({x:-0.96,y:0}, S.theta, g), cy1 = pos({x:0,y:0.96}, S.theta, g), cy2 = pos({x:0,y:-0.96}, S.theta, g);
   ctx.save(); ctx.strokeStyle = TF.css('--fg'); ctx.globalAlpha = 0.35; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(ex - R*0.96, ey); ctx.lineTo(ex + R*0.96, ey); ctx.moveTo(ex, ey - R*0.96); ctx.lineTo(ex, ey + R*0.96); ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.moveTo(ax.x, ax.y); ctx.lineTo(bxp.x, bxp.y); ctx.moveTo(cy1.x, cy1.y); ctx.lineTo(cy2.x, cy2.y); ctx.stroke(); ctx.restore();
 
-  // 공통질량중심
+  // 공통 질량 중심
   ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.moveTo(bx - 7, by); ctx.lineTo(bx + 7, by); ctx.moveTo(bx, by - 7); ctx.lineTo(bx, by + 7); ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.moveTo(g.bx - 7, g.by); ctx.lineTo(g.bx + 7, g.by); ctx.moveTo(g.bx, g.by - 7); ctx.lineTo(g.bx, g.by + 7); ctx.stroke(); ctx.restore();
 
+  // 원심력
   if (S.force){
-    for (const p of pts){
-      const x = toX(p.x), y = toY(p.y);
-      TF.arrow(ctx, x, y, x - ux*L0, y + uy*L0, TF.css('--cent'), p.center ? 3.5 : 2.5);
+    for (const o of pts){
+      const p = pos(o, S.theta, g);
+      let fx, fy;
+      if (S.mode === 'revolve'){ fx = -ux*L0; fy = uy*L0; }
+      else { // 회전: 중심(B)에서 바깥쪽, 크기 ∝ 거리 (지구 중심 = L0)
+        const k = L0/(RB*g.R); fx = (p.x - g.bx)*k; fy = (p.y - g.by)*k;
+      }
+      TF.arrow(ctx, p.x, p.y, p.x + fx, p.y + fy, TF.css('--cent'), o.center ? 3.5 : 2.2);
     }
   }
-  if (S.grav) TF.arrow(ctx, ex, ey, ex + ux*L0, ey - uy*L0, TF.css('--grav'), 3.5);
-  tracked.forEach((p, i) => TF.dot(ctx, toX(p.x), toY(p.y), 4.5, trackColors[i]));
+  if (S.grav) TF.arrow(ctx, E.x, E.y, E.x + ux*L0, E.y - uy*L0, TF.css('--grav'), 3.5);
+  tracked.forEach((o, i) => { const p = pos(o, S.theta, g); TF.dot(ctx, p.x, p.y, 4.5, trackColors[i]); });
 
-  TF.moon(ctx, bx + Lm*ux, by - Lm*uy, Math.max(10, R*0.27));
+  TF.moon(ctx, g.bx + Lm*ux, g.by - Lm*uy, Math.max(10, g.R*0.27));
+
+  // 궤적 겹쳐 보기: 다섯 궤적을 같은 중심으로 옮겨 비교 (오른쪽 아래)
+  if (S.stack){
+    const bw = Math.min(150, w*0.3), cx = w - bw/2 - 10, cy = h - bw/2 - 10;
+    ctx.save(); ctx.fillStyle = TF.css('--card'); ctx.strokeStyle = TF.css('--line'); ctx.globalAlpha = 0.95;
+    ctx.beginPath(); ctx.roundRect(w - bw - 10, h - bw - 10, bw, bw, 10); ctx.fill(); ctx.globalAlpha = 1; ctx.stroke(); ctx.restore();
+    TF.text(ctx, '궤적 겹쳐 보기', w - bw, h - bw + 6, TF.css('--muted'), 'left', 11);
+    const sc = (bw*0.36) / ((S.mode === 'revolve' ? RB : RB + 1)*g.R);
+    tracked.forEach((o, i) => {
+      // 각 궤적의 반지름
+      const r = S.mode === 'revolve' ? RB*g.R : Math.hypot(-RB + o.x, o.y)*g.R;
+      ctx.save(); ctx.strokeStyle = trackColors[i]; ctx.lineWidth = 2; ctx.globalAlpha = 0.85;
+      ctx.setLineDash(S.mode === 'revolve' ? [6, 6] : []); ctx.lineDashOffset = i*2.4;
+      ctx.beginPath(); ctx.arc(cx, cy + 6, r*sc, 0, 2*Math.PI); ctx.stroke(); ctx.restore();
+    });
+    TF.text(ctx, S.mode === 'revolve' ? '모두 같은 크기!' : '크기가 모두 다름', cx, h - 16, TF.css('--fg'), 'center', 11);
+  }
 
   // 범례
   let ly = 20;
   const leg = (draw, label) => { draw(ly); TF.text(ctx, label, 52, ly + 4, TF.css('--fg')); ly += 20; };
   leg(y => { ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(22, y - 6); ctx.lineTo(22, y + 6); ctx.moveTo(16, y); ctx.lineTo(28, y); ctx.stroke(); ctx.restore(); }, '공통 질량 중심');
-  if (S.force) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--cent'), 2.5), '원심력');
+  if (S.force) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--cent'), 2.5), S.mode === 'revolve' ? '원심력 (모두 같음)' : '원심력 (지점마다 다름)');
   if (S.grav) leg(y => TF.arrow(ctx, 14, y, 44, y, TF.css('--grav'), 2.5), '지구 중심의 달 인력');
-  TF.text(ctx, '그림은 축척이 아님', w - 10, h - 10, TF.css('--muted'), 'right', 11);
+  if (S.mode === 'rotate') TF.text(ctx, '비교용: 실제 지구의 운동이 아님', 14, ly + 6, TF.css('--cent'), 'left', 12);
+  TF.text(ctx, '그림은 축척이 아님', 10, h - 10, TF.css('--muted'), 'left', 11);
 });
 
 const $ = id => document.getElementById(id);
+function restart(){ S.theta0 = S.theta; S.full = false; st.redraw(); }
+function setMode(m){
+  S.mode = m;
+  document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('modeNote').innerHTML = NOTES[m];
+  restart();
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
 $('play').addEventListener('click', () => { S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 일시정지' : '▶ 재생'; last = null; });
-['trail','force','grav'].forEach(k => $(k).addEventListener('change', e => { S[k] = e.target.checked; st.redraw(); }));
+$('restart').addEventListener('click', restart);
+['trail','stack','force','grav'].forEach(k => $(k).addEventListener('change', e => { S[k] = e.target.checked; st.redraw(); }));
 
 let last = null;
 function loop(ts){
   if (S.playing){
-    if (last !== null) S.theta = (S.theta + (ts - last)/1000 * 2*Math.PI/14) % (2*Math.PI);
+    if (last !== null){
+      S.theta = S.theta + (ts - last)/1000 * 2*Math.PI/14;
+      if (S.theta - S.theta0 >= 2*Math.PI) S.full = true;
+    }
     last = ts; st.redraw();
   }
   requestAnimationFrame(loop);
 }
+setMode('revolve');
 requestAnimationFrame(loop);
 </script>
 </body>
