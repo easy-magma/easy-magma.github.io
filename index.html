@@ -3,179 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Easy Magma · 과학 수업 시뮬레이터</title>
+<title>Easy Magma · 석희쌤의 과학 시뮬레이터</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="./theme.css?v=1">
 <style>
-  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
-  .top{display:flex;align-items:center;gap:10px;padding:18px 0}
-  .badge{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;letter-spacing:.06em}
-  .badge i{display:grid;place-items:center;width:34px;height:34px;border:2px solid var(--ink);border-radius:10px;background:var(--lava);box-shadow:2px 2px 0 var(--ink);font-style:normal;font-size:18px}
-  .hero{padding:26px 0 30px;border-bottom:2px dashed var(--line)}
-  .hero h1{font-size:clamp(30px,6vw,48px);font-weight:900;line-height:1.25;letter-spacing:-.02em}
-  .hero h1 .wave{position:relative;white-space:nowrap}
-  .hero h1 .wave svg{position:absolute;left:0;right:0;bottom:-10px;width:100%;height:14px}
-  .hero p{margin-top:18px;color:var(--muted);font-size:16px;max-width:560px}
-  /* 도구 */
-  .tools{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 14px;align-items:stretch}
-  .search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:12px;padding:10px 14px;background:var(--card);box-shadow:3px 3px 0 var(--ink)}
-  .search input{flex:1;border:0;outline:0;font:inherit;font-size:15px;background:transparent;color:var(--fg);min-width:0}
-  select.unit{font:inherit;font-size:15px;font-weight:700;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--card);color:var(--fg);box-shadow:3px 3px 0 var(--ink);min-width:200px;max-width:100%}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-  .chip{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--card);color:var(--fg);cursor:pointer}
-  .chip.on{background:var(--ink);color:var(--card)}
-  .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
-  .count{font-size:13px;color:var(--muted);margin-bottom:12px}
-  /* 단원 묶음 */
-  .group{margin-bottom:30px}
-  .group h2{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;margin-bottom:12px}
-  .group h2 .u{font-size:13px;font-weight:700;border:2px solid var(--ink);border-radius:8px;padding:1px 8px}
-  /* 카드 */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
-  a.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--ink);border-radius:14px;
-         box-shadow:4px 4px 0 var(--ink);overflow:hidden;transition:transform .12s, box-shadow .12s}
-  a.card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
-  a.card:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
-  .stripe{height:10px;border-bottom:2px solid var(--ink)}
-  .cbody{padding:18px 18px 14px;display:flex;flex-direction:column;flex:1}
-  .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .icon{display:grid;place-items:center;width:46px;height:46px;border:2px solid var(--ink);border-radius:12px;font-size:24px;background:var(--bg)}
-  .no{font-weight:900;font-size:13px;border:2px solid var(--ink);border-radius:8px;padding:2px 8px;background:var(--lava);color:#1f1a17}
-  .card h3{font-size:19px;font-weight:800;margin-bottom:6px}
-  .card p{font-size:14px;color:var(--muted);line-height:1.6}
-  .tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
-  .tags span{font-size:12px;border:1.5px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--muted)}
-  .open{margin-top:auto;padding-top:12px;border-top:2px dashed var(--line);font-weight:800;font-size:14px;display:flex;justify-content:space-between;gap:8px}
-  .open span{color:var(--muted);font-weight:700}
-  .open b{color:var(--magma);white-space:nowrap}
-  .empty{border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted);background:var(--card)}
-  /* 만든 사람 */
-  .about{margin-top:40px;background:var(--card);border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);padding:22px}
-  .about h2{font-size:18px;font-weight:800;margin-bottom:4px}
-  .about .motto{color:var(--muted);font-size:14px;margin-bottom:14px}
-  .about ul{list-style:none;display:grid;gap:4px;font-size:14px}
-  .about ul li b{display:inline-block;min-width:64px;color:var(--magma)}
-  .about .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-  .about .links a{font-size:13px;font-weight:700;text-decoration:none;color:var(--fg);border:2px solid var(--ink);border-radius:999px;padding:5px 12px}
-  footer{margin:48px 0 32px;font-size:13px;color:var(--muted);text-align:center}
+  :root{ --mono:'JetBrains Mono',ui-monospace,monospace; }
+  body{background-image:none}
+  .wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+  /* ── 상단: 화산 단면 띠 ── */
+  .crust{height:14px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 18px),linear-gradient(var(--magma),var(--lava));border-bottom:2px solid var(--ink)}
+
+  /* ── 머리: 왼쪽 제목 / 오른쪽 교사 카드 ── */
+  .head{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:end;padding:44px 0 34px;border-bottom:2px solid var(--ink)}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--magma);font-weight:700}
+  .head h1{font-size:clamp(34px,7vw,64px);font-weight:900;line-height:1.05;letter-spacing:-.04em;margin:10px 0 16px}
+  .head h1 em{font-style:normal;color:var(--magma)}
+  .head p{color:var(--muted);font-size:15px;max-width:440px}
+
+  .id{border:2px solid var(--ink);border-radius:4px;background:var(--card);position:relative}
+  .id::before{content:'TEACHER';position:absolute;top:-11px;left:12px;background:var(--bg);padding:0 6px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em}
+  .id .top{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:1px dashed var(--line)}
+  .id .av{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--lava),var(--magma));border:2px solid var(--ink);display:grid;place-items:center;font-size:20px}
+  .id .nm{font-weight:900;font-size:17px}
+  .id .nm small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+  .id .motto{padding:10px 16px;font-size:13px;color:var(--muted);border-bottom:1px dashed var(--line)}
+  .id ol{list-style:none;padding:10px 16px;font-size:13px;display:grid;gap:3px}
+  .id ol li{display:grid;grid-template-columns:62px 1fr;gap:6px}
+  .id ol li span{font-family:var(--mono);color:var(--magma);font-weight:700;font-size:12px;padding-top:1px}
+  .id .links{display:flex;border-top:2px solid var(--ink)}
+  .id .links a{flex:1;text-align:center;padding:9px 6px;font-size:13px;font-weight:800;color:var(--fg);text-decoration:none}
+  .id .links a+a{border-left:2px solid var(--ink)}
+  .id .links a:hover{background:var(--lava);color:#1f1a17}
+
+  /* ── 과목 탭 ── */
+  .tabs{display:flex;gap:22px;flex-wrap:wrap;margin:30px 0 8px;font-weight:800;font-size:15px}
+  .tabs button{font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;padding:4px 0;border-bottom:3px solid transparent}
+  .tabs button.on{color:var(--fg);border-color:var(--magma)}
+
+  /* ── 지층: 단원별 띠 ── */
+  .layer{display:grid;grid-template-columns:150px 1fr;border-bottom:2px solid var(--ink)}
+  .layer:first-of-type{border-top:2px solid var(--ink)}
+  .lab{padding:18px 14px 18px 0;border-right:2px solid var(--ink);position:relative}
+  .lab .c{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+  .lab .u{font-weight:900;font-size:16px;line-height:1.35;margin-top:4px}
+  .lab::after{content:'';position:absolute;right:-2px;top:0;bottom:0;width:6px;background:var(--sc)}
+  .rows{display:flex;flex-direction:column}
+  a.row{display:grid;grid-template-columns:62px 1fr auto;gap:14px;align-items:center;padding:16px 4px 16px 18px;text-decoration:none;color:inherit;border-bottom:1px dashed var(--line)}
+  a.row:last-child{border-bottom:0}
+  a.row .n{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--magma)}
+  a.row h3{font-size:17px;font-weight:800}
+  a.row p{font-size:13.5px;color:var(--muted);margin-top:2px}
+  a.row .t{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
+  a.row .go{font-size:20px;transition:transform .15s}
+  a.row:hover{background:var(--card)}
+  a.row:hover .go{transform:translateX(6px);color:var(--magma)}
+  .empty{padding:40px 0;text-align:center;color:var(--muted);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+
+  footer{margin:40px 0 32px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media (max-width:720px){
+    .head{grid-template-columns:1fr;padding-top:30px}
+    .layer{grid-template-columns:1fr}
+    .lab{border-right:0;border-bottom:1px dashed var(--line);padding:14px 0 10px 14px}
+    .lab::after{left:0;right:auto;width:5px}
+    a.row{grid-template-columns:48px 1fr auto;padding-left:6px}
+  }
 </style>
 </head>
 <body>
+<div class="crust"></div>
 <div class="wrap">
-  <div class="top"><div class="badge"><i>🌋</i>EASY MAGMA</div></div>
+  <header class="head">
+    <div>
+      <div class="kicker">🌋 EASY MAGMA · 수업용 인터랙티브</div>
+      <h1>석희쌤의<br><em>움직이는</em> 과학</h1>
+      <p>교과서 그림을 손으로 돌려 보고, 바꿔 보고, 확인해 보는 수업 자료입니다.<br>단원 순서대로 차곡차곡 쌓아 갑니다.</p>
+    </div>
+    <aside class="id">
+      <div class="top"><div class="av">🌋</div><div class="nm">이석희<small>신림고등학교 지구과학 교사</small></div></div>
+      <div class="motto">“어제보다 나으면 1년 후가 기대된다.”</div>
+      <ol>
+        <li><span>2021</span>서울대 지구과학교육과 졸업</li>
+        <li><span>2022–</span>신림고 지구과학 교사</li>
+        <li><span>2023–24</span>AIEDAP 리더·마스터교원, 교실혁명 선도교원</li>
+        <li><span>2024–</span>강남구청 인강 통합과학 강사</li>
+      </ol>
+      <div class="links">
+        <a href="https://blog.naver.com/rational-growth" target="_blank" rel="noopener">블로그 ↗</a>
+        <a href="mailto:magma4885@naver.com">메일 ✉</a>
+      </div>
+    </aside>
+  </header>
 
-  <section class="hero">
-    <h1>손으로 만져 보는<br><span class="wave">과학 시뮬레이터<svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8 Q 12.5 0 25 8 T 50 8 T 75 8 T 100 8 T 125 8 T 150 8 T 175 8 T 200 8" fill="none" stroke="var(--magma)" stroke-width="5" stroke-linecap="round"/></svg></span></h1>
-    <p>교과서 속 개념을 직접 움직여 보며 이해하는 수업용 인터랙티브 자료 모음입니다.</p>
-  </section>
-
-  <div class="tools">
-    <label class="search">🔍<input id="q" type="search" placeholder="제목, 개념, 단원으로 검색"></label>
-    <select class="unit" id="unit" aria-label="단원 선택"></select>
-  </div>
-  <div class="chips" id="subj">
-    <button class="chip on" data-s="all">전체</button>
-    <button class="chip" data-s="earth"><span class="dot" style="background:var(--magma)"></span>지구과학</button>
-    <button class="chip" data-s="integrated"><span class="dot" style="background:var(--teal)"></span>통합과학</button>
-    <button class="chip" data-s="middle"><span class="dot" style="background:var(--violet)"></span>중학교 과학</button>
-  </div>
-  <div class="count" id="count"></div>
+  <nav class="tabs" id="subj">
+    <button class="on" data-s="all">전체</button>
+    <button data-s="earth">지구과학</button>
+    <button data-s="integrated">통합과학</button>
+    <button data-s="middle">중학교 과학</button>
+  </nav>
   <div id="list"></div>
 
-  <section class="about">
-    <h2>만든 사람 · 신림고 지구과학 교사 이석희</h2>
-    <p class="motto">"어제보다 나으면 1년 후가 기대된다."</p>
-    <ul>
-      <li><b>2021</b>서울대학교 지구과학교육과 졸업</li>
-      <li><b>2022~</b>신림고등학교 지구과학 교사</li>
-      <li><b>2023~24</b>AIEDAP 리더·마스터교원, 교실혁명 선도교원, 고교 신설과목 선도교원</li>
-      <li><b>2024~</b>강남구청 인터넷수능방송 통합과학 강사</li>
-    </ul>
-    <div class="links">
-      <a href="https://blog.naver.com/rational-growth" target="_blank" rel="noopener">📝 블로그</a>
-      <a href="mailto:magma4885@naver.com">✉️ magma4885@naver.com</a>
-    </div>
-  </section>
-
-  <footer>easy-magma.github.io · 수업에 자유롭게 활용하세요</footer>
+  <footer><span>easy-magma.github.io</span><span>수업에 자유롭게 활용하세요</span></footer>
 </div>
 
 <script>
 /* ===== 자료 목록: 새 자료는 여기에 추가 =====
    s: earth | integrated | middle,  course: 과목명,  unit: 대단원 › 중단원 */
 const ITEMS = [
-  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⓪', icon:'🌍',
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⓪',
     title:'기초 개념: 자전과 공전, 위도', desc:'지구의 자전과 달의 공전 → 위도와 적도 → 달이 다시 남중하기까지 + 확인 퀴즈',
     tags:['사전 학습','퀴즈'], href:'./tidal-force/basics/' },
-  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'①~④', icon:'🌕',
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'①~④',
     title:'기조력: 인력 + 원심력', desc:'달의 인력 → 원심력 → 합력(기조력) → 하루 두 번의 조차가 다른 까닭',
     tags:['개념 탐구'], href:'./tidal-force/gravity/' },
-  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⑤', icon:'🌊',
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⑤',
     title:'위도별 조석 형태', desc:'관측자의 위도에 따라 반일주조·혼합조·일주조가 어떻게 나타나는지 3D 모형과 그래프로 확인',
     tags:['시뮬레이션'], href:'./tide/' },
 ];
 const SUBJ = { earth:{ name:'지구과학', color:'var(--magma)' }, integrated:{ name:'통합과학', color:'var(--teal)' }, middle:{ name:'중학교 과학', color:'var(--violet)' } };
-const unitKey = it => `${it.course} · ${it.unit}`;
-
-const state = { s:'all', unit:'all', q:'' };
+let cur = 'all';
 const $ = id => document.getElementById(id);
 
-function fillUnits(){
-  const units = [...new Set(ITEMS.filter(it => state.s === 'all' || it.s === state.s).map(unitKey))];
-  if (!units.includes(state.unit)) state.unit = 'all';
-  $('unit').innerHTML = `<option value="all">📚 전체 단원</option>` +
-    units.map(u => `<option value="${u}" ${u === state.unit ? 'selected' : ''}>${u}</option>`).join('');
-}
-function card(it){
-  return `<a class="card" href="${it.href}">
-    <div class="stripe" style="background:${SUBJ[it.s].color}"></div>
-    <div class="cbody">
-      <div class="chead"><span class="icon">${it.icon}</span><span class="no">${it.no}</span></div>
-      <h3>${it.title}</h3>
-      <p>${it.desc}</p>
-      <div class="tags">${it.tags.map(t => `<span>${t}</span>`).join('')}</div>
-      <div class="open"><span>${it.course}</span><b>열기 →</b></div>
-    </div>
-  </a>`;
-}
 function render(){
-  const q = state.q.trim().toLowerCase();
-  const list = ITEMS.filter(it => (state.s === 'all' || it.s === state.s) && (state.unit === 'all' || unitKey(it) === state.unit) &&
-    (!q || [it.title, it.desc, it.course, it.unit, ...it.tags].join(' ').toLowerCase().includes(q)));
-  $('count').textContent = list.length ? `자료 ${list.length}개` : '';
-  if (!list.length){
-    $('list').innerHTML = `<div class="empty">${state.s !== 'all' && !q ? `${SUBJ[state.s].name} 자료는 준비 중입니다.` : '찾는 자료가 없어요.'}</div>`;
-    return;
-  }
-  // 단원별로 묶어서 보여 주기
+  const list = ITEMS.filter(it => cur === 'all' || it.s === cur);
+  if (!list.length){ $('list').innerHTML = `<div class="empty">${SUBJ[cur].name} 자료는 준비 중입니다.</div>`; return; }
   const groups = new Map();
-  list.forEach(it => { const k = unitKey(it); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); });
-  $('list').innerHTML = [...groups].map(([k, its]) => `
-    <section class="group">
-      <h2><span class="u" style="background:${SUBJ[its[0].s].color};color:#fff;border-color:var(--ink)">${its[0].course}</span>${its[0].unit}</h2>
-      <div class="grid">${its.map(card).join('')}</div>
-    </section>`).join('');
+  list.forEach(it => { const k = it.course + '|' + it.unit; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); });
+  $('list').innerHTML = [...groups].map(([k, its]) => {
+    const [main, sub] = its[0].unit.split(' › ');
+    return `<section class="layer" style="--sc:${SUBJ[its[0].s].color}">
+      <div class="lab"><div class="c">${its[0].course}</div><div class="u">${sub || main}</div><div class="c" style="margin-top:4px">${sub ? main : ''}</div></div>
+      <div class="rows">${its.map(it => `<a class="row" href="${it.href}">
+        <span class="n">${it.no}</span>
+        <div><h3>${it.title}</h3><p>${it.desc}</p><div class="t">${it.tags.map(t => '#' + t).join('  ')}</div></div>
+        <span class="go">→</span></a>`).join('')}</div>
+    </section>`;
+  }).join('');
 }
-function syncHash(){
-  const p = [];
-  if (state.s !== 'all') p.push('s=' + state.s);
-  if (state.unit !== 'all') p.push('u=' + encodeURIComponent(state.unit));
-  history.replaceState(null, '', p.length ? '#' + p.join('&') : location.pathname);
-}
-document.querySelectorAll('#subj .chip').forEach(b => b.addEventListener('click', () => {
-  state.s = b.dataset.s;
-  document.querySelectorAll('#subj .chip').forEach(x => x.classList.toggle('on', x === b));
-  fillUnits(); render(); syncHash();
+document.querySelectorAll('#subj button').forEach(b => b.addEventListener('click', () => {
+  cur = b.dataset.s;
+  document.querySelectorAll('#subj button').forEach(x => x.classList.toggle('on', x === b));
+  history.replaceState(null, '', cur === 'all' ? location.pathname : '#s=' + cur);
+  render();
 }));
-$('unit').addEventListener('change', e => { state.unit = e.target.value; render(); syncHash(); });
-$('q').addEventListener('input', e => { state.q = e.target.value; render(); });
-
-// 주소로 바로 열기: #s=earth&u=... (예전 주소 #earth 도 지원)
-const hp = new URLSearchParams(location.hash.slice(1));
-const hs = hp.get('s') || (SUBJ[location.hash.slice(1)] ? location.hash.slice(1) : null);
-if (hs && SUBJ[hs]){ state.s = hs; document.querySelectorAll('#subj .chip').forEach(x => x.classList.toggle('on', x.dataset.s === hs)); }
-if (hp.get('u')) state.unit = hp.get('u');
-fillUnits(); render();
+// 주소로 바로 열기: #s=earth (예전 주소 #earth 도 지원)
+const h = new URLSearchParams(location.hash.slice(1)).get('s') || location.hash.slice(1);
+if (SUBJ[h]){ cur = h; document.querySelectorAll('#subj button').forEach(x => x.classList.toggle('on', x.dataset.s === h)); }
+render();
 </script>
 </body>
 </html>
