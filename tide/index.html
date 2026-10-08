@@ -24,6 +24,9 @@
   .wrap{max-width:1180px;margin:0 auto}
   a.back{font-size:14px;color:var(--muted);text-decoration:none}
   a.back:hover{color:var(--accent)}
+  .steps{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
+  .steps a{font-size:13px;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px;background:var(--card)}
+  .steps a.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
   header{margin:8px 0 18px}
   h1{font-size:clamp(22px,4.5vw,30px);font-weight:700}
   .sub{color:var(--muted);font-size:14px}
@@ -75,9 +78,16 @@
 <body>
 <div class="wrap">
   <a class="back" href="../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a href="../tidal-force/gravity/">① 달의 인력</a>
+    <a href="../tidal-force/centrifugal/">② 원심력</a>
+    <a href="../tidal-force/">③ 기조력 (합력)</a>
+    <a href="../tidal-force/tilt/">④ 조차가 다른 까닭</a>
+    <a class="on" href="./">⑤ 위도별 조석 형태</a>
+  </nav>
   <header>
     <h1>위도별 조석 형태 시뮬레이터</h1>
-    <p class="sub">평형조석론 · 관측 위도와 달의 적위에 따라 반일주조, 혼합조, 일주조가 어떻게 나타나는지 확인해 보세요.</p>
+    <p class="sub">평형조석론 · 관측자의 위도와, 달이 적도면에서 벗어난 정도에 따라 반일주조, 혼합조, 일주조가 어떻게 나타나는지 확인해 보세요.</p>
   </header>
 
   <div class="layout">
@@ -90,9 +100,9 @@
           <div class="ticks"><span>0° 적도</span><span>45°</span><span>90° 극</span></div>
         </div>
         <div class="ctl">
-          <label>달의 적위 <b id="declV">20°</b></label>
+          <label>적도면과 달의 공전 궤도면이 어긋난 각 <b id="declV">20°</b></label>
           <input type="range" id="decl" min="0" max="28.5" step="0.5" value="20">
-          <div class="ticks"><span>0°</span><span>최대 약 28.5°</span></div>
+          <div class="ticks"><span>0° (일치)</span><span>최대 약 28.5°</span></div>
         </div>
         <div class="ctl">
           <label>시각 (달의 남중 후) <b id="timeV">00:00</b></label>
@@ -106,12 +116,12 @@
       </div>
 
       <div class="card">
-        <h2>빠른 비교</h2>
+        <h2>빠른 비교 (위도 · 어긋난 각)</h2>
         <div class="row">
-          <button data-p="0,0">적도 · 적위 0°</button>
-          <button data-p="35,0">35° · 적위 0°</button>
-          <button data-p="35,20">35° · 적위 20°</button>
-          <button data-p="70,25">70° · 적위 25°</button>
+          <button data-p="0,0">적도 · 0°</button>
+          <button data-p="35,0">35° · 0°</button>
+          <button data-p="35,20">35° · 20°</button>
+          <button data-p="70,25">70° · 25°</button>
         </div>
       </div>
     </aside>
@@ -145,11 +155,11 @@
         <h2>원리</h2>
         <p>달의 인력과 원심력의 합력인 <a href="../tidal-force/">기조력</a>으로 바닷물은 달 쪽과 그 반대쪽이 부풀어 오른 타원체 모양이 됩니다. 지구가 자전하면 관측 지점이 부푼 곳(만조)과 낮은 곳(간조)을 차례로 지나갑니다. 달도 공전하므로 달이 같은 위치에 다시 올 때까지 약 24시간 50분이 걸리고, 조석 주기는 그 절반인 약 12시간 25분입니다.</p>
         <ul>
-          <li><b>달의 적위가 0°</b>이면 타원체의 축이 적도면에 놓여, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
-          <li>달의 공전 궤도면과 지구의 적도면이 일치하지 않아 <b>적위가 생기면</b> 축이 기울어, 두 번의 만조·간조 때 해수면 높이가 달라집니다 → 조차가 다른 <b>혼합조</b></li>
-          <li><b>고위도에서 적위가 크면</b> 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
+          <li><b>적도면과 달의 공전 궤도면이 일치</b>하면(0°) 타원체의 축이 적도면에 놓여, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
+          <li>지구 자전축이 기울어져 <b>달의 공전 궤도면과 적도면이 일치하지 않으면</b> 타원체가 비스듬히 놓여, 두 번의 만조·간조 때 해수면 높이가 달라집니다 → 조차가 다른 <b>혼합조</b> (<a href="../tidal-force/tilt/">④에서 자세히</a>)</li>
+          <li><b>고위도에서 어긋난 각이 크면</b> 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
         </ul>
-        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 하루 동안 달의 적위는 일정하다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
+        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 하루 동안 어긋난 각은 일정하다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
       </div>
     </section>
   </div>

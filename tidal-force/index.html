@@ -16,7 +16,8 @@
     <a href="gravity/">① 달의 인력</a>
     <a href="centrifugal/">② 원심력</a>
     <a class="on" href="./">③ 기조력 (합력)</a>
-    <a href="../tide/">④ 위도별 조석 형태</a>
+    <a href="tilt/">④ 조차가 다른 까닭</a>
+    <a href="../tide/">⑤ 위도별 조석 형태</a>
   </nav>
   <h1>③ 기조력 = 달의 인력 + 원심력</h1>
   <p class="sub">조석 현상을 일으키는 힘을 기조력이라고 합니다. 기조력은 달이 지구에 작용하는 인력(①)과 공통 질량 중심을 회전하는 운동으로 생긴 지구의 원심력(②)의 합력입니다.</p>
@@ -24,9 +25,28 @@
   <div class="layout">
     <div class="card">
       <div class="stage"><canvas id="cv"></canvas></div>
-      <p class="note" style="margin-top:8px">지구 위의 점을 누르면 그 지점에서 두 힘을 더하는 과정을 보여 줍니다.</p>
+      <p class="note" style="margin-top:8px">지구 위의 점을 누르면 오른쪽 확대 보기에서 그 지점의 힘의 합성을 볼 수 있습니다. 실제 거리(60 R)로 놓고 확대해 보세요.</p>
     </div>
     <aside class="side">
+      <div class="card">
+        <h2>🔍 지점 확대 보기 <span id="zName" style="color:var(--accent)"></span></h2>
+        <div class="stage" style="aspect-ratio:1/1"><canvas id="zc"></canvas></div>
+        <div class="row" style="margin:10px 0 8px" id="pick">
+          <button data-i="1">A</button><button data-i="4">C</button><button data-i="0">O</button><button data-i="10">D</button><button data-i="7">B</button>
+        </div>
+        <div class="ctl">
+          <label>확대 배율 <b id="zV">×1</b></label>
+          <input type="range" id="z" min="0" max="100" step="1" value="0">
+          <div class="ticks"><span>×1</span><span>×200</span></div>
+        </div>
+        <div class="row" style="margin-bottom:10px"><button id="zAuto">기조력이 잘 보이게 자동 확대</button></div>
+        <div class="readout">
+          <div><span><span class="sw" style="background:var(--grav)"></span> 달의 인력</span><b id="vg">-</b></div>
+          <div><span><span class="sw" style="background:var(--cent)"></span> 원심력</span><b id="vc">-</b></div>
+          <div><span><span class="sw" style="background:var(--tide)"></span> 기조력</span><b id="vt">-</b></div>
+        </div>
+        <p class="note" style="margin-top:6px">지구 중심의 인력 = 100. 지구 위의 점을 눌러도 선택됩니다.</p>
+      </div>
       <div class="card">
         <h2>표시할 힘</h2>
         <label class="check"><input type="checkbox" id="g"> <span class="sw" style="background:var(--grav)"></span> 달의 인력</label>
@@ -59,12 +79,12 @@
     <p class="note">기조력의 크기는 천체의 질량에 비례하고 거리의 세제곱에 반비례합니다. 태양의 질량은 달의 약 2,800만 배이지만 거리가 약 387배 멀어서, 태양의 기조력은 달 기조력의 약 절반입니다.</p>
   </div>
 
-  <div class="next"><a href="centrifugal/">← ② 원심력</a><a href="../tide/">④ 위도별 조석 형태로 →</a></div>
+  <div class="next"><a href="centrifugal/">← ② 원심력</a><a href="tilt/">④ 조차가 다른 까닭으로 →</a></div>
 </div>
 
 <script src="common.js?v=2"></script>
 <script>
-const S = { D:6, g:false, c:false, t:true, e:true, sel:1 };
+const S = { D:6, g:false, c:false, t:true, e:true, sel:1, zoom:1 };
 const pts = TF.points(12);
 const names = { 0:'O', 1:'A', 4:'C', 7:'B', 10:'D' };
 let geo = null;
@@ -108,19 +128,10 @@ const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
     }
   });
 
-  // 선택한 지점: 힘의 합성 (오른쪽 아래 확대 창)
-  const p = pts[S.sel], g = TF.gravity(p, S.D), c = TF.centrifugal(), t = TF.tidal(p, S.D);
-  const bw = Math.min(200, w*0.32), bh = Math.min(140, h*0.36), bx0 = w - bw - 10, by0 = h - bh - 10;
-  ctx.save(); ctx.fillStyle = TF.css('--card'); ctx.strokeStyle = TF.css('--line'); ctx.globalAlpha = 0.95;
-  ctx.beginPath(); ctx.roundRect(bx0, by0, bw, bh, 10); ctx.fill(); ctx.globalAlpha = 1; ctx.stroke(); ctx.restore();
-  TF.text(ctx, `선택 지점 ${names[S.sel] ?? ''} : 힘의 합성`, bx0 + 10, by0 + 18, TF.css('--muted'), 'left', 11);
-  const s = bw*0.32, ox = bx0 + bw/2, oy = by0 + bh*0.58;
-  TF.arrow(ctx, ox, oy, ox + g.x*s, oy - g.y*s, TF.css('--grav'), 2.5);
-  TF.arrow(ctx, ox + g.x*s, oy - g.y*s, ox + (g.x + c.x)*s, oy - (g.y + c.y)*s, TF.css('--cent'), 2.5);
-  const tl = Math.hypot(t.x, t.y)*s;
-  if (tl > 1) TF.arrow(ctx, ox, oy, ox + t.x*s, oy - t.y*s, TF.css('--tide'), 3);
-  TF.dot(ctx, ox, oy, 3, TF.css('--fg'));
-  TF.text(ctx, tl > 1 ? '인력 + 원심력 = 기조력' : '두 힘이 상쇄 → 기조력 0', bx0 + 10, by0 + bh - 10, TF.css('--fg'), 'left', 11);
+  // 선택 지점 표시 (돋보기 고리)
+  { const p = pts[S.sel], x = toX(p.x), y = toY(p.y);
+    ctx.save(); ctx.strokeStyle = TF.css('--accent'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 14, 0, 2*Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 10, y + 10); ctx.lineTo(x + 18, y + 18); ctx.stroke(); ctx.restore(); }
 
   // 범례
   let ly = 20;
@@ -133,15 +144,57 @@ const st = TF.stage(document.getElementById('cv'), (ctx, w, h) => {
     `이 거리에서 기조력은 인력의 최대 ${(tmax*100).toFixed(1)}% 정도로 작아서, 그림에서는 약 ${Math.round(kT/L0)}배 확대했습니다. 바닷물 모양도 크게 과장했습니다.`;
 });
 
+/* ===== 지점 확대 보기 ===== */
+const zoomFromSlider = v => Math.round(Math.pow(200, v/100));      // 0→×1, 100→×200 (로그 눈금)
+const sliderFromZoom = z => Math.round(100*Math.log(z)/Math.log(200));
+const zv = TF.stage(document.getElementById('zc'), (ctx, w, h) => {
+  ctx.clearRect(0, 0, w, h);
+  const p = pts[S.sel], g = TF.gravity(p, S.D), c = TF.centrifugal(), t = TF.tidal(p, S.D);
+  const ox = w*0.5, oy = h*0.5, s = w*0.36*S.zoom;
+  // 격자
+  ctx.save(); ctx.strokeStyle = TF.css('--line'); ctx.lineWidth = 1;
+  const step = w/8;
+  for (let i = 1; i < 8; i++){ ctx.beginPath(); ctx.moveTo(i*step, 0); ctx.lineTo(i*step, h); ctx.moveTo(0, i*step); ctx.lineTo(w, i*step); ctx.stroke(); }
+  ctx.restore();
+  // 인력 → 원심력 (꼬리에 머리 잇기) → 합력
+  const gx = ox + g.x*s, gy = oy - g.y*s;
+  TF.arrow(ctx, ox, oy, gx, gy, TF.css('--grav'), 3);
+  TF.arrow(ctx, gx, gy, gx + c.x*s, gy - c.y*s, TF.css('--cent'), 3);
+  const tl = Math.hypot(t.x, t.y)*s;
+  if (tl > 2) TF.arrow(ctx, ox, oy, ox + t.x*s, oy - t.y*s, TF.css('--tide'), 4);
+  TF.dot(ctx, ox, oy, 4.5, TF.css('--accent'));
+  TF.text(ctx, `×${S.zoom}`, 8, 18, TF.css('--fg'), 'left', 13);
+  TF.text(ctx, '달 →', w - 8, 18, TF.css('--muted'), 'right', 12);
+  let msg = tl > 2 ? '인력 + 원심력 = 기조력' : (p.center ? '두 힘이 완전히 상쇄 → 기조력 0' : '기조력이 너무 작아요 → 확대!');
+  TF.text(ctx, msg, w/2, h - 10, TF.css('--fg'), 'center', 12);
+
+  const n = names[S.sel];
+  document.getElementById('zName').textContent = n ? `· 지점 ${n}` : '· 선택 지점';
+  document.getElementById('zV').textContent = `×${S.zoom}`;
+  const f = v => (Math.hypot(v.x, v.y)*100).toFixed(2);
+  document.getElementById('vg').textContent = f(g);
+  document.getElementById('vc').textContent = f(c);
+  document.getElementById('vt').textContent = f(t);
+});
+function redrawAll(){ st.redraw(); zv.redraw(); }
+function select(i){ S.sel = i; redrawAll(); }
+document.querySelectorAll('#pick [data-i]').forEach(b => b.addEventListener('click', () => select(+b.dataset.i)));
+document.getElementById('z').addEventListener('input', ev => { S.zoom = zoomFromSlider(+ev.target.value); zv.redraw(); });
+document.getElementById('zAuto').addEventListener('click', () => {
+  const t = TF.tidal(pts[S.sel], S.D), m = Math.hypot(t.x, t.y);
+  S.zoom = m < 1e-9 ? 1 : Math.max(1, Math.min(200, Math.round(0.9/(0.36*m))));
+  document.getElementById('z').value = sliderFromZoom(S.zoom); zv.redraw();
+});
+
 const $ = id => document.getElementById(id);
-['g','c','t','e'].forEach(k => $(k).addEventListener('change', ev => { S[k] = ev.target.checked; st.redraw(); }));
-$('d').addEventListener('input', ev => { S.D = +ev.target.value; $('dV').textContent = `${S.D} R`; st.redraw(); });
+['g','c','t','e'].forEach(k => $(k).addEventListener('change', ev => { S[k] = ev.target.checked; redrawAll(); }));
+$('d').addEventListener('input', ev => { S.D = +ev.target.value; $('dV').textContent = `${S.D} R`; redrawAll(); });
 $('cv').addEventListener('click', ev => {
   if (!geo) return;
   const r = ev.target.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
   let best = -1, bd = 1e9;
   pts.forEach((p, i) => { const d = Math.hypot(geo.toX(p.x) - mx, geo.toY(p.y) - my); if (d < bd){ bd = d; best = i; } });
-  if (bd < 30){ S.sel = best; st.redraw(); }
+  if (bd < 30) select(best);
 });
 </script>
 </body>
