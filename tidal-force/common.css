@@ -55,3 +55,16 @@ button.primary{background:var(--accent);color:#fff}
 .next{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
 .next a{text-decoration:none;font-weight:800;color:var(--fg);border:2px solid var(--ink);border-radius:10px;padding:6px 12px;background:var(--card);box-shadow:3px 3px 0 var(--ink)}
 @media (max-width:860px){ .layout{grid-template-columns:1fr} }
+/* 눌러서 확인하는 용어 카드 */
+.terms .term{cursor:pointer;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--card);transition:transform .1s}
+.terms .term:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.terms .term.hide{background:var(--bg)}
+.terms .term.hide .d{display:none}
+.terms .term.hide::after{content:'👆 눌러서 확인';display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.terms .term .d{animation:termIn .25s ease-out}
+@keyframes termIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+details.reveal{border:2px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);background:var(--card);padding:0 14px}
+details.reveal summary{cursor:pointer;font-weight:800;padding:12px 0;list-style:none}
+details.reveal summary::-webkit-details-marker{display:none}
+details.reveal[open] summary{border-bottom:2px dashed var(--line);margin-bottom:8px}
+details.reveal ul{padding:0 0 10px 20px}

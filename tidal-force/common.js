@@ -105,3 +105,18 @@ TF.person = (ctx, x, y, nx, ny, size, color) => {
   const [hx, hy] = P(1.0, 0); ctx.beginPath(); ctx.arc(hx, hy, size*0.16, 0, 2*Math.PI); ctx.fill();
   ctx.restore();
 };
+
+/* 용어 카드(.terms .term): 처음엔 용어만 보이고, 누르면 설명이 나타남 */
+TF.initTerms = () => {
+  document.querySelectorAll('.terms .term').forEach(t => {
+    if (t.dataset.ready) return; t.dataset.ready = '1';
+    const b = t.querySelector('b'); if (!b) return;
+    const d = document.createElement('div'); d.className = 'd';
+    while (b.nextSibling) d.appendChild(b.nextSibling);
+    t.appendChild(d); t.classList.add('hide'); t.tabIndex = 0; t.setAttribute('role', 'button');
+    const toggle = () => t.classList.toggle('hide');
+    t.addEventListener('click', toggle);
+    t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } });
+  });
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', TF.initTerms); else TF.initTerms();

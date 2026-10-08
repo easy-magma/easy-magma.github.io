@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⓪ 기초 개념 · Easy Magma</title>
-<link rel="stylesheet" href="../common.css?v=4">
+<link rel="stylesheet" href="../common.css?v=5">
 <style>
   .zone{display:inline-block;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
   .z-eq{background:#e8590c} .z-low{background:#f08c00} .z-mid{background:#2f9e44} .z-high{background:#1c7ed6}
@@ -85,17 +85,17 @@
         <div class="card">
           <h2>무엇을 볼까?</h2>
           <div class="seg">
-            <button data-m="spin">자전</button>
-            <button data-m="orbit">공전</button>
+            <button data-m="spin">지구의 자전</button>
+            <button data-m="orbit">달의 공전</button>
             <button class="on" data-m="both">둘 다</button>
           </div>
           <div class="row" style="margin-bottom:12px">
             <button class="primary" id="play">⏸ 일시정지</button>
           </div>
           <div class="readout">
-            <div><span>지구 자전</span><b id="days">0 바퀴</b></div>
+            <div><span>지구의 자전</span><b id="days">0 바퀴</b></div>
             <div><span>지난 시간</span><b id="dayTxt">0 일</b></div>
-            <div><span>달의 공전</span><b id="moonTxt">0 %</b></div>
+            <div><span>달의 공전 (한 바퀴 중)</span><b id="moonTxt">0 %</b></div>
           </div>
           <p class="note" style="margin-top:8px">북극 위에서 내려다본 모습입니다. 실제 크기·거리 비율과 다릅니다.</p>
         </div>
@@ -136,11 +136,13 @@
       </aside>
     </div>
     <div class="card explain">
+      <details class="reveal"><summary>💡 왜 24시간이 아닐까? 눌러서 설명 보기</summary>
       <ul>
         <li><b>남중</b>: 천체가 관측자의 정남쪽 하늘에 와서 가장 높이 뜬 때. 그림에서는 관측자(빨간 사람)가 달을 똑바로 바라보는 순간입니다.</li>
         <li>24시간 동안 지구는 한 바퀴(360°) 자전해 관측자가 제자리로 돌아오지만, 그동안 달도 같은 방향으로 약 12° 공전해 앞서 있습니다.</li>
         <li>관측자가 이 12°를 더 따라가는 데 약 50분이 걸려서, 달은 <b>약 24시간 50분</b>마다 남중합니다. → 조석 주기는 그 절반인 약 12시간 25분</li>
       </ul>
+      </details>
     </div>
   </section>
 
@@ -159,7 +161,7 @@
   <div class="next"><span></span><a href="../gravity/">① 달의 인력으로 →</a></div>
 </div>
 
-<script src="../common.js?v=4"></script>
+<script src="../common.js?v=5"></script>
 <script>
 const D2R = Math.PI/180;
 const $ = id => document.getElementById(id);
@@ -260,13 +262,13 @@ const st2 = TF.stage($('cv2'), (ctx, w, h) => {
     ctx.beginPath(); ctx.arc(cx, cy, R*1.25, -0.2, -1.4, true); ctx.stroke(); ctx.restore();
     const ex = cx + R*1.25*Math.cos(-1.4), ey = cy + R*1.25*Math.sin(-1.4);
     TF.arrow(ctx, ex + 6, ey + 2, ex - 2, ey - 1, TF.css('--accent'), 2.5);
-    TF.text(ctx, '자전', cx + R*1.35, cy - R*0.9, TF.css('--accent'), 'left', 13);
+    TF.text(ctx, '지구의 자전', cx + R*1.35, cy - R*0.9, TF.css('--accent'), 'left', 13);
   }
   // 달
   const mx = cx + Lm*Math.cos(-orb), my = cy + Lm*Math.sin(-orb);
   TF.moon(ctx, mx, my, Math.max(9, R*0.27));
   if (M.mode !== 'spin'){
-    TF.text(ctx, '공전', mx + 14, my - 10, TF.css('--grav'), 'left', 13);
+    TF.text(ctx, '달의 공전', mx + 14, my - 10, TF.css('--grav'), 'left', 13);
     ctx.save(); ctx.strokeStyle = TF.css('--grav'); ctx.lineWidth = 3; ctx.globalAlpha = 0.6;
     ctx.beginPath(); ctx.arc(cx, cy, Lm, 0, -(orb % (2*Math.PI)), true); ctx.stroke(); ctx.restore();
   }
