@@ -144,7 +144,7 @@ const latName = la => la === 0 ? '0° (적도)' : `${la > 0 ? '북위' : '남위
 
 const st1 = TF.stage($('cv1'), (ctx, w, h) => {
   ctx.clearRect(0, 0, w, h);
-  const R = Math.min(h*0.38, w*0.25), cx = w*0.42, cy = h*0.5;
+  const R = Math.min(h*0.33, w*0.22), cx = w*0.5, cy = h*0.5;
   // 위도대 색칠
   if (L.bands){
     const band = (a1, a2, col) => {
@@ -183,8 +183,8 @@ const st1 = TF.stage($('cv1'), (ctx, w, h) => {
   // 범례
   if (L.bands){
     [['저위도 0°~30°','#f08c00'],['중위도 30°~60°','#2f9e44'],['고위도 60°~90°','#1c7ed6']].forEach(([t, c], i) => {
-      ctx.save(); ctx.fillStyle = c; ctx.globalAlpha = 0.7; ctx.fillRect(w - 128, 14 + i*22, 14, 14); ctx.restore();
-      TF.text(ctx, t, w - 108, 26 + i*22, TF.css('--fg'), 'left', 12);
+      ctx.save(); ctx.fillStyle = c; ctx.globalAlpha = 0.7; ctx.fillRect(10, 12 + i*20, 12, 12); ctx.restore();
+      TF.text(ctx, t, 28, 22 + i*20, TF.css('--fg'), 'left', 11);
     });
   }
 });
