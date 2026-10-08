@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>④ 조차가 다른 까닭 · Easy Magma</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../common.css?v=3">
+<link rel="stylesheet" href="../common.css?v=4">
 <style>
   .bars{display:flex;gap:16px;align-items:flex-end;height:150px;padding:8px 6px 0;border-bottom:1px solid var(--line)}
   .bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
@@ -13,8 +12,8 @@
   .bar span{font-family:ui-monospace,monospace;font-size:13px;margin-bottom:4px}
   .barlab{display:flex;gap:16px;font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
   .barlab div{flex:1}
-  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;background:var(--bg)}
+  .seg{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;background:var(--card);box-shadow:none}
   .seg button.on{background:var(--accent);color:#fff;font-weight:700}
 </style>
 </head>
@@ -80,7 +79,7 @@
   <div class="next"><a href="../">← ③ 기조력</a><a href="../../tide/">⑤ 위도별 조석 형태로 →</a></div>
 </div>
 
-<script src="../common.js?v=3"></script>
+<script src="../common.js?v=4"></script>
 <script>
 const S = { a:23.5, phi:35 };
 const D2R = Math.PI/180, AMP = 53.5, K = 0.3;

@@ -82,7 +82,7 @@ TF.moon = (ctx, x, y, r, label) => {
   ctx.fillStyle = TF.css('--moon');
   ctx.beginPath(); ctx.arc(x, y, r, 0, 2*Math.PI); ctx.fill();
   if (label){
-    ctx.fillStyle = TF.css('--muted'); ctx.font = '12px "Noto Sans KR", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = TF.css('--muted'); ctx.font = '12px "SUIT Variable", "Noto Sans KR", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(label, x, y + r + 16);
   }
   ctx.restore();
@@ -91,7 +91,7 @@ TF.moon = (ctx, x, y, r, label) => {
 TF.dot = (ctx, x, y, r, color) => { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 2*Math.PI); ctx.fill(); ctx.restore(); };
 
 TF.text = (ctx, s, x, y, color, align = 'left', size = 12) => {
-  ctx.save(); ctx.fillStyle = color; ctx.font = `${size}px "Noto Sans KR", sans-serif`; ctx.textAlign = align; ctx.fillText(s, x, y); ctx.restore();
+  ctx.save(); ctx.fillStyle = color; ctx.font = `${size}px "SUIT Variable", "Noto Sans KR", sans-serif`; ctx.textAlign = align; ctx.fillText(s, x, y); ctx.restore();
 };
 
 /* 사람(관측자) 모양: 발 (x, y), 머리 방향 단위벡터 (nx, ny) — 화면 좌표 */

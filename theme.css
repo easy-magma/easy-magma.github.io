@@ -1,0 +1,12 @@
+/* Easy Magma 공통 테마 — 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --fg:#1f1a17; --ink:#1f1a17; --muted:#6b5f55; --card:#ffffff; --line:#e7dccd;
+  --magma:#ff5a1f; --lava:#ffc93c; --teal:#12b886; --violet:#7950f2;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16120f; --fg:#f4ece3; --ink:#f4ece3; --muted:#b1a395; --card:#221c17; --line:#3d332a;
+         --magma:#ff7a45; --lava:#e0a91a; --teal:#38d9a9; --violet:#9775fa; }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;
+     background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}

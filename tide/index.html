@@ -4,35 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>위도별 조석 형태 · Easy Magma</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root{
-    --bg:#f6f4ef; --fg:#1d1a16; --muted:#6b6259; --card:#ffffff; --line:#e4ddd2;
-    --accent:#d9480f; --accent-soft:#fff1e6;
+    --bg:#fff8ef; --fg:#1f1a17; --ink:#1f1a17; --muted:#6b5f55; --card:#ffffff; --line:#e7dccd;
+    --accent:#ff5a1f; --accent-soft:#fff0e6;
     --water:#1c7ed6; --high:#e03131; --low:#1971c2; --grid:#ece6dc;
     --semi:#2b8a3e; --mixed:#e67700; --diurnal:#c2255c;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#14120f; --fg:#f1ebe3; --muted:#a39889; --card:#1f1b17; --line:#36302a;
-           --accent:#ff7a3d; --accent-soft:#2c1d14; --water:#4dabf7; --high:#ff6b6b; --low:#74c0fc; --grid:#2c2722;
+    :root{ --bg:#16120f; --fg:#f4ece3; --ink:#f4ece3; --muted:#b1a395; --card:#221c17; --line:#3d332a;
+           --accent:#ff7a45; --accent-soft:#2c1d14; --water:#4dabf7; --high:#ff6b6b; --low:#74c0fc; --grid:#2c2722;
            --semi:#69db7c; --mixed:#ffa94d; --diurnal:#f783ac; }
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;padding:20px 16px 48px}
+  body{font-family:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px;background:var(--bg);color:var(--fg);line-height:1.55;padding:20px 16px 48px}
   .wrap{max-width:1180px;margin:0 auto}
   a.back{font-size:14px;color:var(--muted);text-decoration:none}
   a.back:hover{color:var(--accent)}
   .steps{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
-  .steps a{font-size:13px;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px;background:var(--card)}
-  .steps a.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  .steps a{font-size:13px;font-weight:700;text-decoration:none;color:var(--fg);border:2px solid var(--ink);border-radius:999px;padding:3px 12px;background:var(--card)}
+  .steps a.on{background:var(--ink);color:var(--card)}
   header{margin:8px 0 18px}
-  h1{font-size:clamp(22px,4.5vw,30px);font-weight:700}
+  h1{font-size:clamp(24px,4.8vw,34px);font-weight:900;letter-spacing:-.02em}
   .sub{color:var(--muted);font-size:14px}
   .layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .card h2{font-size:14px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.03em}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:16px;box-shadow:4px 4px 0 var(--ink)}
+  .card h2{font-size:15px;font-weight:800;color:var(--fg);margin-bottom:10px}
   .side{display:flex;flex-direction:column;gap:16px}
   .main{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .main .wide{grid-column:1 / -1}
@@ -45,15 +45,16 @@
   input[type=range]{width:100%;accent-color:var(--accent)}
   .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
   .row{display:flex;gap:8px;flex-wrap:wrap}
-  button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--fg);
-         border-radius:8px;padding:6px 10px;cursor:pointer}
+  button{font:inherit;font-size:13px;font-weight:700;border:2px solid var(--ink);background:var(--card);color:var(--fg);
+         border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+  button:active{transform:translate(2px,2px);box-shadow:none}
   button:hover{border-color:var(--accent)}
-  button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
-  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px}
+  button.primary{background:var(--accent);color:#fff}
+  .seg{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;box-shadow:none}
   .seg button.on{background:var(--accent);color:#fff;font-weight:700}
   /* 3D */
-  #view{position:relative;width:100%;aspect-ratio:1/1;max-height:460px;border-radius:10px;overflow:hidden;
+  #view{position:relative;width:100%;aspect-ratio:1/1;max-height:460px;border-radius:10px;overflow:hidden;border:2px solid var(--ink);
         background:radial-gradient(circle at 50% 40%,#1b2a44,#0b1220);touch-action:none;cursor:grab}
   #view canvas{display:block;width:100%;height:100%}
   .hint{position:absolute;left:10px;bottom:8px;font-size:11px;color:#c9d4e6;opacity:.8;pointer-events:none}
@@ -64,7 +65,7 @@
   .type{font-size:24px;font-weight:700}
   .type.semi{color:var(--semi)} .type.mixed{color:var(--mixed)} .type.diurnal{color:var(--diurnal)} .type.none{color:var(--muted)}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
-  .stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+  .stat{background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px}
   .stat .k{font-size:12px;color:var(--muted)}
   .stat .v{font-family:ui-monospace,monospace;font-size:15px;font-weight:600;white-space:pre-line}
   .explain{font-size:14px;color:var(--fg)}

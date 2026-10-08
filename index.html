@@ -4,112 +4,155 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Easy Magma · 과학 수업 시뮬레이터</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="stylesheet" href="./theme.css?v=1">
 <style>
-  :root{
-    --bg:#faf7f2; --fg:#1f1b16; --muted:#6b6259; --card:#ffffff; --line:#e7dfd4;
-    --accent:#d9480f; --accent-soft:#fff1e6;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#16130f; --fg:#f2ece4; --muted:#a39889; --card:#211c17; --line:#3a322a;
-           --accent:#ff7a3d; --accent-soft:#2c1d14; }
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--fg);
-       line-height:1.6;padding:48px 16px 64px}
-  .wrap{max-width:860px;margin:0 auto}
-  header{margin-bottom:36px}
-  .logo{font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
-  h1{font-size:clamp(28px,6vw,40px);font-weight:700;margin:6px 0 8px;line-height:1.25}
-  .sub{color:var(--muted)}
-  h2{font-size:15px;font-weight:700;color:var(--muted);margin:32px 0 12px;letter-spacing:.04em}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-  a.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;
-         padding:18px 18px 16px;text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}
-  a.card:hover{transform:translateY(-2px);border-color:var(--accent)}
-  .tag{display:inline-block;font-size:12px;font-weight:500;background:var(--accent-soft);color:var(--accent);
-       padding:2px 8px;border-radius:999px;margin-bottom:8px}
-  .card h3{font-size:17px;font-weight:700;margin-bottom:4px}
-  .card p{font-size:14px;color:var(--muted)}
-  .empty{border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--muted);font-size:14px}
-  .tabs{display:flex;gap:6px;border-bottom:2px solid var(--line);margin-bottom:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
-  .tabs button{font:inherit;font-size:16px;font-weight:700;background:none;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;
-               border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
-  .tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
-  .panel{display:none}
-  .panel.on{display:block}
-  footer{margin-top:48px;font-size:13px;color:var(--muted)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+  .top{display:flex;align-items:center;gap:10px;padding:18px 0}
+  .badge{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;letter-spacing:.06em}
+  .badge i{display:grid;place-items:center;width:34px;height:34px;border:2px solid var(--ink);border-radius:10px;background:var(--lava);box-shadow:2px 2px 0 var(--ink);font-style:normal;font-size:18px}
+  .hero{padding:26px 0 30px;border-bottom:2px dashed var(--line)}
+  .hero h1{font-size:clamp(30px,6vw,48px);font-weight:900;line-height:1.25;letter-spacing:-.02em}
+  .hero h1 .wave{position:relative;white-space:nowrap}
+  .hero h1 .wave svg{position:absolute;left:0;right:0;bottom:-10px;width:100%;height:14px}
+  .hero p{margin-top:18px;color:var(--muted);font-size:16px;max-width:560px}
+  /* 도구 */
+  .tools{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 14px;align-items:stretch}
+  .search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:12px;padding:10px 14px;background:var(--card);box-shadow:3px 3px 0 var(--ink)}
+  .search input{flex:1;border:0;outline:0;font:inherit;font-size:15px;background:transparent;color:var(--fg);min-width:0}
+  select.unit{font:inherit;font-size:15px;font-weight:700;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--card);color:var(--fg);box-shadow:3px 3px 0 var(--ink);min-width:200px;max-width:100%}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--card);color:var(--fg);cursor:pointer}
+  .chip.on{background:var(--ink);color:var(--card)}
+  .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .count{font-size:13px;color:var(--muted);margin-bottom:12px}
+  /* 단원 묶음 */
+  .group{margin-bottom:30px}
+  .group h2{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;margin-bottom:12px}
+  .group h2 .u{font-size:13px;font-weight:700;border:2px solid var(--ink);border-radius:8px;padding:1px 8px}
+  /* 카드 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
+  a.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--card);border:2px solid var(--ink);border-radius:14px;
+         box-shadow:4px 4px 0 var(--ink);overflow:hidden;transition:transform .12s, box-shadow .12s}
+  a.card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+  a.card:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .stripe{height:10px;border-bottom:2px solid var(--ink)}
+  .cbody{padding:18px 18px 14px;display:flex;flex-direction:column;flex:1}
+  .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .icon{display:grid;place-items:center;width:46px;height:46px;border:2px solid var(--ink);border-radius:12px;font-size:24px;background:var(--bg)}
+  .no{font-weight:900;font-size:13px;border:2px solid var(--ink);border-radius:8px;padding:2px 8px;background:var(--lava);color:#1f1a17}
+  .card h3{font-size:19px;font-weight:800;margin-bottom:6px}
+  .card p{font-size:14px;color:var(--muted);line-height:1.6}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+  .tags span{font-size:12px;border:1.5px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--muted)}
+  .open{margin-top:auto;padding-top:12px;border-top:2px dashed var(--line);font-weight:800;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .open span{color:var(--muted);font-weight:700}
+  .open b{color:var(--magma);white-space:nowrap}
+  .empty{border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted);background:var(--card)}
+  footer{margin:48px 0 32px;font-size:13px;color:var(--muted);text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="logo">🌋 Easy Magma</div>
-    <h1>과학 수업 시뮬레이터</h1>
-    <p class="sub">수업 시간에 바로 열어 보는 인터랙티브 자료 모음</p>
-  </header>
+  <div class="top"><div class="badge"><i>🌋</i>EASY MAGMA</div></div>
 
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="earth">지구과학</button>
-    <button role="tab" data-tab="integrated">통합과학</button>
-    <button role="tab" data-tab="middle">중학교 과학</button>
-  </nav>
-
-  <!-- 새 시뮬레이터를 추가할 때 아래 카드 형식을 복사해 쓰세요 -->
-  <section class="panel" id="earth">
-  <h2>지구과학 · 해양 (조석)</h2>
-  <div class="grid">
-    <a class="card" href="./tidal-force/basics/">
-      <span class="tag">해양 · 0</span>
-      <h3>기초 개념: 위도, 자전과 공전</h3>
-      <p>적도·저위도·중위도·고위도, 자전과 공전 + 확인 퀴즈</p>
-    </a>
-    <a class="card" href="./tidal-force/gravity/">
-      <span class="tag">해양 · 1</span>
-      <h3>기조력: 인력 + 원심력</h3>
-      <p>① 달의 인력 → ② 원심력 → ③ 합력(기조력) → ④ 조차가 다른 까닭</p>
-    </a>
-    <a class="card" href="./tide/">
-      <span class="tag">해양 · 2</span>
-      <h3>위도별 조석 형태</h3>
-      <p>관측자의 위도에 따른 반일주조·혼합조·일주조</p>
-    </a>
-    <!-- 새 카드 형식:
-    <a class="card" href="./폴더명/">
-      <span class="tag">분류</span>
-      <h3>제목</h3>
-      <p>설명</p>
-    </a>
-    -->
-  </div>
+  <section class="hero">
+    <h1>손으로 만져 보는<br><span class="wave">과학 시뮬레이터<svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8 Q 12.5 0 25 8 T 50 8 T 75 8 T 100 8 T 125 8 T 150 8 T 175 8 T 200 8" fill="none" stroke="var(--magma)" stroke-width="5" stroke-linecap="round"/></svg></span></h1>
+    <p>교과서 속 개념을 직접 움직여 보며 이해하는 수업용 인터랙티브 자료 모음입니다.</p>
   </section>
 
-  <section class="panel" id="integrated">
-  <h2>통합과학</h2>
-  <div class="grid">
-    <div class="empty">준비 중</div>
+  <div class="tools">
+    <label class="search">🔍<input id="q" type="search" placeholder="제목, 개념, 단원으로 검색"></label>
+    <select class="unit" id="unit" aria-label="단원 선택"></select>
   </div>
-  </section>
-
-  <section class="panel" id="middle">
-  <h2>중학교 과학</h2>
-  <div class="grid">
-    <div class="empty">준비 중</div>
+  <div class="chips" id="subj">
+    <button class="chip on" data-s="all">전체</button>
+    <button class="chip" data-s="earth"><span class="dot" style="background:var(--magma)"></span>지구과학</button>
+    <button class="chip" data-s="integrated"><span class="dot" style="background:var(--teal)"></span>통합과학</button>
+    <button class="chip" data-s="middle"><span class="dot" style="background:var(--violet)"></span>중학교 과학</button>
   </div>
-  </section>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
 
-  <footer>easy-magma.github.io</footer>
+  <footer>easy-magma.github.io · 수업에 자유롭게 활용하세요</footer>
 </div>
+
 <script>
-  // 탭 전환 (주소 끝 #earth / #integrated / #middle 로 바로 열기 가능)
-  const tabs = document.querySelectorAll('[data-tab]');
-  function show(id){
-    if (!document.getElementById(id)) id = 'earth';
-    tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === id));
-    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === id));
+/* ===== 자료 목록: 새 자료는 여기에 추가 =====
+   s: earth | integrated | middle,  course: 과목명,  unit: 대단원 › 중단원 */
+const ITEMS = [
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⓪', icon:'🌍',
+    title:'기초 개념: 위도, 자전과 공전', desc:'적도·저위도·중위도·고위도, 자전과 공전, 달이 다시 남중하기까지 + 확인 퀴즈',
+    tags:['사전 학습','퀴즈'], href:'./tidal-force/basics/' },
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'①~④', icon:'🌕',
+    title:'기조력: 인력 + 원심력', desc:'달의 인력 → 원심력 → 합력(기조력) → 하루 두 번의 조차가 다른 까닭',
+    tags:['개념 탐구'], href:'./tidal-force/gravity/' },
+  { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⑤', icon:'🌊',
+    title:'위도별 조석 형태', desc:'관측자의 위도에 따라 반일주조·혼합조·일주조가 어떻게 나타나는지 3D 모형과 그래프로 확인',
+    tags:['시뮬레이션'], href:'./tide/' },
+];
+const SUBJ = { earth:{ name:'지구과학', color:'var(--magma)' }, integrated:{ name:'통합과학', color:'var(--teal)' }, middle:{ name:'중학교 과학', color:'var(--violet)' } };
+const unitKey = it => `${it.course} · ${it.unit}`;
+
+const state = { s:'all', unit:'all', q:'' };
+const $ = id => document.getElementById(id);
+
+function fillUnits(){
+  const units = [...new Set(ITEMS.filter(it => state.s === 'all' || it.s === state.s).map(unitKey))];
+  if (!units.includes(state.unit)) state.unit = 'all';
+  $('unit').innerHTML = `<option value="all">📚 전체 단원</option>` +
+    units.map(u => `<option value="${u}" ${u === state.unit ? 'selected' : ''}>${u}</option>`).join('');
+}
+function card(it){
+  return `<a class="card" href="${it.href}">
+    <div class="stripe" style="background:${SUBJ[it.s].color}"></div>
+    <div class="cbody">
+      <div class="chead"><span class="icon">${it.icon}</span><span class="no">${it.no}</span></div>
+      <h3>${it.title}</h3>
+      <p>${it.desc}</p>
+      <div class="tags">${it.tags.map(t => `<span>${t}</span>`).join('')}</div>
+      <div class="open"><span>${it.course}</span><b>열기 →</b></div>
+    </div>
+  </a>`;
+}
+function render(){
+  const q = state.q.trim().toLowerCase();
+  const list = ITEMS.filter(it => (state.s === 'all' || it.s === state.s) && (state.unit === 'all' || unitKey(it) === state.unit) &&
+    (!q || [it.title, it.desc, it.course, it.unit, ...it.tags].join(' ').toLowerCase().includes(q)));
+  $('count').textContent = list.length ? `자료 ${list.length}개` : '';
+  if (!list.length){
+    $('list').innerHTML = `<div class="empty">${state.s !== 'all' && !q ? `${SUBJ[state.s].name} 자료는 준비 중입니다.` : '찾는 자료가 없어요.'}</div>`;
+    return;
   }
-  tabs.forEach(b => b.addEventListener('click', () => { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); }));
-  show(location.hash.slice(1));
+  // 단원별로 묶어서 보여 주기
+  const groups = new Map();
+  list.forEach(it => { const k = unitKey(it); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); });
+  $('list').innerHTML = [...groups].map(([k, its]) => `
+    <section class="group">
+      <h2><span class="u" style="background:${SUBJ[its[0].s].color};color:#fff;border-color:var(--ink)">${its[0].course}</span>${its[0].unit}</h2>
+      <div class="grid">${its.map(card).join('')}</div>
+    </section>`).join('');
+}
+function syncHash(){
+  const p = [];
+  if (state.s !== 'all') p.push('s=' + state.s);
+  if (state.unit !== 'all') p.push('u=' + encodeURIComponent(state.unit));
+  history.replaceState(null, '', p.length ? '#' + p.join('&') : location.pathname);
+}
+document.querySelectorAll('#subj .chip').forEach(b => b.addEventListener('click', () => {
+  state.s = b.dataset.s;
+  document.querySelectorAll('#subj .chip').forEach(x => x.classList.toggle('on', x === b));
+  fillUnits(); render(); syncHash();
+}));
+$('unit').addEventListener('change', e => { state.unit = e.target.value; render(); syncHash(); });
+$('q').addEventListener('input', e => { state.q = e.target.value; render(); });
+
+// 주소로 바로 열기: #s=earth&u=... (예전 주소 #earth 도 지원)
+const hp = new URLSearchParams(location.hash.slice(1));
+const hs = hp.get('s') || (SUBJ[location.hash.slice(1)] ? location.hash.slice(1) : null);
+if (hs && SUBJ[hs]){ state.s = hs; document.querySelectorAll('#subj .chip').forEach(x => x.classList.toggle('on', x.dataset.s === hs)); }
+if (hp.get('u')) state.unit = hp.get('u');
+fillUnits(); render();
 </script>
 </body>
 </html>
