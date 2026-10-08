@@ -49,6 +49,14 @@
   .open span{color:var(--muted);font-weight:700}
   .open b{color:var(--magma);white-space:nowrap}
   .empty{border:2px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted);background:var(--card)}
+  /* 만든 사람 */
+  .about{margin-top:40px;background:var(--card);border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);padding:22px}
+  .about h2{font-size:18px;font-weight:800;margin-bottom:4px}
+  .about .motto{color:var(--muted);font-size:14px;margin-bottom:14px}
+  .about ul{list-style:none;display:grid;gap:4px;font-size:14px}
+  .about ul li b{display:inline-block;min-width:64px;color:var(--magma)}
+  .about .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .about .links a{font-size:13px;font-weight:700;text-decoration:none;color:var(--fg);border:2px solid var(--ink);border-radius:999px;padding:5px 12px}
   footer{margin:48px 0 32px;font-size:13px;color:var(--muted);text-align:center}
 </style>
 </head>
@@ -73,6 +81,21 @@
   </div>
   <div class="count" id="count"></div>
   <div id="list"></div>
+
+  <section class="about">
+    <h2>만든 사람 · 신림고 지구과학 교사 이석희</h2>
+    <p class="motto">"어제보다 나으면 1년 후가 기대된다."</p>
+    <ul>
+      <li><b>2021</b>서울대학교 지구과학교육과 졸업</li>
+      <li><b>2022~</b>신림고등학교 지구과학 교사</li>
+      <li><b>2023~24</b>AIEDAP 리더·마스터교원, 교실혁명 선도교원, 고교 신설과목 선도교원</li>
+      <li><b>2024~</b>강남구청 인터넷수능방송 통합과학 강사</li>
+    </ul>
+    <div class="links">
+      <a href="https://blog.naver.com/rational-growth" target="_blank" rel="noopener">📝 블로그</a>
+      <a href="mailto:magma4885@naver.com">✉️ magma4885@naver.com</a>
+    </div>
+  </section>
 
   <footer>easy-magma.github.io · 수업에 자유롭게 활용하세요</footer>
 </div>
