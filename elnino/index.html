@@ -127,6 +127,8 @@ ul.tight li{margin:3px 0}
 .q-big{font-size:clamp(18px,2.2vw,23px);font-weight:600;margin:0;max-width:40em}
 #hookAns p{margin:0 0 8px;font-size:17px;max-width:44em}
 .next-q{font-weight:600}
+.ref{font-size:13px!important;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.ref a{color:var(--accent)}
 .muted{color:var(--muted);font-weight:400}
 /* basics */
 .basics-lead{margin:0;font-size:17px}
@@ -137,6 +139,15 @@ ul.tight li{margin:3px 0}
 .key{margin:12px 0 0;padding:10px 12px;border:2px dashed var(--accent);border-radius:10px;font-size:15.5px}
 .svg-wrap svg{display:block;width:100%;height:auto}
 .map-wrap{background:var(--chip-cool);border-radius:10px;border:2px solid var(--ink);overflow:hidden}
+#mapSvg{touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none}
+#mapSvg text{pointer-events:none}
+.ll-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.ll-read{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:40px}
+.ll-v{font:700 clamp(22px,3vw,30px) var(--f-mono);font-variant-numeric:tabular-nums}
+.ll-tag{font-size:14px;font-weight:800;padding:3px 10px;border-radius:999px;border:2px solid var(--ink);background:var(--chip-neutral)}
+.ll-tag.hot{background:var(--accent);color:var(--accent-ink)}
+.ll-go{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.btn.sm{font-size:13px;padding:4px 10px}
 .map-legend{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0;align-items:center}
 .map-legend .mk{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600}
 .map-legend .mk i{width:10px;height:10px;border-radius:50%;background:var(--ink);display:inline-block}
@@ -200,9 +211,11 @@ table.mini th,table.mini td{padding:8px 10px}
         <button class="btn" type="button" id="hookBtn" aria-expanded="false">답 보기</button>
         <div id="hookAns" hidden>
           <p>바닷물이 따뜻해지면 물고기가 잘 잡히지 않아 어부들은 일을 쉬어야 했다. 그래서 <b>'예수가 주는 휴가'</b>라고 생각했다.</p>
+          <p class="ref">출처 · 미래엔 『고등 통합과학2』 교과서 p.86 날개 ‘엘니뇨(El Niño)’ /
+            NOAA National Ocean Service, <a href="https://oceanservice.noaa.gov/facts/ninonina.html" target="_blank" rel="noopener">What are El Niño and La Niña?</a> — 남아메리카 어부들이 1600년대부터 12월 무렵의 따뜻한 바닷물을 ‘El Niño de Navidad(크리스마스의 아기)’라고 불렀다.</p>
           <p class="next-q">그렇다면 바닷물은 왜 따뜻해지고, 물고기는 왜 사라졌을까?<br>
             <span class="muted">힌트 · 1학기 '해류의 영향': 찬 해수에는 영양염이 많다. 찬 해수는 어디에서 올라올까?</span></p>
-          <button class="btn primary" type="button" data-go="layer">1학기 복습부터 하기 →</button>
+          <button class="btn primary" type="button" data-go="layer">기초 개념부터 보기 →</button>
         </div>
       </div>
     </div>
@@ -214,6 +227,18 @@ table.mini th,table.mini td{padding:8px 10px}
     <h2 class="sec-title"><span class="num">1</span>위도·경도와 적도 태평양</h2>
     <div class="panel">
       <div class="svg-wrap map-wrap" id="mapWrap"></div>
+      <div class="ll-bar">
+        <div class="ll-read" id="llRead" aria-live="polite"></div>
+        <div class="ll-go">
+          <span class="muted">바로 가기</span>
+          <button type="button" class="btn sm" data-goto="127,37">서울</button>
+          <button type="button" class="btn sm" data-goto="120,0">120°E</button>
+          <button type="button" class="btn sm" data-goto="180,0">180°</button>
+          <button type="button" class="btn sm" data-goto="280,0">80°W</button>
+          <button type="button" class="btn sm" data-goto="284,-12">페루</button>
+        </div>
+      </div>
+      <p class="note" style="margin:6px 0 0">지도를 누르거나 끌어 보자. <b style="color:var(--cool)">파란 선</b>은 본초 자오선(0°)에서 동·서로 잰 <b>경도</b>, <b style="color:var(--warm)">빨간 선</b>은 적도(0°)에서 남·북으로 잰 <b>위도</b>이다. 본초 자오선은 이 지도의 양 끝이다.</p>
       <div class="map-legend">
         <span class="k" style="--c:var(--accent)">엘니뇨가 일어나는 곳 (단면 모형의 범위)</span>
         <span class="mk"><i></i>지명</span>
@@ -824,7 +849,60 @@ table.mini th,table.mini td{padding:8px 10px}
       P.push(`<line x1="${x+18}" y1="${y}" x2="${x-18}" y2="${y}" style="stroke:var(--ink);stroke-width:3" marker-end="url(#mapArr)"/>`); });
     P.push(`<text x="${X(232)}" y="${Y(0) + 20}" text-anchor="middle" style="fill:var(--ink);font:800 12px var(--f-body)">무역풍</text>`);
     document.getElementById('mapWrap').innerHTML =
-      `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="태평양 중심 세계 지도: 적도를 따라 120°E에서 80°W까지가 엘니뇨가 일어나는 곳"><defs><marker id="mapArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink)"/></marker></defs>${P.join('')}</svg>`;
+      `<svg id="mapSvg" viewBox="0 0 ${W} ${H}" tabindex="0" role="application" aria-label="태평양 중심 세계 지도. 지도를 누르거나 끌면 그 지점의 위도와 경도가 나타난다. 방향키로도 움직일 수 있다."><defs><marker id="mapArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink)"/></marker></defs>${P.join('')}<g id="cur"></g></svg>`;
+
+    /* 드래그로 위도·경도 읽기 */
+    const svg = document.getElementById('mapSvg'), g = document.getElementById('cur');
+    let pos = {lon:127, lat:37};
+    const lonOf = x => Math.round(180 + (x - 480) * 360 / W);          // 0~360 (동쪽으로 잰 값)
+    const latOf = y => Math.round(75 - y * 360 / W);
+    const fmtLon = L => { L = ((L % 360) + 360) % 360; return L === 0 ? '0°' : L === 180 ? '180°' : L < 180 ? L + '°E' : (360 - L) + '°W'; };
+    const fmtLat = l => l === 0 ? '0°' : Math.abs(l) + '°' + (l > 0 ? 'N' : 'S');
+    const near = [['서울',127,37],['인도네시아',113,-1],['오스트레일리아',134,-25],['페루',284,-12],['에콰도르',281,-1],['영국 그리니치',360,51],['영국 그리니치',0,51]];
+    const lbl = (t,x,y,c,anchor='middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" style="fill:var(${c});font:800 13px var(--f-mono);paint-order:stroke;stroke:var(--surface);stroke-width:4px">${t}</text>`;
+    function render(){
+      const L = ((pos.lon % 360) + 360) % 360, x = X(L), y = Y(pos.lat), y0 = Y(0);
+      const east = L <= 180, x0 = east ? X(0.0001) : X(359.9999);   // 본초 자오선(지도 양 끝)
+      const xs0 = east ? 0 : W;
+      let h = '';
+      // 경선·위선 (점선)
+      h += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" style="stroke:var(--cool);stroke-width:1.6;stroke-dasharray:6 4"/>`;
+      h += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" style="stroke:var(--warm);stroke-width:1.6;stroke-dasharray:6 4"/>`;
+      // 경도: 본초 자오선에서 적도를 따라 잰 각
+      h += `<line x1="${xs0}" y1="${y0}" x2="${x}" y2="${y0}" style="stroke:var(--cool);stroke-width:6;stroke-linecap:round;opacity:.85"/>`;
+      h += lbl('경도 ' + fmtLon(L), (xs0 + x)/2, y0 + (pos.lat >= 0 ? 22 : -12), '--cool');
+      // 위도: 적도에서 잰 각
+      if (pos.lat !== 0){
+        h += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y}" style="stroke:var(--warm);stroke-width:6;stroke-linecap:round;opacity:.85"/>`;
+        h += lbl('위도 ' + fmtLat(pos.lat), x + (L > 330 ? -10 : 10), (y0 + y)/2 + 4, '--warm', L > 330 ? 'end' : 'start');
+      }
+      h += `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--accent);stroke:var(--ink);stroke-width:2.5"/>`;
+      g.innerHTML = h;
+      const n = near.find(([, lo, la]) => Math.abs(lo - L) <= 6 && Math.abs(la - pos.lat) <= 6);
+      const inBox = L >= 120 && L <= 280 && pos.lat >= -10 && pos.lat <= 10;
+      document.getElementById('llRead').innerHTML =
+        `<span class="ll-v">${fmtLat(pos.lat)}, ${fmtLon(L)}</span>` +
+        (inBox ? '<span class="ll-tag hot">엘니뇨의 무대 안!</span>' : '') +
+        (n ? `<span class="ll-tag">${n[0]} 부근</span>` : '');
+    }
+    function fromEvent(e){
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      pos = {lon: clamp(lonOf(clamp(p.x,0,W)),0,360), lat: clamp(latOf(clamp(p.y,0,H)),-60,75)};
+      render();
+    }
+    let dragging = false;
+    svg.addEventListener('pointerdown', e => { e.preventDefault(); dragging = true; try{ svg.setPointerCapture(e.pointerId); }catch(_){} fromEvent(e); });
+    svg.addEventListener('pointermove', e => { if (dragging) fromEvent(e); });
+    ['pointerup','pointercancel'].forEach(t => svg.addEventListener(t, () => dragging = false));
+    svg.addEventListener('keydown', e => {
+      const d = e.shiftKey ? 10 : 1, k = {ArrowLeft:[-d,0], ArrowRight:[d,0], ArrowUp:[0,d], ArrowDown:[0,-d]}[e.key];
+      if (!k) return; e.preventDefault();
+      pos = {lon: clamp(pos.lon + k[0], 0, 360), lat: clamp(pos.lat + k[1], -60, 75)}; render();
+    });
+    document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => {
+      const [lo, la] = b.dataset.goto.split(',').map(Number); pos = {lon: lo, lat: la}; render(); }));
+    render();
   })();
 
   /* ---------- 대기 대순환 그림 (SVG) ---------- */
