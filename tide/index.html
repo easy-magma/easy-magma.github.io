@@ -20,62 +20,62 @@
            --semi:#69db7c; --mixed:#ffa94d; --diurnal:#f783ac; }
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px;background:var(--bg);color:var(--fg);line-height:1.55;padding:20px 16px 48px}
-  .wrap{max-width:1180px;margin:0 auto}
+  body{font-family:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55;padding:20px 16px 48px}
+  .wrap{max-width:1280px;margin:0 auto}
   a.back{font-size:14px;color:var(--muted);text-decoration:none}
   a.back:hover{color:var(--accent)}
   .steps{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px}
   .steps a{font-size:13px;font-weight:700;text-decoration:none;color:var(--fg);border:2px solid var(--ink);border-radius:999px;padding:3px 12px;background:var(--card)}
   .steps a.on{background:var(--ink);color:var(--card)}
-  header{margin:8px 0 18px}
+  header{margin:8px 0 14px}
   h1{font-size:clamp(24px,4.8vw,34px);font-weight:900;letter-spacing:-.02em}
   .sub{color:var(--muted);font-size:14px}
-  .layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
-  .card{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:16px;box-shadow:4px 4px 0 var(--ink)}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:16px;box-shadow:4px 4px 0 var(--ink);min-width:0}
   .card h2{font-size:15px;font-weight:800;color:var(--fg);margin-bottom:10px}
-  .side{display:flex;flex-direction:column;gap:16px}
-  .main{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .main .wide{grid-column:1 / -1}
-  .layout > *, .main > *{min-width:0}
-  /* controls */
-  .ctl{margin-bottom:16px}
-  .ctl:last-child{margin-bottom:0}
-  .ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-bottom:6px}
+  /* 조작 막대 */
+  .controls{display:grid;grid-template-columns:1.3fr 1fr 1.6fr;gap:18px;align-items:end;margin-bottom:16px}
+  .ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px}
   .ctl label b{font-family:ui-monospace,monospace;color:var(--accent)}
   input[type=range]{width:100%;accent-color:var(--accent)}
   .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   button{font:inherit;font-size:13px;font-weight:700;border:2px solid var(--ink);background:var(--card);color:var(--fg);
          border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
   button:active{transform:translate(2px,2px);box-shadow:none}
-  button:hover{border-color:var(--accent)}
   button.primary{background:var(--accent);color:#fff}
   .seg{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
   .seg button{flex:1;border:0;border-radius:0;padding:8px 6px;box-shadow:none}
-  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
-  /* 3D */
-  #view{position:relative;width:100%;aspect-ratio:1/1;max-height:460px;border-radius:10px;overflow:hidden;border:2px solid var(--ink);
+  .seg button.on{background:var(--accent);color:#fff}
+  /* 큰 화면 */
+  .big{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+  #view{position:relative;width:100%;height:min(68vh,600px);min-height:380px;border-radius:10px;overflow:hidden;border:2px solid var(--ink);
         background:radial-gradient(circle at 50% 40%,#1b2a44,#0b1220);touch-action:none;cursor:grab}
   #view canvas{display:block;width:100%;height:100%}
-  .hint{position:absolute;left:10px;bottom:8px;font-size:11px;color:#c9d4e6;opacity:.8;pointer-events:none}
-  .legend3d{position:absolute;right:10px;top:8px;font-size:11px;color:#c9d4e6;text-align:right;line-height:1.7;pointer-events:none}
-  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:4px;vertical-align:middle}
-  .chartbox{position:relative;width:100%;height:320px}
-  /* results */
-  .type{font-size:24px;font-weight:700}
+  .hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#c9d4e6;opacity:.85;pointer-events:none}
+  .legend3d{position:absolute;right:10px;top:8px;font-size:12px;color:#dbe4f0;text-align:right;line-height:1.7;pointer-events:none}
+  .ramp{display:inline-block;width:90px;height:10px;border-radius:5px;vertical-align:middle;background:linear-gradient(90deg,#1d4e9e,#5fb3ff,#ffd166,#ff4d2e)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:4px;vertical-align:middle}
+  #gaugeBox{position:relative;width:100%;height:min(68vh,600px);min-height:380px;border-radius:10px;overflow:hidden;border:2px solid var(--ink)}
+  #gauge{display:block;width:100%;height:100%}
+  .chartbox{position:relative;width:100%;height:300px}
+  .bottom{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+  /* 결과 */
+  .type{font-size:30px;font-weight:900}
   .type.semi{color:var(--semi)} .type.mixed{color:var(--mixed)} .type.diurnal{color:var(--diurnal)} .type.none{color:var(--muted)}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
+  .why{font-size:15px;margin:6px 0 10px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
   .stat{background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px}
   .stat .k{font-size:12px;color:var(--muted)}
-  .stat .v{font-family:ui-monospace,monospace;font-size:15px;font-weight:600;white-space:pre-line}
-  .explain{font-size:14px;color:var(--fg)}
+  .stat .v{font-family:ui-monospace,monospace;font-size:14px;font-weight:600;white-space:pre-line}
+  .explain{font-size:14px}
   .explain ul{padding-left:18px;margin-top:6px}
   .explain li{margin-bottom:4px}
   .note{font-size:12px;color:var(--muted);margin-top:10px}
   footer{margin-top:28px;font-size:12px;color:var(--muted)}
-  @media (max-width:900px){
-    .layout{grid-template-columns:1fr}
-    .main{grid-template-columns:1fr}
+  @media (max-width:980px){
+    .controls{grid-template-columns:1fr}
+    .big,.bottom{grid-template-columns:1fr}
+    #view,#gaugeBox{height:420px}
   }
 </style>
 </head>
@@ -92,82 +92,78 @@
   </nav>
   <header>
     <h1>위도별 조석 형태 시뮬레이터</h1>
-    <p class="sub">평형조석론 · 관측자의 위도에 따라 반일주조, 혼합조, 일주조가 어떻게 나타나는지 확인해 보세요.</p>
+    <p class="sub">한자리에 가만히 서 있는 관측자가 하루 동안 겪는 해수면 변화를 따라가 봅시다.</p>
   </header>
 
-  <div class="layout">
-    <aside class="side">
-      <div class="card">
-        <h2>조건 설정</h2>
-        <div class="ctl">
-          <label>관측 위도 <b id="latV">35°N</b></label>
-          <input type="range" id="lat" min="0" max="90" step="1" value="35">
-          <div class="ticks"><span>0° 적도</span><span>45°</span><span>90° 극</span></div>
-        </div>
-        <div class="ctl">
-          <label>지구 자전축 기울기</label>
-          <div class="seg">
-            <button class="on" data-tilt="23.5">23.5° (실제)</button>
-            <button data-tilt="0">0° (기울지 않았다면)</button>
-          </div>
-        </div>
-        <div class="ctl">
-          <label>시각 (달의 남중 후) <b id="timeV">00:00</b></label>
-          <input type="range" id="time" min="0" max="24.8333" step="0.01" value="0">
-          <div class="ticks"><span>0시간</span><span>태음일 24시간 50분</span></div>
-        </div>
-        <div class="row">
-          <button class="primary" id="play">▶ 재생</button>
-          <button id="reset">처음으로</button>
-        </div>
+  <div class="card controls">
+    <div class="ctl">
+      <label>관측자의 위도 <b id="latV">35°N</b></label>
+      <input type="range" id="lat" min="0" max="90" step="1" value="35">
+      <div class="ticks"><span>0° 적도</span><span>45°</span><span>90° 극</span></div>
+      <div class="row">
+        <button data-p="0">적도 0°</button>
+        <button data-p="35">35°N 우리나라</button>
+        <button data-p="70">70°N 고위도</button>
       </div>
+    </div>
+    <div class="ctl">
+      <label>지구 자전축 기울기</label>
+      <div class="seg">
+        <button class="on" data-tilt="23.5">23.5° (실제)</button>
+        <button data-tilt="0">0° (가정)</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>시각 (달의 남중 후) <b id="timeV">00:00</b></label>
+      <input type="range" id="time" min="0" max="24.8333" step="0.01" value="0">
+      <div class="ticks"><span>0시간</span><span>12시간 25분</span><span>24시간 50분</span></div>
+      <div class="row">
+        <button class="primary" id="play">▶ 하루 재생</button>
+        <button id="reset">처음으로</button>
+      </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h2>빠른 비교 (관측자의 위도)</h2>
-        <div class="row">
-          <button data-p="0">적도 0°</button>
-          <button data-p="35">35°N (우리나라)</button>
-          <button data-p="70">70°N (고위도)</button>
-        </div>
+  <div class="big">
+    <div class="card">
+      <h2>🌍 3D 모형: 관측자가 지나가는 길(위도선)을 보세요</h2>
+      <div id="view">
+        <div class="legend3d">바닷물 높이 <span class="ramp"></span><br>낮음 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;높음<br>관측자 <span class="dot" style="background:#ff6b6b"></span> · 달 <span class="dot" style="background:#ffe08a"></span></div>
+        <div class="hint">드래그해서 돌려보기 · 굵은 고리 = 관측자가 하루 동안 지나가는 길</div>
       </div>
-    </aside>
+    </div>
+    <div class="card">
+      <h2>🧍 관측자 시점: 해안에서 본 바닷물</h2>
+      <div id="gaugeBox"><canvas id="gauge"></canvas></div>
+    </div>
+  </div>
 
-    <section class="main">
-      <div class="card">
-        <h2>3D 모형 (지구 고정 시점에서 본 조석 타원체)</h2>
-        <div id="view">
-          <div class="legend3d">달 방향 <span class="dot" style="background:#ffe08a"></span><br>관측자 <span class="dot" style="background:#ff6b6b"></span><br>관측 지점 해수면 <span class="dot" style="background:#e7f5ff"></span></div>
-          <div class="hint">드래그해서 돌려보기</div>
-        </div>
+  <div class="bottom">
+    <div class="card">
+      <h2>📈 하루(약 24시간 50분) 동안의 해수면 높이</h2>
+      <div class="chartbox"><canvas id="chart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>관측 결과</h2>
+      <div class="type" id="type">-</div>
+      <div class="why" id="why"></div>
+      <div class="stats">
+        <div class="stat"><div class="k">만조 (시각 · 높이)</div><div class="v" id="highs">-</div></div>
+        <div class="stat"><div class="k">간조 (시각 · 높이)</div><div class="v" id="lows">-</div></div>
+        <div class="stat" style="grid-column:1/-1"><div class="k">조차 (연속되는 만조와 간조의 높이 차)</div><div class="v" id="range">-</div></div>
       </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h2>하루(태음일) 동안의 해수면 높이</h2>
-        <div class="chartbox"><canvas id="chart"></canvas></div>
-      </div>
-
-      <div class="card wide">
-        <h2>관측 결과</h2>
-        <div class="type" id="type">-</div>
-        <div class="stats">
-          <div class="stat"><div class="k">현재 해수면</div><div class="v" id="now">-</div></div>
-          <div class="stat"><div class="k">만조 (시각 · 높이)</div><div class="v" id="highs">-</div></div>
-          <div class="stat"><div class="k">간조 (시각 · 높이)</div><div class="v" id="lows">-</div></div>
-          <div class="stat"><div class="k">조차</div><div class="v" id="range">-</div></div>
-        </div>
-      </div>
-
-      <div class="card wide explain">
-        <h2>원리</h2>
-        <p>달의 인력과 원심력의 합력인 <a href="../tidal-force/">기조력</a>으로 바닷물은 달 쪽과 그 반대쪽이 부풀어 오른 타원체 모양이 됩니다. 지구가 자전하면 관측 지점이 부푼 곳(만조)과 낮은 곳(간조)을 차례로 지나갑니다. 달도 공전하므로 달이 같은 위치에 다시 올 때까지 약 24시간 50분이 걸리고, 조석 주기는 그 절반인 약 12시간 25분입니다.</p>
-        <ul>
-          <li>자전축이 기울지 않아 <b>적도면과 달의 공전 궤도면이 일치</b>한다면 타원체의 축이 적도면에 놓여, 어느 위도에서나, 하루 두 번의 만조와 간조의 조차가 비슷합니다 → <b>반일주조</b></li>
-          <li>지구 자전축이 기울어져 <b>달의 공전 궤도면과 적도면이 일치하지 않으면</b> 타원체가 비스듬히 놓여, 두 번의 만조·간조 때 해수면 높이가 달라집니다 → 조차가 다른 <b>혼합조</b> (<a href="../tidal-force/tilt/">④에서 자세히</a>)</li>
-          <li><b>고위도</b>에서는 관측 지점이 한쪽 부푼 곳만 지나가 하루 한 번씩만 만조와 간조가 나타납니다 → <b>일주조</b></li>
-        </ul>
-        <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 달의 공전 궤도면과 적도면이 자전축 기울기(23.5°)만큼 어긋나 있다고 가정했고, 시각은 달이 관측 지점의 자오선을 지나는 때(남중)를 0시로 합니다. 3D 모형의 부푼 정도는 크게 과장했습니다.</p>
-      </div>
-    </section>
+  <div class="card explain">
+    <h2>원리</h2>
+    <p>기조력으로 바닷물은 달 쪽과 그 반대쪽 두 곳이 부풀어 오릅니다(3D 모형의 빨간 부분). 관측자는 지구와 함께 자전하면서 굵은 고리를 따라 한 바퀴 돌고, 고리 위의 <b>빨간 부분을 지날 때마다 만조</b>, <b>파란 부분을 지날 때마다 간조</b>를 겪습니다.</p>
+    <ul>
+      <li><b>반일주조</b>: 고리가 빨간 부분 두 곳을 비슷한 높이로 지나감 → 하루 두 번, 조차가 비슷한 만조와 간조</li>
+      <li><b>혼합조</b>: 고리가 빨간 부분 두 곳을 지나지만, 자전축이 기울어 한쪽은 높게 다른 쪽은 낮게 지나감 → 하루 두 번, 조차가 다름 (<a href="../tidal-force/tilt/">④에서 자세히</a>)</li>
+      <li><b>일주조</b>: 고위도에서는 고리가 빨간 부분 한 곳만 지나감 → 하루 한 번씩의 만조와 간조</li>
+    </ul>
+    <p class="note">단순화 조건: 달에 의한 평형조석만 계산했습니다. 실제로는 태양의 기조력, 해양의 형태와 크기, 수심 등에 따라 만조·간조 횟수와 조차가 달라지며, 우리나라 서해안처럼 조차가 수 m에 이르기도 합니다. 시각은 달이 관측자의 자오선을 지나는 때(남중)를 0시로 했습니다. 3D 모형과 관측자 시점의 바닷물 높이는 크게 과장했습니다.</p>
   </div>
 
   <footer>Easy Magma · 평형조석론 기반 교육용 시뮬레이터</footer>
@@ -176,13 +172,15 @@
 <script>
 'use strict';
 /* ===== 물리 모델: 평형조석 =====
-   해수면 높이 ζ = A (cos²θ − 1/3),  A = (3/2)(M/E)(R/d)³ R ≈ 53.5 cm
-   cosθ = sinφ sinδ + cosφ cosδ cosH  (φ 위도, δ 달 적위, H 달의 시간각) */
-const T = 24 + 50/60;          // 태음일(시간)
-const A = 53.5;                // cm
+   해수면 높이 ζ = A (cos²θ − 1/3),  A ≈ 53.5 cm
+   cosθ = sinφ sinδ + cosφ cosδ cosH  (φ 위도, δ 달이 적도면에서 벗어난 각, H 달의 시간각) */
+const T = 24 + 50/60;
+const A = 53.5;
 const D2R = Math.PI/180;
+const HMIN = -A/3, HMAX = A*2/3;     // 가능한 높이 범위
 
 const S = { lat:35, decl:23.5, t:0, playing:false };
+let cache = null;
 
 const cosTheta = (lat, decl, t) => {
   const p = lat*D2R, d = decl*D2R, H = 2*Math.PI*t/T;
@@ -198,7 +196,7 @@ function series(){
 }
 function extrema(xs, ys){
   const highs = [], lows = [];
-  const n = ys.length - 1;               // 마지막 점 = 첫 점(주기)
+  const n = ys.length - 1;
   const get = i => ys[(i + n) % n];
   for (let i = 0; i < n; i++){
     const a = get(i-1), b = get(i), c = get(i+1);
@@ -207,7 +205,6 @@ function extrema(xs, ys){
   }
   return { highs, lows };
 }
-/* 조차: 연속되는 만조와 간조 사이의 해수면 높이 차 */
 function ranges(ex){
   const ev = [...ex.highs.map(o => ({ ...o, k:'H' })), ...ex.lows.map(o => ({ ...o, k:'L' }))].sort((a,b) => a.t - b.t);
   const out = [];
@@ -217,7 +214,6 @@ function ranges(ex){
   }
   return out;
 }
-/* 교과서 기준: 일주조(만조·간조 1회) / 반일주조(2회, 조차 비슷) / 혼합조(2회, 조차 다름) */
 function classify(ex, range){
   if (range < 0.5 || ex.highs.length === 0) return { name:'조석 거의 없음', cls:'none' };
   if (ex.highs.length === 1) return { name:'일주조', cls:'diurnal' };
@@ -225,149 +221,157 @@ function classify(ex, range){
   const spread = (Math.max(...rs) - Math.min(...rs)) / Math.max(...rs);
   return spread < 0.1 ? { name:'반일주조', cls:'semi' } : { name:'혼합조', cls:'mixed' };
 }
-function tideRanges(ex){
-  return ranges(ex).map(o => `${fmtT(o.from.t)}→${fmtT(o.to.t)} ${o.r.toFixed(1)} cm`).join('\n');
-}
 const fmtT = t => { let m = Math.round(t*60) % Math.round(T*60); const h = Math.floor(m/60); m = m%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
 const fmtH = h => `${h >= 0 ? '+' : ''}${h.toFixed(1)} cm`;
-
-/* ===== CSS 색 ===== */
+const NUM = ['❶','❷','❸'];
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-/* ===== 3D (Three.js) ===== */
+/* 높이 → 색 (낮음 파랑 → 높음 빨강) */
+const RAMP = [[0,[29,78,158]],[0.4,[95,179,255]],[0.7,[255,209,102]],[1,[255,77,46]]];
+function rampColor(u){
+  u = Math.max(0, Math.min(1, u));
+  for (let i = 1; i < RAMP.length; i++){
+    const [u1, c1] = RAMP[i-1], [u2, c2] = RAMP[i];
+    if (u <= u2){ const k = (u - u1)/(u2 - u1); return c1.map((v, j) => (v + (c2[j] - v)*k)/255); }
+  }
+  return RAMP[RAMP.length-1][1].map(v => v/255);
+}
+
+/* ===== 3D ===== */
 const view = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 view.prepend(renderer.domElement);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-camera.position.set(0, 0, 7.2);
-
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+camera.position.set(0, 0, 6.6);
 const world = new THREE.Group();
-world.rotation.set(0.35, -0.55, 0);
+world.rotation.set(0.42, -0.5, 0);
 scene.add(world);
-
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.55);
 sunLight.position.set(3, 4, 5);
 scene.add(sunLight);
 
-// 지구 (자전하는 부분)
 const earthGroup = new THREE.Group();
 world.add(earthGroup);
-const earth = new THREE.Mesh(
-  new THREE.SphereGeometry(0.94, 64, 48),
-  new THREE.MeshPhongMaterial({ color:0x8c7a5b, shininess:5 })
-);
-earthGroup.add(earth);
-
-function circlePoints(r, y, seg=128){
+earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.94, 64, 48), new THREE.MeshPhongMaterial({ color:0x8c7a5b, shininess:5 })));
+function circlePoints(r, y, seg = 128){
   const pts = [];
   for (let i = 0; i <= seg; i++){ const a = 2*Math.PI*i/seg; pts.push(new THREE.Vector3(r*Math.cos(a), y, r*Math.sin(a))); }
   return pts;
 }
 const gridMat = new THREE.LineBasicMaterial({ color:0x3b3226, transparent:true, opacity:0.6 });
-for (let la = -60; la <= 60; la += 30){
-  const r = 0.945*Math.cos(la*D2R), y = 0.945*Math.sin(la*D2R);
-  earthGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(circlePoints(r, y)), la === 0 ? new THREE.LineBasicMaterial({ color:0xfff3bf }) : gridMat));
-}
 for (let lo = 0; lo < 180; lo += 30){
   const pts = [];
   for (let i = 0; i <= 128; i++){ const a = 2*Math.PI*i/128; pts.push(new THREE.Vector3(0.945*Math.cos(a)*Math.cos(lo*D2R), 0.945*Math.sin(a), 0.945*Math.cos(a)*Math.sin(lo*D2R))); }
   earthGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
 }
-// 자전축
-world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-1.5,0), new THREE.Vector3(0,1.5,0)]),
-  new THREE.LineBasicMaterial({ color:0xdee2e6, transparent:true, opacity:0.7 })));
-const northLabel = makeLabel('N', '#dee2e6'); northLabel.position.set(0, 1.65, 0); world.add(northLabel);
+world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-1.55,0), new THREE.Vector3(0,1.55,0)]),
+  new THREE.LineBasicMaterial({ color:0xdee2e6, transparent:true, opacity:0.75 })));
+function makeLabel(text, color, size = 0.28, bg = null){
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+  const g = cv.getContext('2d');
+  if (bg){ g.fillStyle = bg; g.beginPath(); g.arc(64, 64, 58, 0, 2*Math.PI); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 8; g.stroke(); }
+  g.fillStyle = color; g.font = 'bold 64px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 64, 68);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, depthTest:false }));
+  sp.scale.set(size, size, 1); sp.renderOrder = 10; return sp;
+}
+const nLabel = makeLabel('N', '#dee2e6'); nLabel.position.set(0, 1.72, 0); world.add(nLabel);
 
-// 조석 타원체 (바닷물 껍질) — 달 방향 고정
-const K = 0.22;               // 3D 과장 배율
-const R0 = 1.0;
+// 바닷물: 높이별 색
+const K = 0.22, R0 = 1.0, RW = 0.955;
+const waterR = c => RW*(1 + K*c*c);
 const waterGeo = new THREE.SphereGeometry(R0, 96, 64);
 const basePos = waterGeo.attributes.position.array.slice();
-const water = new THREE.Mesh(waterGeo, new THREE.MeshPhongMaterial({
-  color:0x3a8fe0, transparent:true, opacity:0.5, shininess:60, depthWrite:false, side:THREE.DoubleSide
-}));
+waterGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(basePos.length), 3));
+const water = new THREE.Mesh(waterGeo, new THREE.MeshPhongMaterial({ vertexColors:true, transparent:true, opacity:0.62, shininess:40, depthWrite:false }));
 world.add(water);
 const moonDir = new THREE.Vector3();
-// 짧은 반지름 = 지구 반지름(바닷물이 지구 전체를 항상 덮음), 긴 반지름 = 달 방향으로 부푼 만조
-const RW = 0.955;
-const waterR = c => RW*(1 + K*c*c);
+const moon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 24), new THREE.MeshBasicMaterial({ color:0xffe08a }));
+world.add(moon);
+const moonLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color:0xffe08a, dashSize:0.08, gapSize:0.06, transparent:true, opacity:0.8 }));
+world.add(moonLine);
+const moonLabel = makeLabel('달', '#ffe08a', 0.3); world.add(moonLabel);
 
 function updateWater(){
   const d = S.decl*D2R;
   moonDir.set(Math.cos(d), Math.sin(d), 0);
-  const pos = waterGeo.attributes.position.array;
+  const pos = waterGeo.attributes.position.array, col = waterGeo.attributes.color.array;
   for (let i = 0; i < pos.length; i += 3){
     const x = basePos[i], y = basePos[i+1], z = basePos[i+2];
     const c = (x*moonDir.x + y*moonDir.y + z*moonDir.z) / R0;
     const r = waterR(c) / R0;
     pos[i] = x*r; pos[i+1] = y*r; pos[i+2] = z*r;
+    const [cr, cg, cb] = rampColor(c*c);
+    col[i] = cr; col[i+1] = cg; col[i+2] = cb;
   }
   waterGeo.attributes.position.needsUpdate = true;
+  waterGeo.attributes.color.needsUpdate = true;
   waterGeo.computeVertexNormals();
   moon.position.copy(moonDir).multiplyScalar(2.05);
+  moonLabel.position.copy(moonDir).multiplyScalar(2.05).add(new THREE.Vector3(0, 0.26, 0));
   moonLine.geometry.setFromPoints([moonDir.clone().multiplyScalar(-1.75), moonDir.clone().multiplyScalar(1.9)]);
   moonLine.computeLineDistances();
 }
 
-// 달
-const moon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 24), new THREE.MeshBasicMaterial({ color:0xffe08a }));
-world.add(moon);
-const moonLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color:0xffe08a, dashSize:0.08, gapSize:0.06, transparent:true, opacity:0.8 }));
-world.add(moonLine);
+// 관측자가 지나가는 길: 바닷물 높이 색으로 칠한 굵은 고리
+const obsDir = H => { const p = S.lat*D2R; return new THREE.Vector3(Math.cos(p)*Math.cos(H), Math.sin(p), -Math.cos(p)*Math.sin(H)); };
+let ring = null;
+const markers = new THREE.Group(); world.add(markers);
+function updateRing(ex){
+  if (ring){ world.remove(ring); ring.geometry.dispose(); }
+  const pts = [];
+  for (let i = 0; i < 240; i++){ const d = obsDir(2*Math.PI*i/240); pts.push(d.multiplyScalar(waterR(d.dot(moonDir)) + 0.012)); }
+  const curve = new THREE.CatmullRomCurve3(pts, true);
+  const geo = new THREE.TubeGeometry(curve, 360, 0.024, 10, true);
+  const p = geo.attributes.position.array, cols = new Float32Array(p.length);
+  for (let i = 0; i < p.length; i += 3){
+    const v = new THREE.Vector3(p[i], p[i+1], p[i+2]).normalize(), c = v.dot(moonDir);
+    const [r, g, b] = rampColor(c*c); cols[i] = r; cols[i+1] = g; cols[i+2] = b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  ring = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors:true }));
+  world.add(ring);
+  // 만조·간조 지점 표시
+  while (markers.children.length) markers.remove(markers.children[0]);
+  if (cache.range >= 0.5){
+    ex.highs.forEach((o, i) => {
+      const d = obsDir(2*Math.PI*o.t/T); const m = makeLabel(NUM[i] || '•', '#fff', 0.24, '#e03131');
+      m.position.copy(d.multiplyScalar(waterR(obsDir(2*Math.PI*o.t/T).dot(moonDir)) + 0.16)); markers.add(m);
+    });
+    ex.lows.forEach(o => {
+      const d = obsDir(2*Math.PI*o.t/T); const m = makeLabel('간', '#fff', 0.17, '#1971c2');
+      m.position.copy(d.multiplyScalar(waterR(obsDir(2*Math.PI*o.t/T).dot(moonDir)) + 0.12)); markers.add(m);
+    });
+  }
+}
 
-// 관측 위도선 + 관측 지점
-const latRing = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xff8787, transparent:true, opacity:0.9 }));
-world.add(latRing);
-// 사람 모양 (발 = 원점, 머리 = +y)
+// 사람
 function makePerson(){
-  const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color:0xff6b6b });
+  const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color:0xff4d4d });
   const part = (geo, x, y, z, rz = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.z = rz; g.add(o); };
   const limb = (len, r) => new THREE.CylinderGeometry(r, r, len, 10);
-  part(limb(0.11, 0.011), -0.018, 0.055, 0, 0.12);   // 다리
-  part(limb(0.11, 0.011),  0.018, 0.055, 0, -0.12);
-  part(new THREE.CylinderGeometry(0.026, 0.022, 0.1, 12), 0, 0.16, 0);  // 몸통
-  part(limb(0.09, 0.009), -0.042, 0.17, 0, 0.45);    // 팔
-  part(limb(0.09, 0.009),  0.042, 0.17, 0, -0.45);
-  part(new THREE.SphereGeometry(0.027, 16, 12), 0, 0.24, 0);            // 머리
-  g.scale.setScalar(1.8);
-  return g;
+  part(limb(0.11, 0.011), -0.018, 0.055, 0, 0.12); part(limb(0.11, 0.011), 0.018, 0.055, 0, -0.12);
+  part(new THREE.CylinderGeometry(0.026, 0.022, 0.1, 12), 0, 0.16, 0);
+  part(limb(0.09, 0.009), -0.042, 0.17, 0, 0.45); part(limb(0.09, 0.009), 0.042, 0.17, 0, -0.45);
+  part(new THREE.SphereGeometry(0.027, 16, 12), 0, 0.24, 0);
+  g.scale.setScalar(1.9); return g;
 }
-const person = makePerson();
-world.add(person);
-// 관측 지점의 해수면 높이 고리
-const level = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.008, 8, 40), new THREE.MeshBasicMaterial({ color:0xe7f5ff }));
+const person = makePerson(); world.add(person);
+const level = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.01, 8, 40), new THREE.MeshBasicMaterial({ color:0xffffff }));
 world.add(level);
 const UP = new THREE.Vector3(0, 1, 0);
-
-function updateLatRing(){
-  const p = S.lat*D2R;
-  latRing.geometry.setFromPoints(circlePoints(0.95*Math.cos(p), 0.95*Math.sin(p)));
-}
 function updateMarker(){
-  const p = S.lat*D2R, H = 2*Math.PI*S.t/T;
+  const H = 2*Math.PI*S.t/T;
   earthGroup.rotation.y = H;
-  // 관측 지점의 방향 (rotation.y = H 와 같은 규칙)
-  const dir = new THREE.Vector3(Math.cos(p)*Math.cos(H), Math.sin(p), -Math.cos(p)*Math.sin(H));
-  const c = dir.dot(moonDir);
-  const r = waterR(c);
+  const dir = obsDir(H), r = waterR(dir.dot(moonDir));
   const q = new THREE.Quaternion().setFromUnitVectors(UP, dir);
-  person.quaternion.copy(q);
-  person.position.copy(dir).multiplyScalar(0.94);
+  person.quaternion.copy(q); person.position.copy(dir).multiplyScalar(0.94);
   level.quaternion.copy(q).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), Math.PI/2));
   level.position.copy(dir).multiplyScalar(r);
 }
 
-function makeLabel(text, color){
-  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
-  const g = cv.getContext('2d'); g.fillStyle = color; g.font = 'bold 40px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 32, 34);
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(cv), transparent:true }));
-  sp.scale.set(0.28, 0.28, 1); return sp;
-}
-
-// 드래그 회전
 let drag = null;
 view.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, rx:world.rotation.x, ry:world.rotation.y }; view.setPointerCapture(e.pointerId); view.style.cursor = 'grabbing'; });
 view.addEventListener('pointermove', e => {
@@ -376,45 +380,137 @@ view.addEventListener('pointermove', e => {
   world.rotation.x = Math.max(-1.3, Math.min(1.3, drag.rx + (e.clientY - drag.y)*0.01));
 });
 const endDrag = () => { drag = null; view.style.cursor = 'grab'; };
-view.addEventListener('pointerup', endDrag);
-view.addEventListener('pointercancel', endDrag);
-
-function resize3D(){
-  const w = view.clientWidth, h = view.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w/h; camera.updateProjectionMatrix();
-}
+view.addEventListener('pointerup', endDrag); view.addEventListener('pointercancel', endDrag);
+function resize3D(){ const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize3D).observe(view);
 
-/* ===== 그래프 (Chart.js) ===== */
+/* ===== 관측자 시점 (해안 단면) ===== */
+const gcv = document.getElementById('gauge'), gctx = gcv.getContext('2d');
+let gW = 0, gH = 0;
+function fitGauge(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  gW = gcv.clientWidth; gH = gcv.clientHeight;
+  gcv.width = Math.round(gW*dpr); gcv.height = Math.round(gH*dpr); gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(() => { fitGauge(); drawGauge(performance.now()); }).observe(gcv);
+
+function drawGauge(ts){
+  if (!cache || !gW) return;
+  const g = gctx, w = gW, h = gH;
+  const top = h*0.2, bot = h*0.86;                         // 높이 눈금 영역
+  const yOf = v => bot - (v - HMIN)/(HMAX - HMIN)*(bot - top);
+  const hNow = height(S.lat, S.decl, S.t);
+  // 하늘
+  const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#cfe8ff'); sky.addColorStop(1, '#f4f9ff');
+  g.fillStyle = sky; g.fillRect(0, 0, w, h);
+  // 해안(경사진 갯벌)
+  const shoreX0 = w*0.3, shoreX1 = w*0.98;
+  const slopeY = x => h + 2 - (x - shoreX0)/(shoreX1 - shoreX0)*(h - top*0.55);
+  // 바닷물
+  const wy = yOf(hNow);
+  const xEdge = shoreX0 + (h + 2 - wy)/(h - top*0.55)*(shoreX1 - shoreX0);
+  g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= xEdge; x += 6) g.lineTo(x, wy + Math.sin(x/22 + ts/400)*2.5);
+  g.lineTo(xEdge, wy); g.lineTo(xEdge, h); g.closePath();
+  const sea = g.createLinearGradient(0, wy, 0, h); sea.addColorStop(0, '#4dabf7'); sea.addColorStop(1, '#1864ab');
+  g.fillStyle = sea; g.fill();
+  // 땅
+  g.beginPath(); g.moveTo(shoreX0, h + 2); g.lineTo(shoreX1, slopeY(shoreX1)); g.lineTo(w, slopeY(shoreX1)); g.lineTo(w, h); g.closePath();
+  g.fillStyle = '#c2a878'; g.fill(); g.strokeStyle = '#7a6340'; g.lineWidth = 2; g.stroke();
+  // 물에 젖은 갯벌 표시
+  // 오늘의 만조·간조 높이 선
+  g.save(); g.setLineDash([6, 5]); g.lineWidth = 2; g.font = 'bold 13px "SUIT Variable", sans-serif';
+  if (cache.range >= 0.5){
+    cache.ex.highs.forEach((o, i) => {
+      const y = yOf(o.h); g.strokeStyle = '#e03131'; g.beginPath(); g.moveTo(w*0.14, y); g.lineTo(w*0.98, y); g.stroke();
+      g.fillStyle = '#e03131'; g.textAlign = 'left'; g.fillText(`만조${NUM[i]} ${fmtH(o.h)}`, w*0.17, y - 5);
+    });
+    cache.ex.lows.forEach((o, i) => {
+      const y = yOf(o.h); g.strokeStyle = '#1971c2'; g.beginPath(); g.moveTo(w*0.14, y); g.lineTo(w*0.98, y); g.stroke();
+      g.fillStyle = '#1971c2'; g.textAlign = 'left'; g.fillText(`간조 ${fmtH(o.h)}`, w*0.17, y + 15);
+    });
+  }
+  g.restore();
+  // 조위 눈금자
+  const px = w*0.1;
+  g.fillStyle = '#fff'; g.strokeStyle = '#1f1a17'; g.lineWidth = 2;
+  g.fillRect(px - 8, top - 10, 16, bot - top + 20); g.strokeRect(px - 8, top - 10, 16, bot - top + 20);
+  g.font = '11px "SUIT Variable", sans-serif'; g.fillStyle = '#1f1a17'; g.textAlign = 'left';
+  for (let v = -20; v <= 40; v += 10){
+    const y = yOf(v); g.beginPath(); g.moveTo(px - 8, y); g.lineTo(px + 2, y); g.stroke();
+    g.fillText(`${v}`, px + 12, y + 4);
+  }
+  g.fillText('cm', px + 12, top - 14);
+  // 현재 수위 표시
+  g.fillStyle = '#ff5a1f'; g.beginPath(); g.moveTo(px - 10, wy); g.lineTo(px - 22, wy - 7); g.lineTo(px - 22, wy + 7); g.closePath(); g.fill();
+  // 관측자 (해안 높은 곳에 서 있음)
+  const manX = w*0.86, manY = slopeY(manX), s = Math.min(h*0.12, 60);
+  g.save(); g.strokeStyle = '#e03131'; g.fillStyle = '#e03131'; g.lineWidth = Math.max(3, s*0.09); g.lineCap = 'round';
+  const L = (x1, y1, x2, y2) => { g.beginPath(); g.moveTo(manX + x1*s, manY - y1*s); g.lineTo(manX + x2*s, manY - y2*s); g.stroke(); };
+  L(-0.18, 0, 0, 0.45); L(0.18, 0, 0, 0.45); L(0, 0.45, 0, 0.85); L(0, 0.75, -0.3, 0.6); L(0, 0.75, 0.25, 0.9);
+  g.beginPath(); g.arc(manX, manY - 1.0*s, s*0.15, 0, 2*Math.PI); g.fill(); g.restore();
+  // 상단 정보
+  g.fillStyle = 'rgba(255,255,255,.85)'; g.fillRect(0, 0, w, 40);
+  g.fillStyle = '#1f1a17'; g.font = 'bold 18px "SUIT Variable", sans-serif'; g.textAlign = 'left';
+  g.fillText(`⏱ ${fmtT(S.t)}`, 12, 27);
+  g.textAlign = 'right'; g.fillText(`현재 해수면 ${fmtH(hNow)}`, w - 12, 27);
+  // 만조/간조 알림
+  const near = (arr) => arr.findIndex(o => Math.min(Math.abs(o.t - S.t), T - Math.abs(o.t - S.t)) < 0.35);
+  if (cache.range >= 0.5){
+    const hi = near(cache.ex.highs), lo = near(cache.ex.lows);
+    let msg = null, col = null;
+    if (hi >= 0){ msg = `🌊 만조${NUM[hi]}!`; col = '#e03131'; }
+    else if (lo >= 0){ msg = '🏖️ 간조! 갯벌이 드러나요'; col = '#1971c2'; }
+    if (msg){
+      g.font = 'bold 24px "SUIT Variable", sans-serif'; g.textAlign = 'center';
+      const tw = g.measureText(msg).width + 30;
+      g.fillStyle = col; g.beginPath(); g.roundRect(w/2 - tw/2, 52, tw, 40, 12); g.fill();
+      g.fillStyle = '#fff'; g.fillText(msg, w/2, 81);
+    }
+    // 오늘 지나간 만조 체크
+    g.font = 'bold 14px "SUIT Variable", sans-serif'; g.textAlign = 'left'; g.fillStyle = '#1f1a17';
+    const passed = cache.ex.highs.map((o, i) => `${NUM[i]}${S.t >= o.t - 0.02 ? '✔' : '…'}`).join('  ');
+    g.fillText(`오늘의 만조  ${passed}`, 12, h - 12);
+  } else {
+    g.font = 'bold 16px "SUIT Variable", sans-serif'; g.textAlign = 'center'; g.fillStyle = '#1f1a17';
+    g.fillText('해수면 변화가 거의 없어요', w/2, 80);
+  }
+}
+
+/* ===== 그래프 ===== */
 const nowLine = {
   id:'nowLine',
-  afterDatasetsDraw(chart){
-    const x = chart.scales.x.getPixelForValue(S.t), { top, bottom } = chart.chartArea, g = chart.ctx;
-    g.save(); g.strokeStyle = css('--accent'); g.lineWidth = 1.5; g.setLineDash([4,4]);
+  afterDatasetsDraw(ch){
+    const x = ch.scales.x.getPixelForValue(S.t), { top, bottom } = ch.chartArea, g = ch.ctx;
+    g.save(); g.strokeStyle = css('--accent'); g.lineWidth = 2; g.setLineDash([4,4]);
     g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
+    // 만조 번호
+    if (!cache || cache.range < 0.5) return;
+    g.save(); g.font = 'bold 15px "SUIT Variable", sans-serif'; g.textAlign = 'center'; g.fillStyle = css('--high');
+    cache.ex.highs.forEach((o, i) => g.fillText(`만조${NUM[i]}`, ch.scales.x.getPixelForValue(o.t), ch.scales.y.getPixelForValue(o.h) - 14));
+    g.restore();
   }
 };
 const chart = new Chart(document.getElementById('chart'), {
   type:'line',
   data:{ datasets:[
-    { label:'해수면', data:[], borderColor:css('--water'), borderWidth:2.5, pointRadius:0, tension:0, fill:false, order:3 },
-    { label:'만조', data:[], type:'scatter', pointStyle:'triangle', pointRadius:7, backgroundColor:css('--high'), borderColor:css('--high'), order:2 },
-    { label:'간조', data:[], type:'scatter', pointStyle:'triangle', rotation:180, pointRadius:7, backgroundColor:css('--low'), borderColor:css('--low'), order:2 },
-    { label:'현재', data:[], type:'scatter', pointRadius:6, backgroundColor:css('--accent'), borderColor:'#fff', borderWidth:2, order:1 }
+    { label:'해수면', data:[], borderColor:css('--water'), borderWidth:3, pointRadius:0, tension:0, fill:false, order:3 },
+    { label:'만조', data:[], type:'scatter', pointStyle:'triangle', pointRadius:8, backgroundColor:css('--high'), borderColor:css('--high'), order:2 },
+    { label:'간조', data:[], type:'scatter', pointStyle:'triangle', rotation:180, pointRadius:8, backgroundColor:css('--low'), borderColor:css('--low'), order:2 },
+    { label:'지금', data:[], type:'scatter', pointRadius:7, backgroundColor:css('--accent'), borderColor:'#fff', borderWidth:2, order:1 }
   ]},
   options:{
     responsive:true, maintainAspectRatio:false, animation:false, parsing:false,
+    layout:{ padding:{ top:18 } },
     interaction:{ mode:'nearest', intersect:false },
     plugins:{
-      legend:{ labels:{ color:css('--muted'), usePointStyle:true, boxWidth:8, font:{ family:'Noto Sans KR' } } },
+      legend:{ labels:{ color:css('--muted'), usePointStyle:true, boxWidth:8 } },
       tooltip:{ callbacks:{ title:items => fmtT(items[0].parsed.x), label:item => `${item.dataset.label}: ${fmtH(item.parsed.y)}` } }
     },
     scales:{
-      x:{ type:'linear', min:0, max:T, ticks:{ stepSize:3, color:css('--muted'), callback:v => `${v}시` }, grid:{ color:css('--grid') },
-          title:{ display:true, text:'달의 남중 후 경과 시간', color:css('--muted') } },
-      y:{ min:-20, max:38, ticks:{ color:css('--muted'), callback:v => `${v}` }, grid:{ color:css('--grid') },
-          title:{ display:true, text:'해수면 높이 (cm, 평형조석)', color:css('--muted') } }
+      x:{ type:'linear', min:0, max:T, ticks:{ stepSize:3, color:css('--muted'), callback:v => `${v}시간` }, grid:{ color:css('--grid') } },
+      y:{ min:-20, max:40, ticks:{ color:css('--muted') }, grid:{ color:css('--grid') },
+          title:{ display:true, text:'해수면 높이 (cm)', color:css('--muted') } }
     }
   },
   plugins:[nowLine]
@@ -422,39 +518,36 @@ const chart = new Chart(document.getElementById('chart'), {
 
 /* ===== 갱신 ===== */
 const $ = id => document.getElementById(id);
-let cache = null;
-
+const WHY = {
+  semi:'관측자가 하루 동안 빨간 부분(부푼 곳)을 <b>두 번</b>, 비슷한 높이로 지나가요.',
+  mixed:'관측자가 빨간 부분을 <b>두 번</b> 지나가지만, 한 번은 높게 한 번은 낮게 지나가요.',
+  diurnal:'관측자가 빨간 부분을 <b>한 번만</b> 지나가요.',
+  none:'관측자가 지나는 길의 바닷물 높이가 거의 변하지 않아요.'
+};
 function recompute(){
   const { xs, ys } = series();
   const ex = extrema(xs, ys);
-  const max = Math.max(...ys), min = Math.min(...ys), range = max - min;
+  const range = Math.max(...ys) - Math.min(...ys);
   cache = { ex, range, cls:classify(ex, range) };
   chart.data.datasets[0].data = xs.map((x,i) => ({ x, y:ys[i] }));
   chart.data.datasets[1].data = range < 0.5 ? [] : ex.highs.map(o => ({ x:o.t, y:o.h }));
   chart.data.datasets[2].data = range < 0.5 ? [] : ex.lows.map(o => ({ x:o.t, y:o.h }));
-
   const c = cache.cls;
   $('type').textContent = c.name; $('type').className = 'type ' + c.cls;
-  const list = arr => range < 0.5 || !arr.length ? '-' : arr.map(o => `${fmtT(o.t)} · ${fmtH(o.h)}`).join('\n');
-  $('highs').textContent = list(ex.highs);
-  $('lows').textContent = list(ex.lows);
-  $('range').textContent = range < 0.5 ? '-' :
-    tideRanges(ex);
-  updateWater(); updateLatRing();
+  $('why').innerHTML = WHY[c.cls];
+  const list = (arr, lab) => range < 0.5 || !arr.length ? '-' : arr.map((o, i) => `${lab ? NUM[i] + ' ' : ''}${fmtT(o.t)} · ${fmtH(o.h)}`).join('\n');
+  $('highs').textContent = list(ex.highs, true);
+  $('lows').textContent = list(ex.lows, false);
+  $('range').textContent = range < 0.5 ? '-' : ranges(ex).map(o => `${fmtT(o.from.t)}→${fmtT(o.to.t)}  ${o.r.toFixed(1)} cm`).join('\n');
+  updateWater(); updateRing(ex);
 }
 function refreshTime(){
   const h = height(S.lat, S.decl, S.t);
-  $('now').textContent = fmtH(h);
   $('timeV').textContent = fmtT(S.t);
   chart.data.datasets[3].data = [{ x:S.t, y:h }];
   chart.update('none');
   updateMarker();
 }
-function setSliderFromState(){
-  $('lat').value = S.lat; $('time').value = S.t;
-  $('latV').textContent = `${S.lat}°N`;
-}
-
 $('lat').addEventListener('input', e => { S.lat = +e.target.value; $('latV').textContent = `${S.lat}°N`; recompute(); refreshTime(); });
 document.querySelectorAll('[data-tilt]').forEach(b => b.addEventListener('click', () => {
   S.decl = +b.dataset.tilt;
@@ -462,41 +555,44 @@ document.querySelectorAll('[data-tilt]').forEach(b => b.addEventListener('click'
   recompute(); refreshTime();
 }));
 $('time').addEventListener('input', e => { S.t = +e.target.value; refreshTime(); });
-$('play').addEventListener('click', () => { S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 일시정지' : '▶ 재생'; last = null; });
+$('play').addEventListener('click', () => {
+  if (!S.playing && S.t >= T - 0.05) S.t = 0;
+  S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 멈춤' : '▶ 하루 재생'; last = null;
+});
 $('reset').addEventListener('click', () => { S.t = 0; $('time').value = 0; refreshTime(); });
 document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
-  S.lat = +b.dataset.p; setSliderFromState(); recompute(); refreshTime();
+  S.lat = +b.dataset.p; $('lat').value = S.lat; $('latV').textContent = `${S.lat}°N`; recompute(); refreshTime();
 }));
-
-// 다크/라이트 전환 시 그래프 색 갱신
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   const ds = chart.data.datasets;
   ds[0].borderColor = css('--water');
   ds[1].backgroundColor = ds[1].borderColor = css('--high');
   ds[2].backgroundColor = ds[2].borderColor = css('--low');
   ds[3].backgroundColor = css('--accent');
-  for (const ax of ['x','y']){ chart.options.scales[ax].ticks.color = css('--muted'); chart.options.scales[ax].grid.color = css('--grid'); chart.options.scales[ax].title.color = css('--muted'); }
+  for (const ax of ['x','y']){ chart.options.scales[ax].ticks.color = css('--muted'); chart.options.scales[ax].grid.color = css('--grid'); }
+  chart.options.scales.y.title.color = css('--muted');
   chart.options.plugins.legend.labels.color = css('--muted');
   chart.update('none');
 });
 
-/* ===== 애니메이션 ===== */
-const PLAY_SECONDS = 16;   // 태음일 하나를 16초에 재생
+/* ===== 애니메이션: 하루를 24초에 ===== */
+const PLAY_SECONDS = 24;
 let last = null;
 function loop(ts){
   if (S.playing){
     if (last !== null){
-      S.t = (S.t + (ts - last)/1000 * T/PLAY_SECONDS) % T;
+      S.t += (ts - last)/1000 * T/PLAY_SECONDS;
+      if (S.t >= T){ S.t = T; S.playing = false; $('play').textContent = '▶ 하루 재생'; }
       $('time').value = S.t;
       refreshTime();
     }
     last = ts;
   }
   renderer.render(scene, camera);
+  drawGauge(ts);
   requestAnimationFrame(loop);
 }
-
-resize3D(); recompute(); refreshTime(); requestAnimationFrame(loop);
+fitGauge(); resize3D(); recompute(); refreshTime(); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
