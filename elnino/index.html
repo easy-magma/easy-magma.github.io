@@ -199,14 +199,8 @@ table.mini th,table.mini td{padding:8px 10px}
   <section id="layer" role="tabpanel" aria-labelledby="t-layer" hidden>
     <div class="controls">
       <div class="panel">
-        <h2>수온의 연직 분포와 20℃ 등수온선</h2>
-        <div class="profile-wrap"><canvas id="prof" width="900" height="520" aria-label="서태평양과 동태평양의 깊이에 따른 수온 분포"></canvas></div>
-        <div class="presets" id="profPresets">
-          <button type="button" data-k="0" class="on">평상시</button>
-          <button type="button" data-k="-100">엘니뇨</button>
-          <button type="button" data-k="100">라니냐 <span class="tag">심화</span></button>
-        </div>
-        <p class="note">점선은 평상시 분포이다. 깊이와 수온은 개념을 보여 주기 위한 모형 값이다.</p>
+        <h2>깊이에 따른 수온 분포</h2>
+        <div class="profile-wrap"><canvas id="prof" width="900" height="520" aria-label="깊이에 따른 수온 분포와 해수의 층상 구조"></canvas></div>
       </div>
       <div class="panel">
         <h2>해수의 층상 구조</h2>
@@ -215,19 +209,6 @@ table.mini th,table.mini td{padding:8px 10px}
           <div class="ly ly-thermo"><h3>수온 약층</h3><p>깊이가 깊어질수록 수온이 급격히 낮아지는 층. 매우 안정하여 위아래 해수의 섞임을 막는다.</p></div>
           <div class="ly ly-deep"><h3>심해층</h3><p>햇빛이 닿지 않아 수온이 낮고(약 4℃ 이하) 거의 일정한 층.</p></div>
         </div>
-        <h2 style="margin-top:16px">20℃ 등수온선의 깊이</h2>
-        <p class="muted" style="margin:0 0 8px;font-size:14.5px">20℃ 등수온선은 수온 약층의 위치를 나타내는 기준선으로 많이 쓴다. 이 선이 깊을수록 따뜻한 해수층이 두껍다.</p>
-        <div class="tablewrap">
-          <table class="mini">
-            <thead><tr><th></th><th>서태평양</th><th>동태평양</th></tr></thead>
-            <tbody>
-              <tr><th>평상시</th><td>깊다 <span class="temp">(약 170 m)</span></td><td>얕다 <span class="temp">(약 40 m)</span></td></tr>
-              <tr><th>엘니뇨</th><td class="cold">얕아진다 <span class="temp">(약 110 m)</span></td><td class="hot">깊어진다 <span class="temp">(약 90 m)</span></td></tr>
-              <tr><th>지금</th><td class="temp" id="z20w">—</td><td class="temp" id="z20e">—</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p style="margin:10px 0 0;font-size:15px">엘니뇨가 발생하면 동서 방향의 <b>수온 약층 기울기가 완만해진다</b>. 동태평양은 수온 약층이 깊어져 찬 심층수가 표층까지 잘 올라오지 못한다.</p>
       </div>
     </div>
   </section>
@@ -613,59 +594,41 @@ table.mini th,table.mini td{padding:8px 10px}
     px.setTransform(dpr,0,0,dpr,0,0);
   }
   window.addEventListener('resize', resizeProf);
-  const ZMAX = 400, TD = 5;
-  function profT(Ts, z20, z){
-    const w = 22, zc = z20 - w*Math.log((Ts-TD)/(20-TD) - 1);
-    return TD + (Ts-TD)/(1+Math.exp((z-zc)/w));
-  }
   function ptxt(t,x,y,o={}){ px.font = `${o.w||600} ${o.s||13}px ${getComputedStyle(document.body).fontFamily}`;
-    px.textAlign=o.align||'center'; px.textBaseline='middle'; px.fillStyle=o.c||'#fff'; px.fillText(t,x,y); }
+    px.textAlign=o.align||'center'; px.textBaseline='middle'; px.fillStyle=o.c||'#fff'; px.fillText(t,x,y+(o.dy||0)); }
   function drawProf(){
-    const m = model(kD), m0 = model(0);
     px.fillStyle='#0E2230'; px.fillRect(0,0,PW,PH);
-    const panels = [{name:'서태平양', Ts:m.TW, z:m.dW*300, Ts0:m0.TW, z0:m0.dW*300},
-                    {name:'동태평양', Ts:m.TE, z:m.dE*300, Ts0:m0.TE, z0:m0.dE*300}];
-    const pad = {l:52, r:14, t:40, b:38}, gap = 26;
-    const pw_ = (PW - pad.l - pad.r - gap)/2, ph = PH - pad.t - pad.b;
-    const fsz = Math.max(11, Math.min(14, PW/62));
-    panels.forEach((p, i) => {
-      const ox = pad.l + i*(pw_+gap), oy = pad.t;
-      const X = t => ox + (t-0)/32*pw_, Y = z => oy + z/ZMAX*ph;
-      // layer bands from current profile
-      const w = 22, zc = p.z - w*Math.log((p.Ts-TD)/(20-TD) - 1);
-      const mixB = clamp(zc - 2.2*w, 0, ZMAX), thB = clamp(zc + 2.6*w, 0, ZMAX);
-      px.fillStyle='rgba(240,140,90,.16)'; px.fillRect(ox, Y(0), pw_, Y(mixB)-Y(0));
-      px.fillStyle='rgba(255,255,255,.07)'; px.fillRect(ox, Y(mixB), pw_, Y(thB)-Y(mixB));
-      px.fillStyle='rgba(60,110,200,.22)'; px.fillRect(ox, Y(thB), pw_, Y(ZMAX)-Y(thB));
-      if (mixB > 18) ptxt('혼합층', ox+pw_-8, (Y(0)+Y(mixB))/2, {align:'right', s:fsz, c:'#FFD2B8'});
-      ptxt('수온 약층', ox+pw_-8, (Y(mixB)+Y(thB))/2, {align:'right', s:fsz, c:'#E8EEF3'});
-      ptxt('심해층', ox+pw_-8, (Y(thB)+Y(ZMAX))/2, {align:'right', s:fsz, c:'#B9D3FF'});
-      // grid + axes
-      px.strokeStyle='rgba(255,255,255,.12)'; px.lineWidth=1;
-      [0,100,200,300,400].forEach(z => { px.beginPath(); px.moveTo(ox,Y(z)); px.lineTo(ox+pw_,Y(z)); px.stroke();
-        if (i===0) ptxt(z+' m', ox-6, Y(z), {align:'right', s:fsz*0.85, w:500, c:'rgba(255,255,255,.7)'}); });
-      [0,10,20,30].forEach(t => { ptxt(t+'℃', X(t), oy+ph+14, {s:fsz*0.85, w:500, c:'rgba(255,255,255,.7)'}); });
-      // 20℃ guideline
-      px.setLineDash([2,4]); px.strokeStyle='rgba(255,226,122,.6)'; px.beginPath(); px.moveTo(X(20),oy); px.lineTo(X(20),oy+ph); px.stroke(); px.setLineDash([]);
-      // normal profile (dashed) when not normal
-      const curve = (Ts, z20, style, lw) => { px.strokeStyle=style; px.lineWidth=lw; px.beginPath();
-        for (let z=0; z<=ZMAX; z+=4){ const xx = X(profT(Ts,z20,z)), yy = Y(z); z?px.lineTo(xx,yy):px.moveTo(xx,yy);} px.stroke(); };
-      if (Math.abs(kD) > 0.03){ px.setLineDash([6,5]); curve(p.Ts0, p.z0, 'rgba(255,255,255,.55)', 2); px.setLineDash([]);
-        px.fillStyle='rgba(255,255,255,.55)'; px.beginPath(); px.arc(X(20), Y(p.z0), 4, 0, Math.PI*2); px.fill(); }
-      curve(p.Ts, p.z, '#FF8A5B', 3.2);
-      // 20℃ point + depth label
-      px.fillStyle='#FFE27A'; px.beginPath(); px.arc(X(20), Y(p.z), 6, 0, Math.PI*2); px.fill();
-      px.strokeStyle='rgba(255,226,122,.8)'; px.setLineDash([4,4]); px.beginPath(); px.moveTo(ox, Y(p.z)); px.lineTo(X(20), Y(p.z)); px.stroke(); px.setLineDash([]);
-      ptxt('20℃ · 약 '+Math.round(p.z/10)*10+' m', X(20)-10, Y(p.z)-14, {align:'right', s:fsz, w:700, c:'#FFE27A'});
-      if (Math.abs(kD) > 0.03 && Math.abs(p.z - p.z0) > 8){
-        const up = p.z < p.z0; ptxt(up ? '↑ 얕아짐' : '↓ 깊어짐', X(20)-10, Y((p.z+p.z0)/2)+ (up?10:-2), {align:'right', s:fsz, w:800, c: up ? '#9CC8FF' : '#FF9E80'});
-      }
-      px.strokeStyle='rgba(255,255,255,.5)'; px.lineWidth=1.2; px.strokeRect(ox, oy, pw_, ph);
-      ptxt(p.name, ox + pw_/2, 18, {s:fsz*1.15, w:800});
-    });
-    $('z20w').textContent = '약 ' + Math.round(m.dW*30)*10 + ' m';
-    $('z20e').textContent = '약 ' + Math.round(m.dE*30)*10 + ' m';
+    const fsz = Math.max(12, Math.min(15, PW/52));
+    const pad = {l:60, r:20, t:44, b:40}, pw_ = PW - pad.l - pad.r, ph = PH - pad.t - pad.b;
+    const ox = pad.l, oy = pad.t, ZM = 1000;
+    const X = t => ox + t/30*pw_, Y = z => oy + z/ZM*ph;
+    const mixB = 150, thB = 600, Ts = 25, Tt = 4.6;
+    const T = z => z <= mixB ? Ts : z <= thB ? Tt + (Ts-Tt)*Math.pow(1-(z-mixB)/(thB-mixB), 2.2) : Tt - 0.6*(z-thB)/(ZM-thB);
+    // bands
+    px.fillStyle='rgba(240,140,90,.22)'; px.fillRect(ox, Y(0), pw_, Y(mixB)-Y(0));
+    px.fillStyle='rgba(255,255,255,.07)'; px.fillRect(ox, Y(mixB), pw_, Y(thB)-Y(mixB));
+    px.fillStyle='rgba(60,110,200,.25)'; px.fillRect(ox, Y(thB), pw_, Y(ZM)-Y(thB));
+    // grid & axes
+    px.strokeStyle='rgba(255,255,255,.12)'; px.lineWidth=1;
+    [0,200,400,600,800,1000].forEach(z => { px.beginPath(); px.moveTo(ox,Y(z)); px.lineTo(ox+pw_,Y(z)); px.stroke();
+      ptxt(z+' m', ox-8, Y(z), {align:'right', s:fsz*0.85, w:500, c:'rgba(255,255,255,.7)'}); });
+    [0,10,20,30].forEach(t => ptxt(t+'℃', X(t), oy+ph+16, {s:fsz*0.85, w:500, c:'rgba(255,255,255,.7)'}));
+    // curve
+    px.strokeStyle='#FF8A5B'; px.lineWidth=3.5; px.beginPath();
+    for (let z=0; z<=ZM; z+=5){ const xx=X(T(z)), yy=Y(z); z?px.lineTo(xx,yy):px.moveTo(xx,yy); } px.stroke();
+    // labels
+    const lx = ox + pw_*0.40;
+    [['혼합층','수온이 거의 일정',0,mixB,'#FFD2B8'],['수온 약층','깊을수록 수온 급감',mixB+120,thB,'#F1F4F7'],['심해층','낮은 수온으로 일정',thB,ZM,'#B9D3FF']]
+      .forEach(([n,d,z1,z2,c]) => { const yy=(Y(z1)+Y(z2))/2; ptxt(n, lx, yy-fsz*0.6, {align:'left', s:fsz*1.3, w:800, c}); ptxt(d, lx, yy+fsz*0.9, {align:'left', s:fsz*0.9, w:500, c}); });
+    // wind on surface
+    const wy = oy - 18, wx = ox + pw_*0.55;
+    arrowP(wx, wy, wx + pw_*0.22, wy, '#fff', 3);
+    ptxt('바람 → 해수 혼합', wx + pw_*0.11, wy - 0, {s:fsz*0.85, c:'#fff', w:700, dy:-12});
+    px.strokeStyle='rgba(255,255,255,.5)'; px.lineWidth=1.2; px.strokeRect(ox, oy, pw_, ph);
   }
+  function arrowP(x1,y1,x2,y2,c,w){ const a=Math.atan2(y2-y1,x2-x1), hs=10; px.strokeStyle=c; px.fillStyle=c; px.lineWidth=w;
+    px.beginPath(); px.moveTo(x1,y1); px.lineTo(x2-Math.cos(a)*hs*0.7,y2-Math.sin(a)*hs*0.7); px.stroke();
+    px.beginPath(); px.moveTo(x2,y2); px.lineTo(x2-hs*Math.cos(a-0.45),y2-hs*Math.sin(a-0.45)); px.lineTo(x2-hs*Math.cos(a+0.45),y2-hs*Math.sin(a+0.45)); px.closePath(); px.fill(); }
 
   function frame(now){
     if (current === 'sim') draw(now); else { const dt = Math.min(0.05,(now-t0)/1000); t0 = now; kD += (kT-kD)*(reduce?1:Math.min(1,dt*2.2)); }
