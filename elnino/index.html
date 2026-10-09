@@ -128,6 +128,14 @@ ul.tight li{margin:3px 0}
 #hookAns p{margin:0 0 8px;font-size:17px;max-width:44em}
 .next-q{font-weight:600}
 .muted{color:var(--muted);font-weight:400}
+/* basics */
+.basics-lead{margin:0;font-size:17px}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:900;margin:8px 0 0}
+.sec-title .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:15px;border:2px solid var(--ink)}
+#layer{display:grid;gap:14px}
+#layer[hidden]{display:none!important}
+.key{margin:12px 0 0;padding:10px 12px;border:2px dashed var(--accent);border-radius:10px;font-size:15.5px}
+.svg-wrap svg{display:block;width:100%;height:auto}
 /* layers */
 .profile-wrap{background:#0E2230;border-radius:10px;overflow:hidden}
 #prof{display:block;width:100%;height:auto}
@@ -151,7 +159,7 @@ table.mini th,table.mini td{padding:8px 10px}
     </div>
     <nav class="tabs" role="tablist" aria-label="화면 선택">
       <button role="tab" id="t-intro" aria-selected="true" data-tab="intro">El 이야기</button>
-      <button role="tab" id="t-layer" aria-selected="false" data-tab="layer">1학기 복습: 층상 구조</button>
+      <button role="tab" id="t-layer" aria-selected="false" data-tab="layer">기초 개념</button>
       <button role="tab" id="t-sim" aria-selected="false" data-tab="sim">단면 모형</button>
       <button role="tab" id="t-cmp" aria-selected="false" data-tab="cmp">평상시 vs 엘니뇨</button>
       <button role="tab" id="t-imp" aria-selected="false" data-tab="imp">세계 영향 · 대처</button>
@@ -195,20 +203,35 @@ table.mini th,table.mini td{padding:8px 10px}
     </div>
   </section>
 
-  <!-- 0-1. 층상 구조 복습 -->
+  <!-- 0-1. 기초 개념 (1학기 복습) -->
   <section id="layer" role="tabpanel" aria-labelledby="t-layer" hidden>
+    <p class="basics-lead">엘니뇨를 이해하려면 두 가지를 먼저 떠올리자. <b>① 무역풍이 어느 방향으로 부는가</b>, <b>② 바다는 깊이에 따라 어떻게 나뉘는가</b>.</p>
+    <h2 class="sec-title"><span class="num">1</span>대기 대순환과 무역풍</h2>
     <div class="controls">
       <div class="panel">
-        <h2>깊이에 따른 수온 분포</h2>
+        <div class="svg-wrap" id="gcWrap"></div>
+      </div>
+      <div class="panel">
+        <div class="layers">
+          <div class="ly ly-thermo"><h3>대기 대순환</h3><p>위도에 따른 에너지 불균형과 지구 자전 때문에 생기는 지구 전체 규모의 대기 순환. 반구마다 해들리 순환, 페렐 순환, 극 순환의 세 순환이 있다.</p></div>
+          <div class="ly ly-mix"><h3>무역풍 (위도 0°~30°)</h3><p>해들리 순환의 지상 바람. 30° 부근에서 내려온 공기가 적도로 불어 가며, 전향력 때문에 <b>동쪽에서 서쪽으로</b> 휘어 분다. 북반구는 북동 무역풍, 남반구는 남동 무역풍.</p></div>
+          <div class="ly ly-deep"><h3>편서풍 · 극동풍</h3><p>30°~60°에서는 서쪽에서 동쪽으로 편서풍, 60°~90°에서는 동쪽에서 서쪽으로 극동풍이 분다.</p></div>
+        </div>
+        <p class="key">적도 태평양에서는 무역풍이 <b>동 → 서</b>로 불어 표층 해수를 서쪽으로 밀어낸다. 엘니뇨는 이 무역풍이 약해질 때 일어난다.</p>
+      </div>
+    </div>
+    <h2 class="sec-title"><span class="num">2</span>해수의 층상 구조</h2>
+    <div class="controls">
+      <div class="panel">
         <div class="profile-wrap"><canvas id="prof" width="900" height="520" aria-label="깊이에 따른 수온 분포와 해수의 층상 구조"></canvas></div>
       </div>
       <div class="panel">
-        <h2>해수의 층상 구조</h2>
         <div class="layers">
           <div class="ly ly-mix"><h3>혼합층</h3><p>바람이 해수를 섞어 깊이에 관계없이 수온이 거의 일정한 층. 바람이 강할수록 두껍다.</p></div>
           <div class="ly ly-thermo"><h3>수온 약층</h3><p>깊이가 깊어질수록 수온이 급격히 낮아지는 층. 매우 안정하여 위아래 해수의 섞임을 막는다.</p></div>
           <div class="ly ly-deep"><h3>심해층</h3><p>햇빛이 닿지 않아 수온이 낮고(약 4℃ 이하) 거의 일정한 층.</p></div>
         </div>
+        <p class="key">엘니뇨 단면 모형에서 따뜻한 해수층과 찬 해수(심해층)의 경계가 바로 <b>수온 약층</b>이다.</p>
       </div>
     </div>
   </section>
@@ -409,7 +432,7 @@ table.mini th,table.mini td{padding:8px 10px}
   function resize(){
     const r = cv.getBoundingClientRect(); if (!r.width) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = r.width; H = Math.max(300, Math.min(W*0.52, window.innerHeight*0.62));
+    W = r.width; H = Math.max(340, Math.min(W*0.62, window.innerHeight*0.72));
     cv.style.height = H + 'px';
     cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -436,101 +459,126 @@ table.mini th,table.mini td{padding:8px 10px}
       ctx.fillStyle = opt.bg; rr(bx, y-ph/2, pw_, ph, 6); ctx.fill(); }
     ctx.fillStyle = opt.c||'#fff'; ctx.fillText(txt,x,y);
   }
-  // 대기 순환 고리: 상승 지점 xr, 하강 지점 xs (화면 좌표 비율)
-  function loopPath(xr, xs, yTop, yBot){
-    const a = Math.min(xr,xs)*W, b = Math.max(xr,xs)*W;
-    return {a,b,yTop,yBot, len: 2*(b-a) + 2*(yBot-yTop)};
-  }
-  function loopPoint(L, xr, p){
-    // 순서: 상승(xr에서 위로) → 상층에서 xs 쪽으로 → 하강 → 지표 부근에서 xr 쪽으로
-    const w = L.b - L.a, hgt = L.yBot - L.yTop, d = p*L.len;
-    const riseAtLeft = xr*W <= L.a + 1;
-    const xR = riseAtLeft ? L.a : L.b, xS = riseAtLeft ? L.b : L.a, dir = riseAtLeft ? 1 : -1;
-    if (d < hgt) return [xR, L.yBot - d];
-    if (d < hgt + w) return [xR + dir*(d-hgt), L.yTop];
-    if (d < 2*hgt + w) return [xS, L.yTop + (d-hgt-w)];
-    return [xS - dir*(d-2*hgt-w), L.yBot];
+  // 대기 순환 고리 (픽셀 좌표): 상승 지점 xr, 하강 지점 xs
+  function loopPoint(xr, xs, yTop, yBot, p){
+    const w = Math.abs(xs-xr), hgt = yBot-yTop, len = 2*w + 2*hgt, d = p*len, dir = xs > xr ? 1 : -1;
+    if (d < hgt) return [xr, yBot - d];
+    if (d < hgt + w) return [xr + dir*(d-hgt), yTop];
+    if (d < 2*hgt + w) return [xs, yTop + (d-hgt-w)];
+    return [xs - dir*(d-2*hgt-w), yBot];
   }
 
   function draw(now){
     const dt = Math.min(0.05, (now - t0)/1000); t0 = now;
     kD += (kT - kD) * (reduce ? 1 : Math.min(1, dt*2.2));
     const m = model(kD);
-    const y0 = H*0.46, D = H - y0, land = 0.075;
+    const font = getComputedStyle(document.body).fontFamily;
+
+    // 블록 기하 (사선 투영): 앞면 = 적도 단면, 윗면 = 해수면 수온 분포
+    const bx0 = W*0.06, bw = W*0.72, bx1 = bx0 + bw;
+    const dX = W*0.15, dY = -H*0.19;
+    const yF = H*0.57, yB = H*0.95, D = yB - yF;          // 앞면: 0 ~ 300 m
+    const P = (u, v) => [bx0 + u*bw + v*dX, yF + v*dY];   // 윗면 좌표 (u: 서→동, v: 앞→뒤, 0.5 = 적도)
+    const depth = u => lerp(m.dW, m.dE, smooth(0.04, 0.96, u));
 
     // sky
-    const sky = ctx.createLinearGradient(0,0,0,y0);
-    sky.addColorStop(0,'#16324A'); sky.addColorStop(1,'#3E6E8E');
-    ctx.fillStyle = sky; ctx.fillRect(0,0,W,y0);
+    const sky = ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#16324A'); sky.addColorStop(1,'#2F5874');
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
 
-    // ocean columns
-    const cols = 120;
-    for (let i=0;i<cols;i++){
-      const x = i/cols, xp = x*W, w = W/cols+1;
-      const d = lerp(m.dW, m.dE, smooth(0.05,0.95,x)) * D;
-      const g = ctx.createLinearGradient(0,y0,0,y0+d);
-      const t = sst(m, x);
-      g.addColorStop(0, tColor(t)); g.addColorStop(1, tColor(t-2.5, 0.95));
-      ctx.fillStyle = g; ctx.fillRect(xp, y0, w, d);
-      const g2 = ctx.createLinearGradient(0,y0+d,0,H);
-      g2.addColorStop(0,'#1D4F86'); g2.addColorStop(1,'#0B2140');
-      ctx.fillStyle = g2; ctx.fillRect(xp, y0+d, w, H-y0-d);
+    // ---- 윗면: 해수면 수온 ----
+    const NU = 72, NV = 18;
+    const Tsurf = (u, v) => {
+      const off = Math.abs(v - 0.5) * 2;                        // 0 = 적도, 1 = 가장자리
+      const tongue = (1 - m.up*0.0) * smooth(0.45, 0.95, u) * (1 - smooth(0.0, 0.7, off)); // 적도 냉수대
+      const base = sst(m, u);
+      return base + (m.TW - base) * 0.35 * smooth(0.2, 0.9, off) * (1 - 0.6*off)       // 적도 밖은 덜 차가움
+             + tongue * (m.up - 0.5) * -1.2 - 2.6*off*off;
+    };
+    for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++){
+      const u0 = i/NU, u1 = (i+1)/NU, v0 = j/NV, v1 = (j+1)/NV;
+      const a = P(u0,v0), b = P(u1+0.002,v0), c = P(u1+0.002,v1+0.002), d = P(u0,v1+0.002);
+      ctx.fillStyle = tColor(Tsurf((u0+u1)/2, (v0+v1)/2));
+      ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.lineTo(c[0],c[1]); ctx.lineTo(d[0],d[1]); ctx.closePath(); ctx.fill();
     }
-    // thermocline line
-    ctx.setLineDash([6,6]); ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1.5; ctx.beginPath();
-    for (let i=0;i<=60;i++){ const x=i/60, d=lerp(m.dW,m.dE,smooth(0.05,0.95,x))*D; i?ctx.lineTo(x*W,y0+d):ctx.moveTo(x*W,y0+d); }
+    // 적도 점선
+    ctx.setLineDash([5,6]); ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=1.2;
+    ctx.beginPath(); let e0 = P(0,0.5), e1 = P(1,0.5); ctx.moveTo(e0[0],e0[1]); ctx.lineTo(e1[0],e1[1]); ctx.stroke(); ctx.setLineDash([]);
+    { const q = P(0.005,0.5); label('적도', q[0]-6, q[1], {align:'right', s:fs()*0.7, c:'rgba(255,255,255,.8)'}); }
+
+    // 무역풍 화살표 (윗면 위, 블록 화살표)
+    const arrowsU = [0.2, 0.42, 0.64, 0.86], aL = 0.045 + 0.075*m.wind, hv = 0.07 + 0.05*m.wind;
+    arrowsU.forEach(uc => {
+      const pts = [[uc+aL, 0.5-hv*0.5],[uc-aL*0.2, 0.5-hv*0.5],[uc-aL*0.2, 0.5-hv],[uc-aL, 0.5],[uc-aL*0.2, 0.5+hv],[uc-aL*0.2, 0.5+hv*0.5],[uc+aL, 0.5+hv*0.5]].map(([u,v]) => P(u,v));
+      ctx.fillStyle = `rgba(255,255,255,${0.55+0.45*m.wind})`; ctx.strokeStyle='#1f1a17'; ctx.lineWidth=1.5;
+      ctx.beginPath(); pts.forEach((p,i) => i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill(); ctx.stroke();
+    });
+    { const q = P(0.53, 0.86); label(m.wind < 0.4 ? '무역풍 약화' : m.wind > 0.85 ? '무역풍 강화' : '무역풍', q[0], q[1], {s:fs()*1.0, w:800, bg:'rgba(10,30,45,.6)'}); }
+
+    // ---- 앞면: 적도 단면 ----
+    const cols = 110;
+    for (let i=0;i<cols;i++){
+      const u = i/cols, xp = bx0 + u*bw, w = bw/cols + 1, d = depth(u) * D, t = sst(m, u);
+      const g = ctx.createLinearGradient(0,yF,0,yF+d);
+      g.addColorStop(0, tColor(t)); g.addColorStop(1, tColor(t-2.5, 0.95));
+      ctx.fillStyle = g; ctx.fillRect(xp, yF, w, d);
+      const g2 = ctx.createLinearGradient(0,yF+d,0,yB);
+      g2.addColorStop(0,'#1D4F86'); g2.addColorStop(1,'#0B2140');
+      ctx.fillStyle = g2; ctx.fillRect(xp, yF+d, w, yB-yF-d);
+    }
+    // 수온 약층 (20℃ 등수온선)
+    ctx.setLineDash([6,6]); ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=1.6; ctx.beginPath();
+    for (let i=0;i<=60;i++){ const u=i/60; i?ctx.lineTo(bx0+u*bw, yF+depth(u)*D):ctx.moveTo(bx0+u*bw, yF+depth(u)*D); }
     ctx.stroke(); ctx.setLineDash([]);
 
-    // land masses
-    ctx.fillStyle = '#6E8A4E';
-    ctx.beginPath(); ctx.moveTo(0,y0-H*0.04); ctx.quadraticCurveTo(W*land*0.7,y0-H*0.06,W*land,y0); ctx.lineTo(W*land*0.8,H); ctx.lineTo(0,H); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(W,y0-H*0.13); ctx.quadraticCurveTo(W*(1-land*0.6),y0-H*0.12,W*(1-land),y0); ctx.lineTo(W*(1-land*0.6),H); ctx.lineTo(W,H); ctx.fill();
-    ctx.fillStyle = '#5B6F45';
-    ctx.beginPath(); ctx.moveTo(W,y0-H*0.13); ctx.lineTo(W*(1-land*0.25),y0-H*0.19); ctx.lineTo(W*(1-land*0.45),y0-H*0.12); ctx.fill();
+    // ---- 오른쪽 옆면 (동쪽 끝 단면) ----
+    { const dE = depth(1)*D, tE = sst(m, 1);
+      const quad = (y1, y2, fill) => { ctx.fillStyle = fill; ctx.beginPath();
+        ctx.moveTo(bx1, yF+y1); ctx.lineTo(bx1+dX, yF+y1+dY); ctx.lineTo(bx1+dX, yF+y2+dY); ctx.lineTo(bx1, yF+y2); ctx.closePath(); ctx.fill(); };
+      quad(0, dE, tColor(tE)); quad(dE, D, '#163E6B'); quad(0, D, 'rgba(0,0,0,.28)'); }
+    // 블록 외곽선
+    ctx.strokeStyle='#0a1520'; ctx.lineWidth=2;
+    const c1=P(0,0), c2=P(1,0), c3=P(1,1), c4=P(0,1);
+    ctx.beginPath(); ctx.moveTo(c1[0],c1[1]); ctx.lineTo(c4[0],c4[1]); ctx.lineTo(c3[0],c3[1]); ctx.lineTo(c2[0],c2[1]); ctx.stroke();
+    ctx.strokeRect(bx0, yF, bw, D);
+    ctx.beginPath(); ctx.moveTo(c3[0],c3[1]); ctx.lineTo(c3[0], yB+dY); ctx.lineTo(bx1, yB); ctx.stroke();
 
-    // upwelling (east)
-    const ux = W*(1-land-0.035), ua = m.up;
-    ctx.globalAlpha = 0.25 + 0.75*ua;
-    arrow(ux - W*0.035, H-D*0.12, ux, y0 + D*0.08, '#8FD3FF', 2 + 7*ua);
+    // 용승 (동쪽 연안)
+    const ux = bx1 - bw*0.035, ua = m.up;
+    ctx.globalAlpha = 0.3 + 0.7*ua;
+    arrow(ux, yB - D*0.12, ux, yF + D*0.08, '#BFE6FF', 2 + 6*ua);
     ctx.globalAlpha = 1;
+    label(m.up < 0.4 ? '연안 용승 약화' : m.up > 0.85 ? '연안 용승 강화' : '연안 용승', ux - 12, yB - D*0.2, {align:'right', s:fs()*0.9, c:'#DFF3FF', w:700});
 
-    // surface current arrows
-    const cMag = Math.abs(m.cur), cDir = m.cur >= 0 ? -1 : 1, cy = y0 + D*0.06;
-    if (cMag > 0.06){
-      for (let j=0;j<3;j++){ const cx = W*(0.32 + j*0.16), len = W*0.06*(0.4+cMag);
-        arrow(cx - cDir*len/2, cy, cx + cDir*len/2, cy, 'rgba(255,255,255,.9)', 2.5+2*cMag); }
-    }
+    // 표층 해류 화살표 (앞면 상단)
+    const cMag = Math.abs(m.cur), cDir = m.cur >= 0 ? -1 : 1, cy = yF + D*0.055;
+    if (cMag > 0.06) for (let j=0;j<3;j++){ const cx = bx0 + bw*(0.34 + j*0.15), len = bw*0.06*(0.4+cMag);
+      arrow(cx - cDir*len/2, cy, cx + cDir*len/2, cy, 'rgba(255,255,255,.9)', 2.5+2*cMag); }
 
-    // Walker circulation (atmosphere)
-    const yTop = H*0.10, yBot = y0 - H*0.05;
+    // ---- 대기: 워커 순환, 구름 ----
+    const AX = u => bx0 + u*bw + dX*0.5;                 // 윗면 중앙(적도) 위의 x
+    const yTop = H*0.07, yBot = yF + dY - H*0.03;
+    const xc = m.xc, xEastEnd = 0.88, xWestEnd = 0.1;
     const loops = [];
-    const xc = m.xc, xEastEnd = 0.86, xWestEnd = 0.12;
-    if (xEastEnd - xc > 0.08) loops.push({xr:xc, xs:xEastEnd, s: clamp((xEastEnd-xc)/0.7,0.3,1)*(0.35+0.65*m.wind)});
-    if (xc - xWestEnd > 0.12) loops.push({xr:xc, xs:xWestEnd, s: clamp((xc-xWestEnd)/0.5,0.2,1)});
+    if (xEastEnd - xc > 0.08) loops.push({xr:AX(xc), xs:AX(xEastEnd), s: clamp((xEastEnd-xc)/0.7,0.3,1)*(0.35+0.65*m.wind)});
+    if (xc - xWestEnd > 0.12) loops.push({xr:AX(xc), xs:AX(xWestEnd), s: clamp((xc-xWestEnd)/0.5,0.2,1)});
     loops.forEach((lp, li) => {
-      const L = loopPath(lp.xr, lp.xs, yTop, yBot);
+      const a = Math.min(lp.xr, lp.xs), b = Math.max(lp.xr, lp.xs);
       ctx.strokeStyle = `rgba(255,92,160,${0.25+0.35*lp.s})`; ctx.lineWidth = 2;
-      ctx.setLineDash([3,7]); rr(L.a, L.yTop, L.b-L.a, L.yBot-L.yTop, 18); ctx.stroke(); ctx.setLineDash([]);
-      parts.forEach((pt, i) => {
-        if (pt.loop !== (loops.length===1 ? pt.loop : li)) return;
+      ctx.setLineDash([3,7]); rr(a, yTop, b-a, yBot-yTop, 18); ctx.stroke(); ctx.setLineDash([]);
+      parts.forEach(pt => {
+        if (loops.length > 1 && pt.loop !== li) return;
         if (!reduce) pt.p = (pt.p + dt*0.05*(0.4+lp.s)) % 1;
-        const [px,py] = loopPoint(L, lp.xr, (pt.p + li*0.013) % 1);
+        const [px_,py_] = loopPoint(lp.xr, lp.xs, yTop, yBot, pt.p);
         ctx.fillStyle = `rgba(255,110,175,${0.55+0.45*lp.s})`;
-        ctx.beginPath(); ctx.arc(px,py,2.2+2.2*lp.s,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(px_,py_,2.2+2.2*lp.s,0,Math.PI*2); ctx.fill();
       });
-      // direction arrows on top and bottom legs
-      const midTop = (L.a+L.b)/2, dirTop = lp.xs > lp.xr ? 1 : -1, aw = Math.min(46, (L.b-L.a)*0.25);
-      arrow(midTop - dirTop*aw/2, L.yTop, midTop + dirTop*aw/2, L.yTop, `rgba(255,92,160,${0.6+0.4*lp.s})`, 3+2*lp.s);
-      arrow(midTop + dirTop*aw/2, L.yBot, midTop - dirTop*aw/2, L.yBot, `rgba(255,92,160,${0.6+0.4*lp.s})`, 3+2*lp.s);
+      const mid = (a+b)/2, dirTop = lp.xs > lp.xr ? 1 : -1, aw = Math.min(46, (b-a)*0.25);
+      arrow(mid - dirTop*aw/2, yTop, mid + dirTop*aw/2, yTop, `rgba(255,92,160,${0.6+0.4*lp.s})`, 3+2*lp.s);
+      arrow(mid + dirTop*aw/2, yBot, mid - dirTop*aw/2, yBot, `rgba(255,92,160,${0.6+0.4*lp.s})`, 3+2*lp.s);
+      label('하강 기류 · 맑음', clamp(lp.xs, 80, W-80), yTop + fs()*1.3, {s:fs()*0.82, c:'#FFE7A8', bg:'rgba(10,30,45,.55)'});
     });
-
-    // trade wind label
-    const twx = W*0.79, twy = y0 - H*0.025, twl = W*0.05 + W*0.10*m.wind;
-    arrow(twx + twl/2, twy, twx - twl/2, twy, 'rgba(255,255,255,.95)', 2 + 4*m.wind);
-    label(m.wind < 0.4 ? '무역풍 약화' : m.wind > 0.85 ? '무역풍 강화' : '무역풍', twx, twy - fs()*1.15, {s:fs()*0.95, bg:'rgba(10,30,45,.55)'});
-
-    // cloud + rain at rising branch
-    const cxp = xc*W, cyp = H*0.20;
+    const cxp = AX(xc), cyp = H*0.16;
     if (!reduce){
       ctx.strokeStyle='rgba(190,225,255,.6)'; ctx.lineWidth=1.3;
       for (let i=0;i<14;i++){ const rx = cxp - 34 + i*5.2, off = ((now/14 + i*37) % 60);
@@ -538,43 +586,43 @@ table.mini th,table.mini td{padding:8px 10px}
     }
     ctx.fillStyle='rgba(245,248,252,.96)';
     [[-26,6,22],[0,-6,28],[26,6,22],[-10,12,20],[12,12,20],[0,-26,20]].forEach(([dx,dy,r])=>{ctx.beginPath();ctx.arc(cxp+dx,cyp+dy,r*(W/1100+0.25),0,Math.PI*2);ctx.fill();});
-    label('상승 기류 · 비', cxp, cyp + H*0.155, {s:fs()*0.9, bg:'rgba(10,30,45,.6)'});
-    // descending/dry labels
-    loops.forEach(lp => { const x = lp.xs*W; label('하강 기류 · 맑음', clamp(x, 80, W-80), H*0.10 + fs()*1.3, {s:fs()*0.85, c:'#FFE7A8', bg:'rgba(10,30,45,.55)'}); });
+    label('상승 기류 · 비', cxp, cyp + H*0.095, {s:fs()*0.88, bg:'rgba(10,30,45,.6)'});
 
-    // text labels
-    label('서', W*0.02+10, y0 + D*0.5, {align:'left', s:fs()*1.1});
-    label('동', W*0.98-10, y0 + D*0.5, {align:'right', s:fs()*1.1});
-    label('동남아시아·오스트레일리아', W*0.012, y0 - H*0.09, {align:'left', s:fs()*0.85, bg:'rgba(10,30,45,.55)'});
-    label('남아메리카(페루)', W*0.988, y0 - H*0.21, {align:'right', s:fs()*0.85, bg:'rgba(10,30,45,.55)'});
-    label('따뜻한 해수', W*0.22, y0 + Math.min(m.dW*D*0.55, D*0.3), {s:fs()});
-    label('심해층 (찬 해수)', W*0.55, y0 + D*0.8, {s:fs(), c:'rgba(255,255,255,.85)'});
-    label(m.up < 0.4 ? '용승 약화' : '용승', ux - W*0.06, H - D*0.25, {s:fs()*0.9, c:'#BFE6FF'});
-    label('20℃ 등수온선 (수온 약층)', W*0.5, y0 + lerp(m.dW,m.dE,smooth(0.05,0.95,0.5))*D + fs()*0.95, {s:fs()*0.78, c:'rgba(255,255,255,.8)'});
-    // depth axis (0–300 m)
-    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1;
-    [0,100,200,300].forEach(z => { const yy = y0 + D*z/300 - (z===300?1:0), xx = W*0.105;
-      ctx.beginPath(); ctx.moveTo(xx-5,yy); ctx.lineTo(xx,yy); ctx.stroke();
-      label(z+' m', xx-8, yy + (z===0?8:z===300?-8:0), {align:'right', s:fs()*0.65, w:500, c:'rgba(255,255,255,.75)'}); });
-    // 20℃ depth markers at west and east
-    [[0.16, m.dW],[0.84, m.dE]].forEach(([fx, dd]) => {
-      const xx = W*fx, yy = y0 + lerp(m.dW,m.dE,smooth(0.05,0.95,fx))*D;
+    // ---- 글자 ----
+    label('따뜻한 해수', bx0 + bw*0.2, yF + Math.min(m.dW*D*0.55, D*0.3), {s:fs()});
+    label('찬 해수 (심해층)', bx0 + bw*0.5, yF + D*0.8, {s:fs(), c:'rgba(255,255,255,.88)'});
+    label('수온 약층 (20℃ 등수온선)', bx0 + bw*0.52, yF + depth(0.52)*D + fs()*0.95, {s:fs()*0.75, c:'rgba(255,255,255,.8)'});
+    label('120°E · 서', bx0, yB + fs()*0.0 - 10, {align:'left', s:fs()*0.85, w:700, c:'#fff', bg:'rgba(10,30,45,.55)'});
+    label('80°W · 동', bx1, yB - 10, {align:'right', s:fs()*0.85, w:700, c:'#fff', bg:'rgba(10,30,45,.55)'});
+    { const q = P(0.02, 0.98); label('동남아시아 쪽', q[0]+4, q[1]-10, {align:'left', s:fs()*0.75, c:'rgba(255,255,255,.85)'}); }
+    { const q = P(0.98, 0.98); label('남아메리카 쪽', q[0]-4, q[1]-10, {align:'right', s:fs()*0.75, c:'rgba(255,255,255,.85)'}); }
+    // 깊이 눈금
+    ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1;
+    [0,100,200,300].forEach(z => { const yy = yF + D*z/300;
+      ctx.beginPath(); ctx.moveTo(bx0-5,yy); ctx.lineTo(bx0,yy); ctx.stroke();
+      label(z+' m', bx0-8, yy + (z===0?6:z===300?-6:0), {align:'right', s:fs()*0.62, w:500, c:'rgba(255,255,255,.75)'}); });
+    // 20℃ 깊이 표시 (서·동)
+    [0.1, 0.9].forEach(u => { const xx = bx0 + u*bw, yy = yF + depth(u)*D;
       ctx.fillStyle='#FFE27A'; ctx.beginPath(); ctx.arc(xx,yy,4.5,0,Math.PI*2); ctx.fill();
-      label('약 '+Math.round(lerp(m.dW,m.dE,smooth(0.05,0.95,fx))*300/10)*10+' m', xx, yy + fs()*1.0, {s:fs()*0.75, w:700, c:'#FFE27A', bg:'rgba(0,0,0,.35)'});
-    });
-    // SST readouts
-    label(m.TW.toFixed(1)+'℃', W*0.15, y0 + D*0.04 + fs()*0.6, {s:fs()*0.95, w:700, bg:'rgba(0,0,0,.35)'});
-    label(m.TE.toFixed(1)+'℃', W*0.84, y0 + D*0.04 + fs()*0.6, {s:fs()*0.95, w:700, bg:'rgba(0,0,0,.35)'});
+      label('약 '+Math.round(depth(u)*30)*10+' m', xx, yy + fs()*1.0, {s:fs()*0.72, w:700, c:'#FFE27A', bg:'rgba(0,0,0,.35)'}); });
+    // 표층 수온 값
+    { const q = P(0.1, 0.18); label(m.TW.toFixed(1)+'℃', q[0], q[1], {s:fs()*0.9, w:800, bg:'rgba(0,0,0,.4)'}); }
+    { const q = P(0.86, 0.18); label(m.TE.toFixed(1)+'℃', q[0], q[1], {s:fs()*0.9, w:800, bg:'rgba(0,0,0,.4)'}); }
+    // 수온 범례
+    { const lx = W - 34, ly = H*0.56, lh = H*0.32;
+      for (let i=0;i<40;i++){ ctx.fillStyle = tColor(31 - i*11/40); ctx.fillRect(lx, ly + i*lh/40, 14, lh/40+1); }
+      label('고온', lx+7, ly-10, {s:fs()*0.68, c:'#fff'}); label('저온', lx+7, ly+lh+11, {s:fs()*0.68, c:'#fff'}); }
 
     // highlight ring (stepper)
     if (highlight){
       const pulse = reduce ? 0 : (Math.sin(now/260)+1)/2;
+      const wq = P(0.53, 0.5), eq = P(0.86, 0.3);
       const H_ = {
-        wind:  [twx, twy, W*0.14, H*0.06],
-        current:[W*0.48, cy, W*0.28, H*0.05],
-        warmW: [W*0.18, y0 + m.dW*D*0.5, W*0.15, m.dW*D*0.62],
-        upwell:[ux - W*0.02, y0 + D*0.5, W*0.07, D*0.5],
-        sstE:  [W*0.8, y0 + D*0.08, W*0.14, H*0.06],
+        wind:  [wq[0], wq[1], bw*0.45, -dY*0.45],
+        current:[bx0+bw*0.49, cy, bw*0.28, H*0.045],
+        warmW: [bx0+bw*0.18, yF + m.dW*D*0.5, bw*0.17, m.dW*D*0.62],
+        upwell:[ux - bw*0.02, yF + D*0.5, bw*0.06, D*0.5],
+        sstE:  [eq[0], eq[1], bw*0.15, -dY*0.35],
         cloud: [cxp, cyp+20, W*0.12, H*0.14]
       }[highlight];
       if (H_){ ctx.strokeStyle = `rgba(255,236,120,${0.6+0.4*pulse})`; ctx.lineWidth = 3+2*pulse;
@@ -717,6 +765,63 @@ table.mini th,table.mini td{padding:8px 10px}
   $('regions').innerHTML = regions.map(([w, tags]) =>
     `<div class="region"><span class="where">${w}</span><span class="what">${tags.map(t=>`<span class="k" style="--c:${C[t]}">${t}</span>`).join('')}</span></div>`).join('');
 
+
+  /* ---------- 대기 대순환 그림 (SVG) ---------- */
+  (function buildGC(){
+    const cx=230, cy=260, R=200, P=[];
+    const yOf = lat => cy - R*Math.sin(lat*Math.PI/180);
+    const hw = lat => R*Math.cos(lat*Math.PI/180);
+    P.push(`<defs>
+      <marker id="mA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker>
+      <marker id="mM" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
+      <marker id="mC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--cool)"/></marker>
+      <clipPath id="gClip"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>`);
+    // globe
+    P.push(`<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:var(--chip-cool);stroke:var(--ink);stroke-width:2.5"/>`);
+    // trade-wind bands highlight
+    P.push(`<g clip-path="url(#gClip)"><rect x="${cx-R}" y="${yOf(30)}" width="${2*R}" height="${yOf(-30)-yOf(30)}" style="fill:var(--chip-warm)"/></g>`);
+    [60,30,0,-30,-60].forEach(l => { const y=yOf(l), w=hw(l);
+      P.push(`<line x1="${cx-w}" y1="${y}" x2="${cx+w}" y2="${y}" style="stroke:var(--ink);stroke-width:${l===0?2:1};stroke-dasharray:${l===0?'0':'4 4'};opacity:${l===0?.8:.45}"/>`);
+      P.push(`<text x="${cx-w-6}" y="${y+4}" text-anchor="end" style="fill:var(--muted);font:600 12px var(--f-mono)">${l===0?'0°':Math.abs(l)+'°'+(l>0?'N':'S')}</text>`); });
+    P.push(`<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:none;stroke:var(--ink);stroke-width:2.5"/>`);
+    // surface wind arrows: [lat center, dx, dy, marker, xs]
+    const arrows = [
+      [15,-1, .55,'mA',[-110,-20,70]], [-15,-1,-.55,'mA',[-110,-20,70]],
+      [45, 1,-.45,'mM',[-95,-5]],      [-45, 1, .45,'mM',[-95,-5]],
+      [71,-1, .35,'mC',[-20,22]],      [-71,-1,-.35,'mC',[-20,22]]
+    ];
+    arrows.forEach(([lat,dx,dy,mk,xs]) => { const y=yOf(lat), L=Math.abs(lat)>70?16:Math.abs(lat)>40?30:34;
+      xs.forEach(x0 => { const x=cx+x0, n=Math.hypot(dx,dy);
+        P.push(`<line x1="${x-dx/n*L}" y1="${y-dy/n*L}" x2="${x+dx/n*L}" y2="${y+dy/n*L}" style="stroke:var(${mk==='mA'?'--accent':mk==='mM'?'--muted':'--cool'});stroke-width:${mk==='mA'?4:3}" marker-end="url(#${mk})"/>`); }); });
+    const lab = (t,x,y,c,w=800,s=15) => P.push(`<text x="${x}" y="${y}" text-anchor="middle" style="fill:var(${c});font:${w} ${s}px var(--f-body);paint-order:stroke;stroke:var(--surface);stroke-width:4px">${t}</text>`);
+    lab('북동 무역풍', cx+148, yOf(15)+5, '--accent'); lab('남동 무역풍', cx+148, yOf(-15)+5, '--accent');
+    lab('편서풍', cx+90, yOf(45)+5, '--muted'); lab('편서풍', cx+90, yOf(-45)+5, '--muted');
+    lab('극동풍', cx+100, yOf(78)+4, '--cool', 800, 13); lab('극동풍', cx+100, yOf(-78)+10, '--cool', 800, 13);
+    lab('서', cx-R+22, cy-8, '--ink', 900, 14); lab('동', cx+R-22, cy-8, '--ink', 900, 14);
+    // circulation cells (side panel: x = 높이, y = 위도)
+    const sx=470, tx=600;
+    P.push(`<line x1="${sx}" y1="${yOf(90)}" x2="${sx}" y2="${yOf(-90)}" style="stroke:var(--ink);stroke-width:3"/>`);
+    P.push(`<text x="${sx-6}" y="${yOf(90)-8}" text-anchor="start" style="fill:var(--muted);font:600 12px var(--f-body)">지표 │ 높이 →</text>`);
+    const cells = [[0,30,1,'해들리'],[30,60,-1,'페렐'],[60,90,1,'극'],[0,-30,1,'해들리'],[-30,-60,-1,'페렐'],[-60,-90,1,'극']];
+    cells.forEach(([a,b,dir,name]) => {
+      const ya=yOf(a), yb=yOf(b), x1=sx+10, x2=tx, m=5, y1=Math.min(ya,yb)+m, y2=Math.max(ya,yb)-m;
+      const eq = Math.abs(a) < Math.abs(b) ? ya : yb; // equatorward edge y
+      // rising at equatorward edge if dir=1
+      const yr = dir===1 ? (eq===ya? (ya>yb? y2:y1) : (yb>ya? y2:y1)) : (eq===ya? (ya>yb? y1:y2) : (yb>ya? y1:y2));
+      const ys = yr===y1 ? y2 : y1;
+      const col = name==='해들리' ? '--accent' : name==='페렐' ? '--muted' : '--cool';
+      const mk = name==='해들리' ? 'mA' : name==='페렐' ? 'mM' : 'mC';
+      P.push(`<path d="M${x1},${yr} L${x2},${yr} L${x2},${ys} L${x1},${ys} Z" style="fill:none;stroke:var(${col});stroke-width:1.5;opacity:.45"/>`);
+      const mid=(yr+ys)/2;
+      P.push(`<line x1="${x1+20}" y1="${yr}" x2="${x2-20}" y2="${yr}" style="stroke:var(${col});stroke-width:2.5" marker-end="url(#${mk})"/>`);
+      P.push(`<line x1="${x2}" y1="${yr+(ys-yr)*.2}" x2="${x2}" y2="${ys-(ys-yr)*.2}" style="stroke:var(${col});stroke-width:2.5" marker-end="url(#${mk})"/>`);
+      P.push(`<line x1="${x2-20}" y1="${ys}" x2="${x1+20}" y2="${ys}" style="stroke:var(${col});stroke-width:2.5" marker-end="url(#${mk})"/>`);
+      P.push(`<line x1="${x1}" y1="${ys-(ys-yr)*.2}" x2="${x1}" y2="${yr+(ys-yr)*.2}" style="stroke:var(${col});stroke-width:2.5" marker-end="url(#${mk})"/>`);
+      P.push(`<text x="${(x1+x2)/2}" y="${mid+4}" text-anchor="middle" style="fill:var(${col});font:800 12.5px var(--f-body)">${name}</text>`);
+    });
+    document.getElementById('gcWrap').innerHTML = `<svg viewBox="0 30 640 470" role="img" aria-label="대기 대순환과 지상의 바람: 위도 0~30도에서 무역풍이 동쪽에서 서쪽으로 분다">${P.join('')}</svg>`;
+  })();
+
   /* ---------- quiz ---------- */
   const Q = [
     {s:'무역풍이 평상시보다 강하게 불면 엘니뇨가 발생한다.', o:['O','X'], a:1, e:'무역풍이 약해질 때 엘니뇨가 발생한다. 강해지면 라니냐가 된다.', src:'p.87'},
@@ -727,6 +832,7 @@ table.mini th,table.mini td{padding:8px 10px}
     {s:'엘니뇨 시기와 평상시를 비교했을 때, 엘니뇨 시기에 더 큰 값은?', o:['무역풍의 평균 풍속','서태평양 적도 부근 해역의 강수량','동태평양 적도 부근 해역의 수온'], a:2, e:'엘니뇨 시기에는 무역풍이 약하고 서태평양 강수량이 줄며, 동태평양 수온이 높다.', src:'p.94'},
     {s:'엘니뇨는 적도 부근에서만 영향을 미치고 다른 지역의 기후에는 영향을 주지 않는다.', o:['O','X'], a:1, e:'대기와 해양의 상호작용으로 지구 곳곳에 이상 기후가 나타난다.', src:'p.87'},
     {s:'엘니뇨는 매년 크리스마스 무렵 규칙적으로 발생한다.', o:['O','X'], a:1, e:'2년~7년에 한 번씩 불규칙한 주기로 발생하고, 보통 9개월~2년 지속된다.', src:'p.86'},
+    {s:'위도 0°~30°의 지상에서는 무역풍이 대체로 동쪽에서 서쪽으로 분다.', o:['O','X'], a:0, e:'해들리 순환의 지상 바람이 전향력으로 휘어 북동·남동 무역풍이 된다.', src:'1학기 복습'},
     {s:'혼합층은 바람의 혼합 작용으로 깊이에 관계없이 수온이 거의 일정한 층이다.', o:['O','X'], a:0, e:'바람이 강할수록 혼합층이 두꺼워진다.', src:'1학기 복습'},
     {s:'수온 약층은 깊이에 따라 수온이 급격히 낮아지며, 매우 (   ) 위아래 해수의 섞임을 막는다.', o:['안정하여','불안정하여'], a:0, e:'아래쪽이 차갑고 무거워 대류가 일어나지 않는 안정한 층이다.', src:'1학기 복습'},
     {s:'엘니뇨가 발생하면 동태평양의 20℃ 등수온선(수온 약층)의 깊이는 평상시보다 (   ).', o:['깊어진다','얕아진다'], a:0, e:'따뜻한 해수가 동쪽으로 퍼지고 용승이 약해져 동태평양의 수온 약층이 깊어진다.', src:'심화'},
