@@ -151,6 +151,7 @@ ul.tight li{margin:3px 0}
 .globe-wrap{position:relative;background:radial-gradient(circle at 50% 45%, var(--chip-cool), var(--surface));border-radius:10px;border:2px solid var(--ink);overflow:hidden;min-height:300px}
 .globe-wrap canvas{display:block}
 .gl{position:absolute;left:0;top:0;pointer-events:none;font:800 13px var(--f-mono);padding:2px 7px;border-radius:6px;white-space:nowrap;border:1.5px solid var(--ink);background:var(--surface)}
+.gl-ldn{font:800 12px var(--f-body);color:var(--ink)}
 .gl-lon{color:var(--cool)} .gl-lat{color:var(--warm)} .gl-pt{background:var(--accent);color:var(--accent-ink)}
 .gctl{display:grid;gap:4px;margin-bottom:12px}
 .gctl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:15px}
@@ -237,7 +238,7 @@ table.mini th,table.mini td{padding:8px 10px}
       <div class="panel">
         <h2>3D 지구에서 보기</h2>
         <div class="globe-wrap" id="globeWrap">
-          <span class="gl gl-lon" id="gl-lon"></span><span class="gl gl-lat" id="gl-lat"></span><span class="gl gl-pt" id="gl-pt"></span>
+          <span class="gl gl-lon" id="gl-lon"></span><span class="gl gl-lat" id="gl-lat"></span><span class="gl gl-pt" id="gl-pt"></span><span class="gl gl-ldn" id="gl-ldn"></span>
         </div>
         <p class="note" style="margin:6px 0 0">지구를 끌어서 돌려 보자. 위도와 경도는 모두 <b>지구 중심에서 잰 각도</b>이다.</p>
       </div>
@@ -254,6 +255,7 @@ table.mini th,table.mini td{padding:8px 10px}
         </div>
         <div class="ll-go" style="margin-top:10px">
           <span class="muted">바로 가기</span>
+          <button type="button" class="btn sm" data-goto="0,51">런던</button>
           <button type="button" class="btn sm" data-goto="0,0">0°, 0°</button>
           <button type="button" class="btn sm" data-goto="127,37">서울</button>
           <button type="button" class="btn sm" data-goto="120,0">120°E</button>
@@ -288,7 +290,7 @@ table.mini th,table.mini td{padding:8px 10px}
       </div>
       <div class="latlon">
         <div class="ly ly-thermo"><h3>위도</h3><p>적도(0°)를 기준으로 북쪽(N)이나 남쪽(S)으로 몇 도 떨어져 있는지 나타낸다. 0°~90°. 가로선(위선)으로 그린다.</p></div>
-        <div class="ly ly-thermo"><h3>경도</h3><p>영국 그리니치를 지나는 본초 자오선(0°)을 기준으로 동쪽(E)이나 서쪽(W)으로 몇 도인지 나타낸다. 0°~180°. 세로선(경선)으로 그린다.</p></div>
+        <div class="ly ly-thermo"><h3>경도</h3><p>영국 런던의 그리니치 천문대를 지나는 본초 자오선(0°)을 기준으로 동쪽(E)이나 서쪽(W)으로 몇 도인지 나타낸다. 0°~180°. 세로선(경선)으로 그린다.</p></div>
         <div class="ly ly-mix"><h3>우리나라는?</h3><p>서울은 약 <b class="temp">37°N, 127°E</b>. 엘니뇨는 우리나라보다 남쪽, 적도를 따라 <b class="temp">120°E</b>(인도네시아 부근)부터 <b class="temp">80°W</b>(페루 부근)까지 태평양 전체에서 일어난다.</p></div>
       </div>
     </div>
@@ -878,6 +880,19 @@ table.mini th,table.mini td{padding:8px 10px}
       const curve = new THREE.CatmullRomCurve3(pts);
       return new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(8, pts.length*2), rad, 8, false), new THREE.MeshBasicMaterial({color}));
     }
+    function onTop(obj){ obj.traverse(o => { if (o.material){ o.material.depthTest = false; o.material.transparent = true; } o.renderOrder = 10; }); return obj; }
+    function arrowArc(pts, color, rad){
+      const n = pts.length, tip = pts[n-1], prev = pts[Math.max(0, n-4)];
+      const dir = tip.clone().sub(prev).normalize(), hl = rad*7;
+      const base = tip.clone().sub(dir.clone().multiplyScalar(hl));
+      const shaft = pts.slice(0, -3).concat([base]);
+      const grp = new THREE.Group();
+      if (shaft.length > 1) grp.add(tube(shaft, color, rad));
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(rad*3, hl, 16), new THREE.MeshBasicMaterial({color}));
+      cone.position.copy(base.clone().add(dir.clone().multiplyScalar(hl/2)));
+      cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+      grp.add(cone); return grp;
+    }
     function makeTexture(){
       const c = document.createElement('canvas'); c.width = 2048; c.height = 1024;
       const g = c.getContext('2d');
@@ -909,6 +924,8 @@ table.mini th,table.mini td{padding:8px 10px}
       root.add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), new THREE.MeshBasicMaterial({color:0x1f1a17})));
       // 지축
       root.add(lineFrom([new THREE.Vector3(0,-1.35,0), new THREE.Vector3(0,1.35,0)], 0x1f1a17, 2, true));
+      { const lm = new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 12), new THREE.MeshBasicMaterial({color:0x1f1a17}));
+        lm.position.copy(v3(51.5, 0, 1.01)); root.add(lm); }
       dyn = new THREE.Group(); root.add(dyn);
       // 드래그로 회전
       const el = renderer.domElement; let drag = null;
@@ -938,19 +955,20 @@ table.mini th,table.mini td{padding:8px 10px}
       { const pts=[]; for (let a=-90; a<=90; a+=3) pts.push(v3(a, L, 1.006)); dyn.add(lineFrom(pts, 0x1971c2, 2, true)); }
       if (Math.abs(lat) < 89){ const pts=[]; for (let a=0; a<=360; a+=3) pts.push(v3(lat, a, 1.006)); dyn.add(lineFrom(pts, 0xe03131, 2, true)); }
       // 중심에서 그은 선
-      dyn.add(lineFrom([O, Z], 0x2f2620, 2));
-      dyn.add(lineFrom([O, Q], 0x1971c2, 2));
-      dyn.add(lineFrom([O, P], 0xe03131, 2));
+      dyn.add(onTop(lineFrom([O, Z], 0x2f2620, 2)));
+      dyn.add(onTop(lineFrom([O, Q], 0x1971c2, 2)));
+      dyn.add(onTop(lineFrom([O, P], 0xe03131, 2)));
       // 경도 각: 적도면에서 본초 자오선 → 지점의 경선
-      if (Math.abs(Ls) > 0.5){ dyn.add(tube(arc(0, 0, 0, Ls, 0.42), 0x1971c2, 0.016)); dyn.add(tube(arc(0, 0, 0, Ls, 1.012), 0x1971c2, 0.014)); }
+      if (Math.abs(Ls) > 3){ dyn.add(onTop(arrowArc(arc(0, 0, 0, Ls, 0.42), 0x1971c2, 0.02))); dyn.add(arrowArc(arc(0, 0, 0, Ls, 1.015), 0x1971c2, 0.015)); }
       // 위도 각: 적도 → 지점 (경선 따라)
-      if (Math.abs(lat) > 0.5){ dyn.add(tube(arc(0, L, lat, L, 0.55), 0xe03131, 0.016)); dyn.add(tube(arc(0, L, lat, L, 1.012), 0xe03131, 0.014)); }
+      if (Math.abs(lat) > 3){ dyn.add(onTop(arrowArc(arc(0, L, lat, L, 0.55), 0xe03131, 0.02))); dyn.add(arrowArc(arc(0, L, lat, L, 1.015), 0xe03131, 0.015)); }
       // 지점
       const pm = new THREE.Mesh(new THREE.SphereGeometry(0.05, 20, 14), new THREE.MeshBasicMaterial({color:0xff5a1f}));
       pm.position.copy(v3(lat, L, 1.02)); dyn.add(pm);
-      labels.lon = {p: v3(0, Ls/2, 0.52), t: '경도 ' + fmtLonG(L)};
-      labels.lat = {p: v3(lat/2, L, 0.66), t: '위도 ' + fmtLatG(lat)};
+      labels.lon = {p: v3(0, Ls/2, 0.66), t: '경도 ' + fmtLonG(L)};
+      labels.lat = {p: v3(lat/2, L, 0.76), t: '위도 ' + fmtLatG(lat)};
       labels.pt  = {p: v3(lat, L, 1.12), t: fmtLatG(lat) + ', ' + fmtLonG(L)};
+      labels.ldn = {p: v3(51.5, 0, 1.13), t: '런던 (그리니치) · 경도 0°'};
       readout();
     }
     const labels = {};
@@ -970,7 +988,7 @@ table.mini th,table.mini td{padding:8px 10px}
       root.rotation.set(pitch, yaw, 0);
       renderer.render(scene, camera);
       // HTML 라벨
-      ['lon','lat','pt'].forEach(k => {
+      ['lon','lat','pt','ldn'].forEach(k => {
         const el = document.getElementById('gl-'+k), d = labels[k]; if (!el || !d) return;
         const v = d.p.clone().applyMatrix4(root.matrixWorld).project(camera);
         el.style.transform = `translate(-50%,-50%) translate(${(v.x+1)/2*W3}px, ${(1-v.y)/2*H3}px)`;
@@ -1006,7 +1024,10 @@ table.mini th,table.mini td{padding:8px 10px}
     [60,30,0,-30].forEach(lat => { const y = Y(lat), eq = lat === 0;
       P.push(`<line x1="0" y1="${y}" x2="${W}" y2="${y}" style="stroke:var(${eq?'--accent':'--ink'});stroke-width:${eq?2:.6};opacity:${eq?.9:.25};stroke-dasharray:${eq?'0':'3 4'}"/>`);
       P.push(`<text x="6" y="${y - 4}" style="fill:var(${eq?'--accent':'--muted'});font:700 11px var(--f-mono)">${eq ? '0° 적도' : Math.abs(lat) + '°' + (lat > 0 ? 'N' : 'S')}</text>`); });
-    P.push(`<text x="${X(0)+4}" y="${Y(50)}" style="fill:var(--muted);font:700 11px var(--f-body)">본초 자오선</text>`);
+    [[3,'start',10],[W-3,'end',-10]].forEach(([lx, anc, dx]) => {
+      P.push(`<circle cx="${lx}" cy="${Y(51.5)}" r="5" style="fill:var(--ink);stroke:var(--surface);stroke-width:1.5"/>`);
+      P.push(`<text x="${lx+dx}" y="${Y(51.5)+4}" text-anchor="${anc}" style="fill:var(--ink);font:800 12px var(--f-body);paint-order:stroke;stroke:var(--surface);stroke-width:4px">런던(그리니치)</text>`); });
+    P.push(`<text x="${X(0)+4}" y="${Y(15)}" style="fill:var(--muted);font:700 11px var(--f-body)">본초 자오선</text>`);
     // 영역 표시 글자
     P.push(`<text x="${bx + bw/2}" y="${by - 8}" text-anchor="middle" style="fill:var(--accent);font:900 15px var(--f-body);paint-order:stroke;stroke:var(--chip-cool);stroke-width:4px">적도 태평양 · 엘니뇨의 무대</text>`);
     P.push(`<text x="${bx + 4}" y="${by + bh + 16}" style="fill:var(--ink);font:800 12px var(--f-mono);paint-order:stroke;stroke:var(--chip-cool);stroke-width:3px">120°E (서)</text>`);
@@ -1022,7 +1043,7 @@ table.mini th,table.mini td{padding:8px 10px}
       P.push(`<line x1="${x+18}" y1="${y}" x2="${x-18}" y2="${y}" style="stroke:var(--ink);stroke-width:3" marker-end="url(#mapArr)"/>`); });
     P.push(`<text x="${X(232)}" y="${Y(0) + 20}" text-anchor="middle" style="fill:var(--ink);font:800 12px var(--f-body)">무역풍</text>`);
     document.getElementById('mapWrap').innerHTML =
-      `<svg id="mapSvg" viewBox="0 0 ${W} ${H}" tabindex="0" role="application" aria-label="태평양 중심 세계 지도. 지도를 누르거나 끌면 그 지점의 위도와 경도가 나타난다. 방향키로도 움직일 수 있다."><defs><marker id="mapArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink)"/></marker></defs>${P.join('')}<g id="cur"></g></svg>`;
+      `<svg id="mapSvg" viewBox="0 0 ${W} ${H}" tabindex="0" role="application" aria-label="태평양 중심 세계 지도. 지도를 누르거나 끌면 그 지점의 위도와 경도가 나타난다. 방향키로도 움직일 수 있다."><defs><marker id="mapArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink)"/></marker><marker id="arrLon" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--cool)"/></marker><marker id="arrLat" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--warm)"/></marker></defs>${P.join('')}<g id="cur"></g></svg>`;
 
     /* 드래그로 위도·경도 읽기 */
     const svg = document.getElementById('mapSvg'), g = document.getElementById('cur');
@@ -1031,7 +1052,7 @@ table.mini th,table.mini td{padding:8px 10px}
     const latOf = y => Math.round(75 - y * 360 / W);
     const fmtLon = L => { L = ((L % 360) + 360) % 360; return L === 0 ? '0°' : L === 180 ? '180°' : L < 180 ? L + '°E' : (360 - L) + '°W'; };
     const fmtLat = l => l === 0 ? '0°' : Math.abs(l) + '°' + (l > 0 ? 'N' : 'S');
-    const near = [['서울',127,37],['인도네시아',113,-1],['오스트레일리아',134,-25],['페루',284,-12],['에콰도르',281,-1],['영국 그리니치',360,51],['영국 그리니치',0,51]];
+    const near = [['서울',127,37],['인도네시아',113,-1],['오스트레일리아',134,-25],['페루',284,-12],['에콰도르',281,-1],['런던(그리니치)',360,51],['런던(그리니치)',0,51]];
     const lbl = (t,x,y,c,anchor='middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}" style="fill:var(${c});font:800 13px var(--f-mono);paint-order:stroke;stroke:var(--surface);stroke-width:4px">${t}</text>`;
     function render(){
       const L = ((pos.lon % 360) + 360) % 360, x = X(L), y = Y(pos.lat), y0 = Y(0);
@@ -1042,11 +1063,11 @@ table.mini th,table.mini td{padding:8px 10px}
       h += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" style="stroke:var(--cool);stroke-width:1.6;stroke-dasharray:6 4"/>`;
       h += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" style="stroke:var(--warm);stroke-width:1.6;stroke-dasharray:6 4"/>`;
       // 경도: 본초 자오선에서 적도를 따라 잰 각
-      h += `<line x1="${xs0}" y1="${y0}" x2="${x}" y2="${y0}" style="stroke:var(--cool);stroke-width:6;stroke-linecap:round;opacity:.85"/>`;
+      if (Math.abs(x - xs0) > 14) h += `<line x1="${xs0}" y1="${y0}" x2="${x}" y2="${y0}" style="stroke:var(--cool);stroke-width:5;opacity:.9" marker-end="url(#arrLon)"/>`;
       h += lbl('경도 ' + fmtLon(L), (xs0 + x)/2, y0 + (pos.lat >= 0 ? 22 : -12), '--cool');
       // 위도: 적도에서 잰 각
       if (pos.lat !== 0){
-        h += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y}" style="stroke:var(--warm);stroke-width:6;stroke-linecap:round;opacity:.85"/>`;
+        if (Math.abs(y - y0) > 14) h += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y}" style="stroke:var(--warm);stroke-width:5;opacity:.9" marker-end="url(#arrLat)"/>`;
         h += lbl('위도 ' + fmtLat(pos.lat), x + (L > 330 ? -10 : 10), (y0 + y)/2 + 4, '--warm', L > 330 ? 'end' : 'start');
       }
       h += `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--accent);stroke:var(--ink);stroke-width:2.5"/>`;
