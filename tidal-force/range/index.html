@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>④ 만조·간조·조차 · Easy Magma</title>
+<link rel="stylesheet" href="../common.css?v=5">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  .wrap{max-width:1280px}
+  .controls{display:grid;grid-template-columns:1.2fr 1.6fr;gap:18px;align-items:end;margin-bottom:16px}
+  .big{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .big > *{min-width:0}
+  #view{position:relative;width:100%;height:min(62vh,540px);min-height:360px;border-radius:10px;overflow:hidden;border:2px solid var(--ink);
+        background:radial-gradient(circle at 50% 40%,#1b2a44,#0b1220);touch-action:none;cursor:grab}
+  #view canvas{display:block;width:100%;height:100%}
+  .hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#c9d4e6;opacity:.85;pointer-events:none}
+  .legend3d{position:absolute;right:10px;top:8px;font-size:12px;color:#dbe4f0;text-align:right;line-height:1.7;pointer-events:none}
+  .ramp{display:inline-block;width:90px;height:10px;border-radius:5px;vertical-align:middle;background:linear-gradient(90deg,#1d4e9e,#5fb3ff,#ffd166,#ff4d2e)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:4px;vertical-align:middle}
+  #gbox{position:relative;width:100%;height:min(62vh,540px);min-height:360px;border-radius:10px;overflow:hidden;border:2px solid var(--ink);background:#f6f1e3}
+  #graph{display:block;width:100%;height:100%}
+  .sum{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .sum div{flex:1;min-width:120px;background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+  .sum b{display:block;font-family:ui-monospace,monospace;font-size:15px;white-space:pre-line}
+  .predict{border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:16px;background:var(--accent-soft)}
+  .predict b.t{color:var(--accent)}
+  .terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:6px}
+  .term{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:14px}
+  .term b{display:block;font-size:16px;color:var(--accent)}
+  .seg{display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+  @media (max-width:980px){ .controls,.big{grid-template-columns:1fr} #view,#gbox{height:420px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../">← 시뮬레이터 목록</a>
+  <nav class="steps">
+    <a href="../basics/">⓪ 기초 개념</a>
+    <a href="../gravity/">① 달의 인력</a>
+    <a href="../centrifugal/">② 원심력</a>
+    <a href="../">③ 기조력 (합력)</a>
+    <a class="on" href="../range/">④ 만조·간조·조차</a>
+    <a href="../tilt/">⑤ 조차가 다른 까닭</a>
+    <a href="../../tide/">⑥ 위도별 조석 형태</a>
+  </nav>
+  <h1>④ 만조·간조·조차 (예측: 자전축이 기울지 않았다면?)</h1>
+  <p class="sub">가장 간단한 경우부터 생각해 봅시다. 지구 자전축이 기울지 않아 적도면과 달의 공전 궤도면이 일치한다면, 한자리에 서 있는 관측자의 해수면은 하루 동안 어떻게 변할까요?</p>
+
+  <div class="predict">
+    <b class="t">🤔 먼저 예측해 보기</b> — 재생하기 전에 짝과 이야기해 보세요.
+    <ol style="padding-left:20px;margin-top:6px">
+      <li>우리나라(35°N) 관측자는 하루(약 24시간 50분)에 만조를 몇 번 겪을까?</li>
+      <li>두 번의 조차는 같을까, 다를까?</li>
+    </ol>
+  </div>
+
+  <div class="card controls">
+    <div class="ctl">
+      <label>관측자의 위도 <b id="latV">35°N</b></label>
+      <input type="range" id="lat" min="0" max="80" step="1" value="35">
+      <div class="ticks"><span>0° 적도</span><span>40°</span><span>80°N</span></div>
+      <div class="row" style="margin-top:8px">
+        <button data-p="0">적도 0°</button>
+        <button data-p="35">35°N 우리나라</button>
+        <button data-p="60">60°N</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>시각 (달의 남중 후) <b id="timeV">00:00</b></label>
+      <input type="range" id="time" min="0" max="24.8333" step="0.01" value="0">
+      <div class="ticks"><span>00:00</span><span>12:25</span><span>24:50</span></div>
+      <div class="row" style="margin-top:8px">
+        <button class="primary" id="play">▶ 하루 재생</button>
+        <button id="reset">처음으로</button>
+        <label class="check" style="margin:0 0 0 6px"><input type="checkbox" id="preview"> 앞으로의 곡선 미리 보기</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="big">
+    <div class="card">
+      <h2>🌍 3D 모형 (자전축 기울기 0°로 가정)</h2>
+      <div id="view">
+        <div class="legend3d">바닷물 높이 <span class="ramp"></span><br>관측자 <span class="dot" style="background:#ff6b6b"></span> · 달 <span class="dot" style="background:#ffe08a"></span></div>
+        <div class="hint">드래그해서 돌려보기 · 굵은 고리 = 관측자가 하루 동안 지나가는 길</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📈 관측자의 해수면 높이 변화</h2>
+      <div id="gbox"><canvas id="graph"></canvas></div>
+      <div class="sum">
+        <div>만조<b id="nHigh">-</b></div>
+        <div>간조<b id="nLow">-</b></div>
+        <div style="flex:2">조차<b id="rList">-</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card explain">
+    <h2>용어 정리 (눌러서 확인)</h2>
+    <div class="terms">
+      <div class="term"><b>만조</b>조석으로 해수면이 가장 높아졌을 때</div>
+      <div class="term"><b>간조</b>조석으로 해수면이 가장 낮아졌을 때</div>
+      <div class="term"><b>조차</b>연속되는 만조와 간조 사이에 나타나는 해수면의 높이 차</div>
+      <div class="term"><b>조석 주기</b>만조에서 다음 만조까지(또는 간조에서 다음 간조까지)의 시간. 약 12시간 25분</div>
+    </div>
+    <details class="reveal" style="margin-top:14px"><summary>💡 예측 확인: 눌러서 정리 보기</summary>
+      <ul>
+        <li>관측자는 하루 동안 부푼 곳(달 쪽, 달 반대쪽) <b>두 곳</b>을 지나므로 만조 2번, 간조 2번이 나타납니다.</li>
+        <li>자전축이 기울지 않았다면 두 부푼 곳이 적도에 대해 대칭이라, 관측자가 두 곳을 <b>같은 높이로</b> 지나갑니다 → 두 번의 조차가 같습니다.</li>
+        <li>위도가 높을수록 부푼 곳의 가장자리를 지나므로 조차가 작아집니다.</li>
+        <li>그런데 실제 지구는 자전축이 기울어져 있습니다. 그러면 무엇이 달라질까요? → ⑤</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="next"><a href="../">← ③ 기조력</a><a href="../tilt/">⑤ 조차가 다른 까닭으로 →</a></div>
+</div>
+
+<script src="../common.js?v=5"></script>
+<script>
+'use strict';
+/* 평형조석: ζ = A(cos²θ − 1/3),  cosθ = cosφ cosH  (자전축 기울기 0°: 달이 적도면 위) */
+const T = 24 + 50/60, A = 53.5, D2R = Math.PI/180;
+const HMIN = -A/3, HMAX = A*2/3;
+const S = { lat:35, t:0, playing:false, preview:false };
+let cache = null;
+const height = t => { const c = Math.cos(S.lat*D2R)*Math.cos(2*Math.PI*t/T); return A*(c*c - 1/3); };
+const fmtT = t => { let m = Math.round(t*60); const h = Math.floor(m/60); m = m%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
+const fmtH = h => `${h >= 0 ? '+' : ''}${h.toFixed(1)} cm`;
+const NUM = ['❶','❷','❸'];
+
+function compute(){
+  const n = 1000, xs = [], ys = [];
+  for (let i = 0; i <= n; i++){ const t = T*i/n; xs.push(t); ys.push(height(t)); }
+  // 극값 (0과 T 끝점 포함: 0시는 달의 남중 = 만조)
+  const ev = [];
+  for (let i = 0; i <= n; i++){
+    const a = ys[Math.max(0, i-1)], b = ys[i], c = ys[Math.min(n, i+1)];
+    const isMax = (i === 0 || b > a) && (i === n || b >= c) && !(i === 0 && b < c) && !(i === n && b < a);
+    const isMin = (i === 0 || b < a) && (i === n || b <= c) && !(i === 0 && b > c) && !(i === n && b > a);
+    if (isMax) ev.push({ t:xs[i], h:b, k:'H' });
+    else if (isMin) ev.push({ t:xs[i], h:b, k:'L' });
+  }
+  const mean = ys.reduce((s, v) => s + v, 0)/ys.length;
+  const range = Math.max(...ys) - Math.min(...ys);
+  cache = { xs, ys, ev, mean, range };
+}
+
+/* ===== 3D ===== */
+const RAMP = [[0,[29,78,158]],[0.4,[95,179,255]],[0.7,[255,209,102]],[1,[255,77,46]]];
+function rampColor(u){
+  u = Math.max(0, Math.min(1, u));
+  for (let i = 1; i < RAMP.length; i++){
+    const [u1, c1] = RAMP[i-1], [u2, c2] = RAMP[i];
+    if (u <= u2){ const k = (u - u1)/(u2 - u1); return c1.map((v, j) => (v + (c2[j] - v)*k)/255); }
+  }
+  return [1, 0.3, 0.18];
+}
+const view = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+view.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+camera.position.set(0, 0, 7.3);
+const world = new THREE.Group(); world.rotation.set(0.42, -0.5, 0); scene.add(world);
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const sun = new THREE.DirectionalLight(0xffffff, 0.55); sun.position.set(3, 4, 5); scene.add(sun);
+const earthGroup = new THREE.Group(); world.add(earthGroup);
+earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.94, 64, 48), new THREE.MeshPhongMaterial({ color:0x8c7a5b, shininess:5 })));
+const gridMat = new THREE.LineBasicMaterial({ color:0x3b3226, transparent:true, opacity:0.6 });
+for (let lo = 0; lo < 180; lo += 30){
+  const pts = [];
+  for (let i = 0; i <= 128; i++){ const a = 2*Math.PI*i/128; pts.push(new THREE.Vector3(0.945*Math.cos(a)*Math.cos(lo*D2R), 0.945*Math.sin(a), 0.945*Math.cos(a)*Math.sin(lo*D2R))); }
+  earthGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
+}
+// 적도 (지구와 함께 돌지 않아도 같은 모양)
+{ const pts = []; for (let i = 0; i <= 128; i++){ const a = 2*Math.PI*i/128; pts.push(new THREE.Vector3(1.01*Math.cos(a), 0, 1.01*Math.sin(a))); }
+  world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color:0xfff3bf, dashSize:0.05, gapSize:0.04 }))); world.children[world.children.length-1].computeLineDistances(); }
+world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-1.55,0), new THREE.Vector3(0,1.55,0)]),
+  new THREE.LineBasicMaterial({ color:0xdee2e6, transparent:true, opacity:0.75 })));
+function makeLabel(text, color, size = 0.28, bg = null){
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+  const g = cv.getContext('2d');
+  if (bg){ g.fillStyle = bg; g.beginPath(); g.arc(64, 64, 58, 0, 2*Math.PI); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 8; g.stroke(); }
+  g.fillStyle = color; g.font = 'bold 64px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 64, 68);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, depthTest:false }));
+  sp.scale.set(size, size, 1); sp.renderOrder = 10; return sp;
+}
+const nL = makeLabel('N', '#dee2e6'); nL.position.set(0, 1.72, 0); world.add(nL);
+// 바닷물 (달 방향 = +x, 적도면 위)
+const K = 0.22, RW = 0.955, moonDir = new THREE.Vector3(1, 0, 0);
+const waterR = c => RW*(1 + K*c*c);
+{
+  const geo = new THREE.SphereGeometry(1, 96, 64), p = geo.attributes.position.array, col = new Float32Array(p.length);
+  for (let i = 0; i < p.length; i += 3){
+    const c = p[i], r = waterR(c); p[i] *= r; p[i+1] *= r; p[i+2] *= r;
+    const [a, b, d] = rampColor(c*c); col[i] = a; col[i+1] = b; col[i+2] = d;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+  world.add(new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ vertexColors:true, transparent:true, opacity:0.62, shininess:40, depthWrite:false })));
+}
+const moon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 32, 24), new THREE.MeshBasicMaterial({ color:0xffe08a }));
+moon.position.set(1.8, 0, 0); world.add(moon);
+const mL = makeLabel('달', '#ffe08a', 0.3); mL.position.set(1.8, 0.28, 0); world.add(mL);
+{ const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.6,0,0), new THREE.Vector3(1.66,0,0)]),
+    new THREE.LineDashedMaterial({ color:0xffe08a, dashSize:0.08, gapSize:0.06, transparent:true, opacity:0.8 })); l.computeLineDistances(); world.add(l); }
+
+const obsDir = H => { const p = S.lat*D2R; return new THREE.Vector3(Math.cos(p)*Math.cos(H), Math.sin(p), -Math.cos(p)*Math.sin(H)); };
+let ring = null; const markers = new THREE.Group(); world.add(markers);
+function updateRing(){
+  if (ring){ world.remove(ring); ring.geometry.dispose(); }
+  const pts = [];
+  for (let i = 0; i < 240; i++){ const d = obsDir(2*Math.PI*i/240); pts.push(d.multiplyScalar(waterR(d.x) + 0.012)); }
+  const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 360, 0.024, 10, true);
+  const p = geo.attributes.position.array, cols = new Float32Array(p.length);
+  for (let i = 0; i < p.length; i += 3){ const v = new THREE.Vector3(p[i], p[i+1], p[i+2]).normalize(); const [r, g, b] = rampColor(v.x*v.x); cols[i] = r; cols[i+1] = g; cols[i+2] = b; }
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  ring = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors:true })); world.add(ring);
+  while (markers.children.length) markers.remove(markers.children[0]);
+  let hi = 0;
+  cache.ev.filter(e => e.t < T - 0.01).forEach(e => {
+    const d = obsDir(2*Math.PI*e.t/T), r = waterR(d.x);
+    const m = e.k === 'H' ? makeLabel(NUM[hi++] || '•', '#fff', 0.24, '#e03131') : makeLabel('간', '#fff', 0.17, '#1971c2');
+    m.position.copy(d.multiplyScalar(r + (e.k === 'H' ? 0.16 : 0.12))); markers.add(m);
+  });
+}
+function makePerson(){
+  const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color:0xff4d4d });
+  const part = (geo, x, y, z, rz = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.z = rz; g.add(o); };
+  const limb = (len, r) => new THREE.CylinderGeometry(r, r, len, 10);
+  part(limb(0.11, 0.011), -0.018, 0.055, 0, 0.12); part(limb(0.11, 0.011), 0.018, 0.055, 0, -0.12);
+  part(new THREE.CylinderGeometry(0.026, 0.022, 0.1, 12), 0, 0.16, 0);
+  part(limb(0.09, 0.009), -0.042, 0.17, 0, 0.45); part(limb(0.09, 0.009), 0.042, 0.17, 0, -0.45);
+  part(new THREE.SphereGeometry(0.027, 16, 12), 0, 0.24, 0);
+  g.scale.setScalar(1.9); return g;
+}
+const person = makePerson(); world.add(person);
+const level = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.01, 8, 40), new THREE.MeshBasicMaterial({ color:0xffffff })); world.add(level);
+const UP = new THREE.Vector3(0, 1, 0);
+function updatePerson(){
+  const H = 2*Math.PI*S.t/T; earthGroup.rotation.y = H;
+  const dir = obsDir(H), r = waterR(dir.x), q = new THREE.Quaternion().setFromUnitVectors(UP, dir);
+  person.quaternion.copy(q); person.position.copy(dir).multiplyScalar(0.94);
+  level.quaternion.copy(q).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), Math.PI/2));
+  level.position.copy(dir).multiplyScalar(r);
+}
+let drag = null;
+view.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, rx:world.rotation.x, ry:world.rotation.y }; view.setPointerCapture(e.pointerId); });
+view.addEventListener('pointermove', e => { if (!drag) return; world.rotation.y = drag.ry + (e.clientX - drag.x)*0.01; world.rotation.x = Math.max(-1.3, Math.min(1.3, drag.rx + (e.clientY - drag.y)*0.01)); });
+view.addEventListener('pointerup', () => drag = null); view.addEventListener('pointercancel', () => drag = null);
+function resize3D(){ const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize3D).observe(view);
+
+/* ===== 교과서식 정의 그래프 ===== */
+const gcv = document.getElementById('graph'), g = gcv.getContext('2d');
+let W = 0, Hh = 0;
+function fitG(){ const dpr = Math.min(devicePixelRatio || 1, 2); W = gcv.clientWidth; Hh = gcv.clientHeight; gcv.width = W*dpr; gcv.height = Hh*dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); drawGraph(); }
+new ResizeObserver(fitG).observe(gcv);
+const FONT = '"SUIT Variable","Noto Sans KR",sans-serif';
+function arrow2(x, y1, y2, col){
+  g.save(); g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(x, y1); g.lineTo(x, y2); g.stroke();
+  const head = (y, dir) => { g.beginPath(); g.moveTo(x, y); g.lineTo(x - 5, y - dir*9); g.lineTo(x + 5, y - dir*9); g.closePath(); g.fill(); };
+  const dir = y2 > y1 ? 1 : -1; head(y2, dir); head(y1, -dir);
+  g.restore();
+}
+function label(text, x, y, col, size = 16, align = 'center', bg = true){
+  g.save(); g.font = `bold ${size}px ${FONT}`; g.textAlign = align; g.textBaseline = 'middle';
+  if (bg){ const w = g.measureText(text).width + 10, x0 = align === 'center' ? x - w/2 : align === 'left' ? x - 5 : x - w + 5;
+    g.fillStyle = 'rgba(246,241,227,.92)'; g.fillRect(x0, y - size*0.7, w, size*1.4); }
+  g.fillStyle = col; g.fillText(text, x, y); g.restore();
+}
+function drawGraph(){
+  if (!cache || !W) return;
+  const L = 74, R = W - 18, Tp = 34, B = Hh - 46;
+  const X = t => L + (t/T)*(R - L), Y = v => B - (v - (HMIN - 3))/((HMAX + 4) - (HMIN - 3))*(B - Tp);
+  g.clearRect(0, 0, W, Hh);
+  // 좌측 축 설명
+  g.fillStyle = '#e9e1cc'; g.fillRect(0, 0, L - 8, Hh);
+  g.fillStyle = '#1f1a17'; g.font = `bold 15px ${FONT}`; g.textAlign = 'center';
+  g.fillText('높다', (L - 8)/2, Tp + 6); g.fillText('↑', (L - 8)/2, Tp + 30);
+  const my = Y(cache.mean);
+  g.font = `bold 13px ${FONT}`; g.fillText('평균', (L - 8)/2, my - 2); g.fillText('해수면', (L - 8)/2, my + 14);
+  g.font = `bold 15px ${FONT}`; g.fillText('↓', (L - 8)/2, B - 26); g.fillText('낮다', (L - 8)/2, B);
+  // 축
+  g.strokeStyle = '#1f1a17'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(L, Tp - 10); g.lineTo(L, B); g.lineTo(R, B); g.stroke();
+  // 평균 해수면
+  g.strokeStyle = '#7a6f62'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(L, my); g.lineTo(R, my); g.stroke();
+  // 시각 눈금
+  g.fillStyle = '#1f1a17'; g.font = `14px ${FONT}`; g.textAlign = 'center';
+  [0, T/4, T/2, 3*T/4, T].forEach(t => { g.beginPath(); g.moveTo(X(t), B); g.lineTo(X(t), B + 6); g.stroke(); g.fillText(fmtT(t), X(t), B + 22); });
+  g.textAlign = 'right'; g.fillText('시각 (달의 남중 후)', R, B + 40);
+  // 미리 보기 곡선
+  if (S.preview){
+    g.save(); g.strokeStyle = '#b8ad9c'; g.lineWidth = 2; g.setLineDash([6, 6]); g.beginPath();
+    cache.xs.forEach((t, i) => i ? g.lineTo(X(t), Y(cache.ys[i])) : g.moveTo(X(t), Y(cache.ys[i]))); g.stroke(); g.restore();
+  }
+  // 지금까지의 곡선
+  g.save(); g.strokeStyle = '#ef4b2a'; g.lineWidth = 4; g.lineJoin = 'round'; g.beginPath();
+  let started = false;
+  for (let i = 0; i < cache.xs.length; i++){
+    if (cache.xs[i] > S.t) break;
+    const x = X(cache.xs[i]), y = Y(cache.ys[i]); started ? g.lineTo(x, y) : g.moveTo(x, y); started = true;
+  }
+  g.lineTo(X(S.t), Y(height(S.t))); g.stroke(); g.restore();
+  // 지나간 만조·간조
+  const passed = cache.ev.filter(e => e.t <= S.t + 1e-6);
+  if (cache.range > 0.5){
+    // 조차: 연속되는 만조와 간조
+    for (let i = 1; i < passed.length; i++){
+      const a = passed[i-1], b = passed[i], xm = (X(a.t) + X(b.t))/2;
+      g.save(); g.strokeStyle = '#1f1a17'; g.lineWidth = 1.2; g.setLineDash([4, 4]);
+      g.beginPath(); g.moveTo(X(a.t), Y(a.h)); g.lineTo(xm + 18, Y(a.h)); g.stroke();
+      g.beginPath(); g.moveTo(xm - 18, Y(b.h)); g.lineTo(X(b.t), Y(b.h)); g.stroke(); g.restore();
+      arrow2(xm, Y(a.h), Y(b.h), '#1f1a17');
+      label(`조차 ${Math.abs(a.h - b.h).toFixed(1)}cm`, xm, (Y(a.h) + Y(b.h))/2, '#1f1a17', 14);
+    }
+    let hi = 0;
+    passed.forEach(e => {
+      const x = X(e.t), y = Y(e.h);
+      g.save(); g.strokeStyle = '#1f1a17'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 30, y); g.lineTo(x + 30, y); g.stroke(); g.restore();
+      if (e.k === 'H'){ label(`만조${e.t < T - 0.01 ? NUM[hi++] : ''}`, Math.min(x, R - 26), y - 22, '#c92a2a', 17); }
+      else label('간조', x, y + 22, '#1864ab', 17);
+      TF.dot(g, x, y, 5, e.k === 'H' ? '#c92a2a' : '#1864ab');
+    });
+    // 조석 주기
+    const highs = passed.filter(e => e.k === 'H');
+    if (highs.length >= 2){
+      const x1 = X(highs[0].t), x2 = X(highs[1].t), y = Tp - 8;
+      g.save(); g.strokeStyle = '#2b8a3e'; g.fillStyle = '#2b8a3e'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(x1, y + 8); g.lineTo(x1, y); g.lineTo(x2, y); g.lineTo(x2, y + 8); g.stroke(); g.restore();
+      label(`조석 주기 약 ${fmtT(highs[1].t - highs[0].t).replace(':', '시간 ')}분`, (x1 + x2)/2, y, '#2b8a3e', 14);
+    }
+  } else label('해수면 변화가 거의 없어요', (L + R)/2, Tp + 40, '#1f1a17', 16);
+  // 현재 위치
+  TF.dot(g, X(S.t), Y(height(S.t)), 7, '#1f1a17'); TF.dot(g, X(S.t), Y(height(S.t)), 4, '#ffd43b');
+  // 요약
+  const H_ = passed.filter(e => e.k === 'H' && e.t < T - 0.01).length, L_ = passed.filter(e => e.k === 'L').length;
+  document.getElementById('nHigh').textContent = `${H_}번`;
+  document.getElementById('nLow').textContent = `${L_}번`;
+  const rs = []; for (let i = 1; i < passed.length; i++) rs.push(Math.abs(passed[i].h - passed[i-1].h).toFixed(1) + ' cm');
+  document.getElementById('rList').textContent = rs.length && cache.range > 0.5 ? rs.join(' · ') : '-';
+}
+
+/* ===== 조작 ===== */
+const $ = id => document.getElementById(id);
+function setLat(v){ S.lat = v; $('lat').value = v; $('latV').textContent = `${v}°N`; compute(); updateRing(); updatePerson(); drawGraph(); }
+$('lat').addEventListener('input', e => setLat(+e.target.value));
+document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => setLat(+b.dataset.p)));
+$('time').max = T;
+$('time').addEventListener('input', e => { S.t = +e.target.value >= T - 0.01 ? T : +e.target.value; $('timeV').textContent = fmtT(S.t); updatePerson(); drawGraph(); });
+$('preview').addEventListener('change', e => { S.preview = e.target.checked; drawGraph(); });
+$('play').addEventListener('click', () => { if (!S.playing && S.t >= T - 0.05) S.t = 0; S.playing = !S.playing; $('play').textContent = S.playing ? '⏸ 멈춤' : '▶ 하루 재생'; last = null; });
+$('reset').addEventListener('click', () => { S.t = 0; $('time').value = 0; $('timeV').textContent = fmtT(0); updatePerson(); drawGraph(); });
+const PLAY_SECONDS = 24; let last = null;
+function loop(ts){
+  if (S.playing){
+    if (last !== null){
+      S.t += (ts - last)/1000*T/PLAY_SECONDS;
+      if (S.t >= T){ S.t = T; S.playing = false; $('play').textContent = '▶ 하루 재생'; }
+      $('time').value = S.t; $('timeV').textContent = fmtT(S.t); updatePerson(); drawGraph();
+    }
+    last = ts;
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+compute(); resize3D(); updateRing(); updatePerson(); fitG(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
