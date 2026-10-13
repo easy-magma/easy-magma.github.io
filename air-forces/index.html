@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대기를 움직이는 힘 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Easy Magma 공통 테마(theme.css)와 같은 토큰 · 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f; --accent-ink:#fff;
+  --p-bg:#ffffff;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --accent-ink:#16120f; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{display:flex;align-items:flex-end;gap:16px;padding:8px 24px 4px;flex-wrap:wrap;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tab{font:700 17px var(--f-body);padding:8px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg)}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.card:has(> canvas){background:var(--p-bg);padding:8px}
+.btn{font:700 16px var(--f-body);padding:8px 12px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{display:grid;grid-template-columns:1fr 370px;gap:16px;padding:16px 24px;max-width:1520px;margin:0 auto}
+@media (max-width:960px){main{grid-template-columns:1fr;padding:12px 16px}}
+.side{display:flex;flex-direction:column;gap:12px}
+.side h2{font-size:17px;margin:0 0 8px;color:var(--sub);font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:14px;color:var(--sub);line-height:1.55;margin:8px 0 0}
+.hide{display:none!important}
+canvas{width:100%;height:auto;display:block;border-radius:8px}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.lbl{display:flex;justify-content:space-between;font-size:17px;font-weight:700;margin-top:6px}
+.lbl b{font-family:'JetBrains Mono',monospace}
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:17px}
+.stat b{font-size:22px}
+.formula{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;padding:8px 10px;border:2px dashed var(--line);border-radius:10px;margin:6px 0;text-align:center}
+.cap{font-size:20px;font-weight:800;line-height:1.4;min-height:56px}
+.meme{background:#fff3bf;color:#1f1a17;border:2px solid #1f1a17;border-radius:12px;padding:8px 12px;font-weight:800;font-size:15px;box-shadow:3px 3px 0 #1f1a17}
+</style>
+</head>
+<body>
+<a class="back" href="../">← 시뮬레이터 목록</a>
+<header>
+  <div><h1>대기를 움직이는 힘</h1><p class="subt">지구시스템과학 · 04. 대기를 움직이는 힘 (교과서 p.105–111) — 공기에 작용하는 힘을 하나씩 켜 보고 바꿔 보자.</p></div>
+  <div class="tabs">
+    <button class="tab on" data-mode="A">① 정역학 평형</button>
+    <button class="tab" data-mode="B">② 기압 경도력</button>
+    <button class="tab" data-mode="C">③ 전향력</button>
+    <button class="tab" data-mode="D">④ 마찰력</button>
+  </div>
+</header>
+
+<!-- ===== A. 정역학 평형 ===== -->
+<main id="pageA">
+  <div class="card"><canvas id="cvA" width="1200" height="720"></canvas></div>
+  <div class="side">
+    <div class="card">
+      <h2>공기 덩어리의 높이</h2>
+      <div class="lbl"><span>높이</span><b id="zVal">2.0 km</b></div>
+      <input type="range" id="zA" min="0" max="12" step="0.1" value="2">
+      <div class="stat"><span>그 높이의 기압</span><b id="pVal">-</b></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="gOff">중력 끄기</button>
+        <button class="btn" id="resetA">처음 상태</button>
+      </div>
+      <p class="note">중력을 끄면 위쪽으로 작용하는 기압 경도력만 남는다. 공기 덩어리는 어떻게 될까?</p>
+    </div>
+    <div class="card">
+      <h2>정역학 방정식 계산기 &nbsp;ΔP = −ρgΔZ</h2>
+      <div class="lbl"><span>공기의 밀도 ρ</span><b id="rhoV">1.225 kg/m³</b></div>
+      <input type="range" id="rho" min="0.3" max="1.3" step="0.005" value="1.225">
+      <div class="lbl"><span>높이 차 ΔZ</span><b id="dzV">100 m</b></div>
+      <input type="range" id="dz" min="10" max="1000" step="10" value="100">
+      <div class="formula" id="dpOut">-</div>
+      <p class="note">확인 01: ρ = 1.225 kg/m³, g = 9.80665 m/s², ΔZ = 100 m</p>
+    </div>
+  </div>
+</main>
+
+<!-- ===== B. 기압 경도력 ===== -->
+<main id="pageB" class="hide">
+  <div class="card"><canvas id="cvB" width="1200" height="720"></canvas></div>
+  <div class="side">
+    <div class="card">
+      <div class="row">
+        <button class="btn on" data-bv="iso">등압선과 바람</button>
+        <button class="btn" data-bv="vert">고기압·저기압의 연직 운동</button>
+      </div>
+    </div>
+    <div class="card" id="isoCtl">
+      <h2>수평 기압 경도력 &nbsp;Pʜ = (1/ρ)(ΔP/d)</h2>
+      <div class="lbl"><span>등압선 간격 d</span><b id="dV">200 km</b></div>
+      <input type="range" id="dIso" min="50" max="400" step="10" value="200">
+      <div class="lbl"><span>공기의 밀도 ρ</span><b id="rhoBV">1.2 kg/m³</b></div>
+      <input type="range" id="rhoB" min="0.4" max="1.3" step="0.05" value="1.2">
+      <div class="stat"><span>기압 차 ΔP</span><b>4 hPa</b></div>
+      <div class="stat"><span>기압 경도력 Pʜ</span><b id="phV">-</b></div>
+      <p class="note">등압선 간격을 좁혀 보자. 공기 알갱이(바람)는 어떻게 달라질까?</p>
+      <div class="meme" id="memeB" style="margin-top:8px">등압선 빽빽 = 바람 난리자베스 🌪️</div>
+    </div>
+    <div class="card hide" id="vertCtl">
+      <h2>작은 탐구: 연직 운동의 원인</h2>
+      <div class="cap" id="vCap">지상 H와 L 부근에서 공기는 어느 쪽으로 움직일까? 예상해 본 뒤 단계를 넘겨 보자.</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="vPrev">◀ 이전</button>
+        <button class="btn primary" id="vNext">다음 ▶</button>
+        <button class="btn" id="vAll">전체 보기</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== C. 전향력 ===== -->
+<main id="pageC" class="hide">
+  <div class="card"><canvas id="cvC" width="1200" height="720"></canvas></div>
+  <div class="side">
+    <div class="card">
+      <div class="row">
+        <button class="btn on" data-cv="disk">회전원판 실험</button>
+        <button class="btn" data-cv="lat">위도와 전향력</button>
+      </div>
+    </div>
+    <div id="diskCtl" class="side">
+      <div class="card">
+        <h2>회전판</h2>
+        <div class="row">
+          <button class="btn" data-rot="0">회전 안 함</button>
+          <button class="btn on" data-rot="1">시계 반대 방향</button>
+          <button class="btn" data-rot="-1">시계 방향</button>
+        </div>
+        <div class="lbl"><span>회전 속도</span><b id="wV">보통</b></div>
+        <input type="range" id="wC" min="0.2" max="1.4" step="0.05" value="0.6">
+      </div>
+      <div class="card">
+        <h2>보는 위치</h2>
+        <div class="row">
+          <button class="btn on" data-view="out">밖에서 보기</button>
+          <button class="btn" data-view="in">회전판 위에서 보기</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="fire">쇠구슬 굴리기 ▶</button>
+          <button class="btn" id="clr">새 각도기</button>
+        </div>
+        <p class="note" id="diskNote">밖에서 보면 쇠구슬은 곧게 나아가지만, 회전판에 찍힌 궤적은 휘어진다.</p>
+      </div>
+    </div>
+    <div id="latCtl" class="side hide">
+      <div class="card">
+        <h2>전향력 &nbsp;C = 2vΩ sinθ</h2>
+        <div class="lbl"><span>위도 θ</span><b id="latV">37°N</b></div>
+        <input type="range" id="lat" min="-90" max="90" step="1" value="37">
+        <div class="lbl"><span>풍속 v</span><b id="vV">20 m/s</b></div>
+        <input type="range" id="vel" min="0" max="50" step="1" value="20">
+        <div class="formula" id="cOut">-</div>
+        <div class="stat"><span>휘는 방향</span><b id="cDir">-</b></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" data-lp="90">북극</button><button class="btn" data-lp="37">서울</button>
+          <button class="btn" data-lp="0">적도</button><button class="btn" data-lp="-34">시드니</button>
+        </div>
+        <p class="note">Ω = 7.29 × 10⁻⁵ rad/s (지구 자전 각속도)</p>
+      </div>
+      <div class="meme">북반구 = 오른쪽만 습득하는 몬스터 👾</div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== D. 마찰력 ===== -->
+<main id="pageD" class="hide">
+  <div class="card"><canvas id="cvD" width="1200" height="720"></canvas></div>
+  <div class="side">
+    <div class="card">
+      <h2>지표면의 종류</h2>
+      <div class="row">
+        <button class="btn" data-sf="sea">바다</button>
+        <button class="btn on" data-sf="land">평지</button>
+        <button class="btn" data-sf="city">도시·산지</button>
+      </div>
+      <div class="stat"><span>마찰 계수 k</span><b id="kV">-</b></div>
+      <div class="stat"><span>대기 경계층 높이</span><b id="hV">-</b></div>
+    </div>
+    <div class="card">
+      <h2>높이를 골라 힘 비교 &nbsp;Fr = kv</h2>
+      <div class="lbl"><span>높이</span><b id="zdV">0.3 km</b></div>
+      <input type="range" id="zD" min="0.05" max="2" step="0.05" value="0.3">
+      <div class="stat"><span>풍속 v</span><b id="vdV">-</b></div>
+      <div class="stat"><span>마찰력</span><b id="frV">-</b></div>
+      <p class="note">마찰력은 바람의 반대 방향으로 작용하고, 지표가 거칠수록·풍속이 클수록 크다. 대기 경계층 위(자유 대기)에서는 마찰력을 받지 않는다.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const FONT="'SUIT Variable','SUIT','Noto Sans KR',sans-serif";
+function ctxOf(id){const c=$(id).getContext('2d');return c;}
+function arrow(c,x1,y1,x2,y2,col,w=6,head=18){
+  const a=Math.atan2(y2-y1,x2-x1),L=Math.hypot(x2-x1,y2-y1); if(L<2)return;
+  const h=Math.min(head,L*0.6);
+  c.strokeStyle=col;c.fillStyle=col;c.lineWidth=w;c.lineCap='round';
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x2-Math.cos(a)*h*0.8,y2-Math.sin(a)*h*0.8);c.stroke();
+  c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45));c.lineTo(x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45));c.closePath();c.fill();
+}
+function text(c,s,x,y,{size=22,col='#1d2330',w=700,align='left',base='alphabetic'}={}){c.font=`${w} ${size}px ${FONT}`;c.fillStyle=col;c.textAlign=align;c.textBaseline=base;c.fillText(s,x,y);}
+function pill(c,s,x,y,col,size=20){c.font=`800 ${size}px ${FONT}`;const w=c.measureText(s).width+20;c.fillStyle='#fff';c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.roundRect(x-w/2,y-size*0.85,w,size*1.6,10);c.fill();c.stroke();text(c,s,x,y+size*0.15,{size,col,w:800,align:'center',base:'middle'});}
+const COL={pgf:'#0c8599',grav:'#1c4fd6',cor:'#e03131',fr:'#f08c00',wind:'#1d2330',sub:'#5b6475',grid:'#e9ecf2'};
+let mode='A';
+
+/* ================= A. 정역학 평형 ================= */
+const A={z:2,gOff:false,vz:0,dzOff:0};
+const H=8.0; // 규모 높이(km)
+const Pz=z=>1013.25*Math.exp(-z/H);
+const dots=[];for(let i=0;i<900;i++){const z=-H*Math.log(1-Math.random()*(1-Math.exp(-14/H)));if(z<14)dots.push([Math.random(),z]);}
+function drawA(){
+  const c=ctxOf('cvA');c.clearRect(0,0,1200,720);
+  // 왼쪽: 공기 기둥
+  const X0=70,X1=520,Y0=660,Y1=50,zmax=14,ky=(Y0-Y1)/zmax;
+  const g=c.createLinearGradient(0,Y1,0,Y0);g.addColorStop(0,'#eef6ff');g.addColorStop(1,'#a5d8ff');
+  c.fillStyle=g;c.fillRect(X0,Y1,X1-X0,Y0-Y1);
+  c.fillStyle='rgba(28,79,214,.55)';dots.forEach(([u,z])=>{c.beginPath();c.arc(X0+8+u*(X1-X0-16),Y0-z*ky,3,0,7);c.fill();});
+  c.fillStyle='#8fce6b';c.fillRect(X0-20,Y0,X1-X0+40,30);text(c,'지표면',X0,Y0+24,{size:18,col:'#2b5a16'});
+  for(let z=0;z<=14;z+=2){c.strokeStyle=COL.grid;c.lineWidth=1;text(c,z+' km',X0-10,Y0-z*ky+7,{size:16,col:COL.sub,align:'right'});}
+  text(c,'공기 기둥: 위로 갈수록 공기 알갱이가 적다',X0,Y1-14,{size:20});
+  // 공기 덩어리
+  const z=A.z+A.dzOff, yc=Y0-z*ky, th=56, bx=X0+120,bw=210;
+  if(yc>Y1-60){
+    c.fillStyle='rgba(255,255,255,.75)';c.strokeStyle='#1d2330';c.lineWidth=3;c.beginPath();c.roundRect(bx,yc-th/2,bw,th,8);c.fill();c.stroke();
+    text(c,'공기 덩어리',bx+bw/2,yc+7,{size:18,align:'center'});
+    // 아랫면 기압(크다)과 윗면 기압(작다)
+    const pTop=Pz(z+0.4),pBot=Pz(Math.max(0,z-0.4));
+    text(c,`윗면 ${pTop.toFixed(0)} hPa`,bx+bw+14,yc-th/2+6,{size:17,col:COL.sub});
+    text(c,`아랫면 ${pBot.toFixed(0)} hPa`,bx+bw+14,yc+th/2+12,{size:17,col:COL.sub});
+    arrow(c,bx+bw/2-40,yc-th/2-4,bx+bw/2-40,yc-th/2-110,COL.pgf,8,22);
+    text(c,'기압 경도력',bx+bw/2-50,yc-th/2-118,{size:20,col:COL.pgf,align:'right'});
+    if(!A.gOff){arrow(c,bx+bw/2+40,yc+th/2+4,bx+bw/2+40,yc+th/2+110,COL.grav,8,22);text(c,'중력',bx+bw/2+52,yc+th/2+100,{size:20,col:COL.grav});}
+    pill(c,A.gOff?'힘의 평형이 깨짐 → 위로 가속!':'기압 경도력 = 중력 → 정역학 평형',300,700,A.gOff?COL.cor:'#2f9e44',19);
+  } else pill(c,'공기 덩어리가 우주로 날아갔다… 중력을 다시 켜자',300,700,COL.cor,19);
+  // 오른쪽: 기압-높이 그래프
+  const GX0=640,GX1=1150,GY0=640,GY1=60,kx=(GX1-GX0)/1050,kyy=(GY0-GY1)/14;
+  c.strokeStyle=COL.grid;c.lineWidth=1;
+  for(let p=0;p<=1000;p+=200){const x=GX0+p*kx;c.beginPath();c.moveTo(x,GY1);c.lineTo(x,GY0);c.stroke();text(c,p,x,GY0+24,{size:16,col:COL.sub,align:'center'});}
+  for(let zz=0;zz<=14;zz+=2){const y=GY0-zz*kyy;c.beginPath();c.moveTo(GX0,y);c.lineTo(GX1,y);c.stroke();text(c,zz,GX0-10,y+6,{size:16,col:COL.sub,align:'right'});}
+  c.strokeStyle='#1d2330';c.lineWidth=2;c.strokeRect(GX0,GY1,GX1-GX0,GY0-GY1);
+  text(c,'기압(hPa)',GX1,GY0+50,{size:18,col:COL.sub,align:'right'});text(c,'높이(km)',GX0,GY1-14,{size:18,col:COL.sub});
+  c.strokeStyle='#e8590c';c.lineWidth=4;c.beginPath();for(let zz=0;zz<=14;zz+=0.1){const x=GX0+Pz(zz)*kx,y=GY0-zz*kyy;zz?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+  // 기준선
+  const y55=GY0-5.5*kyy;c.setLineDash([8,6]);c.strokeStyle='#868e96';c.beginPath();c.moveTo(GX0,y55);c.lineTo(GX1,y55);c.stroke();c.setLineDash([]);
+  text(c,'약 5.5 km: 기압이 절반 → 이 아래에 공기의 50 %',GX0+150,y55-8,{size:16,col:COL.sub});
+  const ye=GY0-8.85*kyy;text(c,'▲ 에베레스트산(8.8 km) ≈ '+Pz(8.85).toFixed(0)+' hPa',GX0+Pz(8.85)*kx+10,ye+6,{size:16,col:COL.sub});
+  if(z<=14){const px=GX0+Pz(z)*kx,py=GY0-z*kyy;c.fillStyle='#e03131';c.beginPath();c.arc(px,py,9,0,7);c.fill();}
+  $('pVal').textContent=Pz(Math.min(z,14)).toFixed(0)+' hPa';
+}
+function updCalc(){const r=+$('rho').value,dz=+$('dz').value,dp=r*9.80665*dz;$('rhoV').textContent=r.toFixed(3)+' kg/m³';$('dzV').textContent=dz+' m';
+  $('dpOut').innerHTML=`ΔP = ${r.toFixed(3)} × 9.80665 × ${dz}<br>≈ ${dp.toFixed(0)} Pa = ${(dp/100).toFixed(2)} hPa`;}
+$('zA').oninput=()=>{A.z=+$('zA').value;A.dzOff=0;A.vz=0;$('zVal').textContent=A.z.toFixed(1)+' km';drawA();};
+$('gOff').onclick=()=>{A.gOff=!A.gOff;$('gOff').classList.toggle('on',A.gOff);$('gOff').textContent=A.gOff?'중력 켜기':'중력 끄기';if(!A.gOff){A.dzOff=0;A.vz=0;}drawA();};
+$('resetA').onclick=()=>{A.gOff=false;A.dzOff=0;A.vz=0;$('gOff').classList.remove('on');$('gOff').textContent='중력 끄기';drawA();};
+['rho','dz'].forEach(i=>$(i).oninput=updCalc);
+
+/* ================= B. 기압 경도력 ================= */
+const B={view:'iso',parts:[],step:0};
+function phOf(){const d=+$('dIso').value*1000,r=+$('rhoB').value;return (1/r)*(400/d);} // m/s²
+function updB(){const ph=phOf();$('dV').textContent=$('dIso').value+' km';$('rhoBV').textContent=(+$('rhoB').value).toFixed(2)+' kg/m³';
+  $('phV').textContent=(ph*1000).toFixed(2)+' × 10⁻³ m/s²';$('memeB').style.visibility=(+$('dIso').value<=100)?'visible':'hidden';}
+function drawIso(){
+  const c=ctxOf('cvB');c.clearRect(0,0,1200,720);
+  const g=c.createLinearGradient(0,0,1200,0);g.addColorStop(0,'#ffe3e3');g.addColorStop(1,'#e7f5ff');c.fillStyle=g;c.fillRect(0,0,1200,720);
+  const d=+$('dIso').value,px=d*1.0; // 1 km = 1 px
+  const n=Math.floor(1100/px)+1, x0=600-((n-1)*px)/2;
+  for(let i=0;i<n;i++){const x=x0+i*px,p=1016-4*i;c.strokeStyle='#495057';c.lineWidth=3;c.beginPath();c.moveTo(x,70);c.lineTo(x,640);c.stroke();
+    if(px>=110||i%2===0)pill(c,p+' hPa',x,48,'#495057',17);}
+  text(c,'고기압 쪽',30,690,{size:24,col:'#c92a2a',w:900});text(c,'저기압 쪽',1170,690,{size:24,col:'#1864ab',w:900,align:'right'});
+  // 거리 표시
+  if(n>1){const y=610;arrow(c,x0+4,y,x0+px-4,y,'#868e96',3,12);arrow(c,x0+px-4,y,x0+4,y,'#868e96',3,12);text(c,'d = '+d+' km',x0+px/2,y-12,{size:17,col:COL.sub,align:'center'});}
+  const ph=phOf();
+  B.parts.forEach(p=>{c.fillStyle='#1d2330';c.beginPath();c.arc(p.x,p.y,6,0,7);c.fill();
+    c.strokeStyle='rgba(29,35,48,.25)';c.lineWidth=3;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-ph*1000*14,p.y);c.stroke();});
+  // 대표 화살표
+  arrow(c,520,350,520+Math.min(560,ph*1000*80),350,COL.pgf,10,26);
+  pill(c,'기압 경도력 (등압선에 직각, 고기압 → 저기압)',600,300,COL.pgf,20);
+}
+function drawVert(){
+  const c=ctxOf('cvB');c.clearRect(0,0,1200,720);
+  const sky=c.createLinearGradient(0,0,0,720);sky.addColorStop(0,'#e7f5ff');sky.addColorStop(1,'#d0ebff');c.fillStyle=sky;c.fillRect(0,0,1200,720);
+  c.fillStyle='#c9a978';c.fillRect(0,600,1200,120);c.strokeStyle='#1d2330';c.lineWidth=2;c.beginPath();c.moveTo(0,600);c.lineTo(1200,600);c.stroke();
+  c.setLineDash([10,8]);c.strokeStyle='#868e96';c.beginPath();c.moveTo(0,130);c.lineTo(1200,130);c.stroke();c.setLineDash([]);
+  text(c,'상층',20,120,{size:22,col:COL.sub});text(c,'지상',20,590,{size:22,col:COL.sub});
+  const HX=330,LX=870;
+  text(c,'H',HX,660,{size:56,col:'#1864ab',w:900,align:'center'});text(c,'L',LX,660,{size:56,col:'#c92a2a',w:900,align:'center'});
+  text(c,'지상 고기압',HX,702,{size:20,col:'#1864ab',align:'center'});text(c,'지상 저기압',LX,702,{size:20,col:'#c92a2a',align:'center'});
+  const s=B.step;
+  if(s>=1){ // 지상 바람
+    arrow(c,HX+40,570,HX+190,570,'#1d2330',6);arrow(c,HX-40,570,HX-190,570,'#1d2330',6);
+    arrow(c,LX+190,570,LX+40,570,'#1d2330',6);arrow(c,LX-190,570,LX-40,570,'#1d2330',6);
+    pill(c,'지상 발산',HX,520,'#1864ab');pill(c,'지상 수렴',LX,520,'#c92a2a');}
+  if(s>=2){ arrow(c,LX,480,LX,200,'#c92a2a',9,24);arrow(c,HX,200,HX,480,'#1864ab',9,24);
+    pill(c,'상승 기류',LX+110,340,'#c92a2a');pill(c,'하강 기류',HX-110,340,'#1864ab');}
+  if(s>=3){ arrow(c,LX+40,160,LX+190,160,'#1d2330',6);arrow(c,LX-40,160,LX-190,160,'#1d2330',6);
+    arrow(c,HX+190,160,HX+40,160,'#1d2330',6);arrow(c,HX-190,160,HX-40,160,'#1d2330',6);
+    pill(c,'상층 발산',LX,95,'#c92a2a');pill(c,'상층 수렴',HX,95,'#1864ab');}
+  if(s>=4){ // 구름과 해
+    c.fillStyle='#fff';[[-50,0,46],[0,-22,56],[50,0,46],[0,14,50]].forEach(([dx,dy,r])=>{c.beginPath();c.arc(LX+dx,265+dy,r,0,7);c.fill();});
+    text(c,'구름 · 비',LX+90,215,{size:20,col:'#495057'});
+    c.fillStyle='#ffd43b';c.beginPath();c.arc(HX,270,42,0,7);c.fill();text(c,'맑음',HX-110,275,{size:20,col:'#495057'});
+    // 순환 입자
+    B.parts.forEach(p=>{c.fillStyle='rgba(29,35,48,.75)';c.beginPath();c.arc(p.x,p.y,6,0,7);c.fill();});}
+}
+const vCaps=['지상 H와 L 부근에서 공기는 어느 쪽으로 움직일까? 예상해 본 뒤 단계를 넘겨 보자.',
+ '① 지상 고기압에서는 바람이 밖으로 불어 나가고(발산), 지상 저기압으로는 불어 들어온다(수렴).',
+ '② 모인 공기는 갈 곳이 위쪽뿐 → 저기압에서 상승, 빠져나간 자리는 위에서 채움 → 고기압에서 하강.',
+ '③ 상층에서는 반대로: 저기압 위에서 발산, 고기압 위에서 수렴한다.',
+ '④ 상승하는 공기는 단열 팽창 → 구름·비, 하강하는 공기는 맑은 날씨. 하나의 큰 순환!'];
+function setStep(k){B.step=Math.max(0,Math.min(4,k));$('vCap').textContent=vCaps[B.step];drawVert();}
+$('vPrev').onclick=()=>setStep(B.step-1);$('vNext').onclick=()=>setStep(B.step+1);$('vAll').onclick=()=>setStep(4);
+document.querySelectorAll('[data-bv]').forEach(b=>b.onclick=()=>{B.view=b.dataset.bv;document.querySelectorAll('[data-bv]').forEach(x=>x.classList.toggle('on',x===b));
+  $('isoCtl').classList.toggle('hide',B.view!=='iso');$('vertCtl').classList.toggle('hide',B.view!=='vert');B.parts=[];});
+['dIso','rhoB'].forEach(i=>$(i).oninput=updB);
+function loopPos(u){ // 순환 경로: 지상 H→L, L 상승, 상층 L→H, H 하강
+  const HX=330,LX=870,yt=165,yb=575,seg=[LX-HX,yb-yt,LX-HX,yb-yt],tot=seg.reduce((a,b)=>a+b);let d=u*tot;
+  if(d<seg[0])return[HX+d,yb];d-=seg[0];if(d<seg[1])return[LX,yb-d];d-=seg[1];if(d<seg[2])return[LX-d,yt];d-=seg[2];return[HX,yt+d];}
+
+/* ================= C. 전향력 ================= */
+const C={view:'disk',rot:1,eye:'out',theta:0,balls:[],trails:[],hue:0,lat:37,lp:[]};
+const R=300,CX=420,CY=360,VB=110; // px/s
+const TRC=['#e03131','#1c7ed6','#2f9e44','#f08c00','#7950f2','#0c8599'];
+function w(){return C.rot*(+$('wC').value);}
+function drawDisk(){
+  const c=ctxOf('cvC');c.clearRect(0,0,1200,720);
+  const view=C.eye==='out'?C.theta:0; // 화면 회전각
+  c.save();c.translate(CX,CY);
+  // 판
+  c.fillStyle='#f3d9a4';c.strokeStyle='#8a6d3b';c.lineWidth=6;c.beginPath();c.arc(0,0,R+18,0,7);c.fill();c.stroke();
+  c.fillStyle='#fff';c.beginPath();c.arc(0,0,R,0,7);c.fill();
+  c.save();c.rotate(-view);
+  c.strokeStyle='#dee2e6';c.lineWidth=1;for(let r=50;r<=R;r+=50){c.beginPath();c.arc(0,0,r,0,7);c.stroke();}
+  for(let a=0;a<360;a+=15){const t=a*Math.PI/180;c.beginPath();c.moveTo(0,0);c.lineTo(R*Math.cos(t),-R*Math.sin(t));c.stroke();}
+  for(let a=0;a<360;a+=30){const t=a*Math.PI/180;c.save();c.translate((R-22)*Math.cos(t),-(R-22)*Math.sin(t));c.rotate(view);text(c,a+'°',0,6,{size:15,col:'#868e96',align:'center'});c.restore();}
+  // 판에 찍힌 궤적 (판 좌표: r, φ)
+  C.trails.forEach(tr=>{c.strokeStyle=tr.col;c.lineWidth=5;c.lineCap='round';c.beginPath();tr.pts.forEach(([r,f],i)=>{const x=r*Math.cos(f),y=-r*Math.sin(f);i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();});
+  c.restore();
+  // 회전 방향 표시
+  if(C.rot){const sgn=C.rot>0?1:-1;c.strokeStyle='#2f9e44';c.lineWidth=5;const a1=-Math.PI*0.70,a2=-Math.PI*0.30,rr=R+42;
+    c.beginPath();c.arc(0,0,rr,a1,a2);c.stroke();
+    const ae=sgn>0?a1:a2,tx=-Math.sin(ae)*(sgn>0?-1:1),ty=Math.cos(ae)*(sgn>0?-1:1);const ex=rr*Math.cos(ae),ey=rr*Math.sin(ae);
+    arrow(c,ex-tx*20,ey-ty*20,ex+tx*6,ey+ty*6,'#2f9e44',5,20);}
+  // 굴림대(관성계에서 12시 방향 고정)
+  const launchScr=Math.PI/2 + (C.eye==='out'?0:-C.theta);
+  c.save();c.rotate(-launchScr+Math.PI/2);c.fillStyle='rgba(120,120,120,.5)';c.fillRect(-10,-110,20,100);c.restore();
+  // 공
+  C.balls.forEach(b=>{const ang=C.eye==='out'?b.phi0:b.f;const x=b.r*Math.cos(ang),y=-b.r*Math.sin(ang);
+    c.fillStyle='#495057';c.beginPath();c.arc(x,y,11,0,7);c.fill();});
+  c.restore();
+  text(c,C.eye==='out'?'밖에서 보기 (교실 바닥 기준)':'회전판 위에서 보기 (판과 함께 회전)',CX,32,{size:22,align:'center'});
+  // 오른쪽 설명
+  const tx=800;
+  text(c,'판에 찍힌 궤적',tx,110,{size:22});
+  const lab=C.rot===0?'곧은 직선':(C.rot>0?'진행 방향의 오른쪽으로 휨':'진행 방향의 왼쪽으로 휨');
+  pill(c,lab,tx+170,160,C.rot===0?'#495057':COL.cor,22);
+  text(c,'회전판의 회전 방향 ↔ 지구',tx,250,{size:20,col:COL.sub});
+  text(c,'· 시계 반대 방향 = 북반구 (북극 위에서 본 지구)',tx,285,{size:18,col:COL.sub});
+  text(c,'· 시계 방향 = 남반구 (남극 위에서 본 지구)',tx,315,{size:18,col:COL.sub});
+  text(c,'회전 속도 ↔ 위도',tx,370,{size:20,col:COL.sub});
+  text(c,'· 빠르게 = 고위도, 느리게 = 저위도',tx,405,{size:18,col:COL.sub});
+  text(c,'· 회전 안 함 = 적도 (전향력 0)',tx,435,{size:18,col:COL.sub});
+  C.trails.forEach((tr,i)=>{c.fillStyle=tr.col;c.fillRect(tx,490+i*30,26,8);text(c,tr.lab,tx+36,500+i*30,{size:17,col:COL.sub});});
+}
+function fire(){const om=w();const col=TRC[C.trails.length%TRC.length];
+  const tr={col,pts:[],lab:(C.rot===0?'회전 안 함':C.rot>0?'시계 반대':'시계')+(C.rot?` (속도 ${(+$('wC').value).toFixed(2)})`:'')};
+  if(C.trails.length>=6)C.trails.shift();C.trails.push(tr);
+  C.balls.push({r:0,phi0:Math.PI/2,f:Math.PI/2-C.theta,tr});}
+$('fire').onclick=fire;$('clr').onclick=()=>{C.trails=[];C.balls=[];};
+document.querySelectorAll('[data-rot]').forEach(b=>b.onclick=()=>{C.rot=+b.dataset.rot;document.querySelectorAll('[data-rot]').forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{C.eye=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('on',x===b));
+  $('diskNote').textContent=C.eye==='out'?'밖에서 보면 쇠구슬은 곧게 나아가지만, 회전판에 찍힌 궤적은 휘어진다.':'판 위의 관찰자에게는 쇠구슬이 저절로 휘는 것처럼 보인다 → 이 겉보기 힘이 전향력!';});
+$('wC').oninput=()=>{const v=+$('wC').value;$('wV').textContent=v<0.5?'느리게':v<0.95?'보통':'빠르게';};
+document.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{C.view=b.dataset.cv;document.querySelectorAll('[data-cv]').forEach(x=>x.classList.toggle('on',x===b));
+  $('diskCtl').classList.toggle('hide',C.view!=='disk');$('latCtl').classList.toggle('hide',C.view!=='lat');C.lp=[];});
+// 위도와 전향력
+const OM=7.2921e-5;
+function updLat(){const la=+$('lat').value,v=+$('vel').value,cc=2*v*OM*Math.sin(la*Math.PI/180);
+  $('latV').textContent=la===0?'0° (적도)':Math.abs(la)+'°'+(la>0?'N':'S');$('vV').textContent=v+' m/s';
+  $('cOut').innerHTML=`C = 2 × ${v} × 7.29×10⁻⁵ × sin${Math.abs(la)}°<br>≈ ${(Math.abs(cc)*1000).toFixed(2)} × 10⁻³ m/s²`;
+  $('cDir').textContent=(la===0||v===0)?'휘지 않음':la>0?'오른쪽 ↷':'왼쪽 ↶';$('cDir').style.color=la===0?'':COL.cor;}
+['lat','vel'].forEach(i=>$(i).oninput=()=>{updLat();C.lp=[];});
+document.querySelectorAll('[data-lp]').forEach(b=>b.onclick=()=>{$('lat').value=b.dataset.lp;updLat();C.lp=[];});
+function drawLat(t){
+  const c=ctxOf('cvC');c.clearRect(0,0,1200,720);
+  const la=+$('lat').value,v=+$('vel').value,rad=la*Math.PI/180;
+  // 지구
+  const gx=230,gy=330,gr=180;
+  const gg=c.createRadialGradient(gx-60,gy-60,20,gx,gy,gr);gg.addColorStop(0,'#d0ebff');gg.addColorStop(1,'#4dabf7');c.fillStyle=gg;c.beginPath();c.arc(gx,gy,gr,0,7);c.fill();
+  c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=1.5;for(let a=-60;a<=60;a+=30){const y=gy-gr*Math.sin(a*Math.PI/180),hw=gr*Math.cos(a*Math.PI/180);c.beginPath();c.ellipse(gx,y,hw,hw*0.12,0,0,7);c.stroke();}
+  c.strokeStyle='#1d2330';c.lineWidth=3;c.beginPath();c.moveTo(gx,gy-gr-40);c.lineTo(gx,gy+gr+30);c.stroke();
+  text(c,'자전축',gx+10,gy-gr-26,{size:16,col:COL.sub});
+  const py=gy-gr*Math.sin(rad),phw=gr*Math.cos(rad);c.strokeStyle='#e03131';c.lineWidth=4;c.beginPath();c.ellipse(gx,py,Math.max(phw,1),Math.max(phw*0.12,1),0,0,7);c.stroke();
+  c.fillStyle='#e03131';c.beginPath();c.arc(gx+phw*0.0,py+phw*0.12,9,0,7);c.fill();
+  text(c,'관측 지점',gx,gy+gr+70,{size:18,col:COL.sub,align:'center'});
+  // 지역 평면(위에서 내려다봄)
+  const bx=480,by=60,bw=320,bh=420;
+  c.fillStyle='#f8f9fa';c.strokeStyle='#1d2330';c.lineWidth=2;c.fillRect(bx,by,bw,bh);c.strokeRect(bx,by,bw,bh);
+  text(c,'N',bx+bw/2,by+26,{size:20,align:'center'});text(c,'위에서 내려다본 모습',bx+bw/2,by+bh+30,{size:17,col:COL.sub,align:'center'});
+  const k=Math.sin(rad)*(v/50); // 휘는 정도
+  const sx=bx+bw/2,sy=by+bh-30;
+  arrow(c,sx,sy,sx,sy-120,'rgba(28,79,214,.45)',5,16);text(c,'처음 운동 방향',sx+10,sy-60,{size:15,col:'#1c4fd6'});
+  // 경로: 북쪽으로 출발, 오른쪽(+x)으로 휨 (북반구)
+  const tt=(t/1000)%3.2,L=Math.min(tt,2.6)/2.6;
+  c.strokeStyle=COL.cor;c.lineWidth=5;c.beginPath();
+  for(let s=0;s<=L;s+=0.01){const yy=sy-s*330,xx=sx+k*230*s*s;s?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.stroke();
+  const ex=sx+k*230*L*L,ey=sy-L*330;c.fillStyle='#1d2330';c.beginPath();c.arc(ex,ey,10,0,7);c.fill();
+  // 그래프 C-위도
+  const GX0=860,GX1=1170,GY0=640,GY1=110,mid=(GY0+GY1)/2;
+  c.strokeStyle=COL.grid;c.lineWidth=1;for(let a=-90;a<=90;a+=30){const y=mid-a/90*(GY0-GY1)/2;c.beginPath();c.moveTo(GX0,y);c.lineTo(GX1,y);c.stroke();text(c,(a>0?a+'°N':a<0?(-a)+'°S':'0°'),GX0-8,y+5,{size:15,col:COL.sub,align:'right'});}
+  c.strokeStyle='#1d2330';c.lineWidth=2;c.strokeRect(GX0,GY1,GX1-GX0,GY0-GY1);
+  const cmax=2*50*OM;text(c,'전향력 크기 (v = '+v+' m/s)',GX0,GY1-16,{size:17,col:COL.sub});
+  c.strokeStyle='#e8590c';c.lineWidth=4;c.beginPath();for(let a=-90;a<=90;a++){const x=GX0+Math.abs(2*v*OM*Math.sin(a*Math.PI/180))/cmax*(GX1-GX0),y=mid-a/90*(GY0-GY1)/2;a>-90?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+  const cx2=GX0+Math.abs(2*v*OM*Math.sin(rad))/cmax*(GX1-GX0),cy2=mid-la/90*(GY0-GY1)/2;c.fillStyle='#e03131';c.beginPath();c.arc(cx2,cy2,9,0,7);c.fill();
+  text(c,'0',GX0,GY0+22,{size:15,col:COL.sub,align:'center'});text(c,'고위도일수록 ↑',GX1,GY0+24,{size:15,col:COL.sub,align:'right'});
+  pill(c,la===0?'적도: 전향력 0':(la>0?'북반구: 오른쪽으로 휜다':'남반구: 왼쪽으로 휜다'),640,560,la===0?'#495057':COL.cor,22);
+}
+
+/* ================= D. 마찰력 ================= */
+const SF={sea:{k:0.4,h:0.5,a:0.10,n:'바다'},land:{k:1,h:1.0,a:0.16,n:'평지'},city:{k:2,h:1.5,a:0.30,n:'도시·산지'}};
+let sf='land';const VF=20;
+function vProf(z){const s=SF[sf];if(z>=s.h)return VF;return VF*Math.pow(z/s.h,s.a*2.2);}
+function frAt(z){const s=SF[sf];if(z>=s.h)return 0;return s.k*(1-z/s.h)*vProf(z)*0.01;} // 상대값
+function drawD(t){
+  const c=ctxOf('cvD');c.clearRect(0,0,1200,720);
+  const s=SF[sf],X0=120,X1=760,Y0=640,Y1=60,ky=(Y0-Y1)/2,kx=(X1-X0)/26;
+  // 경계층 음영
+  const yh=Y0-s.h*ky;c.fillStyle='rgba(240,140,0,.10)';c.fillRect(X0,yh,X1-X0,Y0-yh);c.fillStyle='rgba(28,126,214,.06)';c.fillRect(X0,Y1,X1-X0,yh-Y1);
+  c.setLineDash([10,7]);c.strokeStyle='#e8590c';c.lineWidth=2;c.beginPath();c.moveTo(X0,yh);c.lineTo(X1,yh);c.stroke();c.setLineDash([]);
+  text(c,'자유 대기 (마찰력 X)',X1-10,Y1+34,{size:22,col:'#1864ab',align:'right'});text(c,'대기 경계층',X1-10,yh+32,{size:22,col:'#e8590c',align:'right'});
+  // 지표
+  const gcol={sea:'#4dabf7',land:'#8fce6b',city:'#868e96'}[sf];c.fillStyle=gcol;c.fillRect(X0-30,Y0,X1-X0+60,40);
+  if(sf==='city'){c.fillStyle='#495057';[[0,40],[50,70],[110,30],[160,90],[230,50],[300,75],[370,40],[430,85],[500,55],[560,35]].forEach(([dx,h])=>c.fillRect(X0+dx,Y0-h,36,h));}
+  if(sf==='sea'){c.strokeStyle='#fff';c.lineWidth=2;for(let x=X0;x<X1;x+=40){c.beginPath();c.arc(x+20,Y0+12,12,Math.PI,0);c.stroke();}}
+  // 축
+  c.strokeStyle='#1d2330';c.lineWidth=2;c.beginPath();c.moveTo(X0,Y1-10);c.lineTo(X0,Y0);c.lineTo(X1,Y0);c.stroke();
+  for(let z=0;z<=2;z+=0.5)text(c,z.toFixed(1),X0-12,Y0-z*ky+6,{size:16,col:COL.sub,align:'right'});
+  text(c,'높이(km)',X0-10,Y1-20,{size:17,col:COL.sub,align:'right'});text(c,'풍속 →',X1,Y0+64,{size:17,col:COL.sub,align:'right'});
+  // 프로파일
+  c.strokeStyle='#e03131';c.lineWidth=4;c.beginPath();for(let z=0;z<=2;z+=0.01){const x=X0+vProf(z)*kx,y=Y0-z*ky;z?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+  // 바람 화살표 + 흐르는 입자
+  for(let z=0.1;z<=1.95;z+=0.2){const v=vProf(z),y=Y0-z*ky;arrow(c,X0,y,X0+v*kx,y,'rgba(28,79,214,.75)',4,14);}
+  // 선택 높이
+  const zs=+$('zD').value,vs=vProf(zs),ys=Y0-zs*ky,fr=frAt(zs);
+  c.fillStyle='#fff';c.strokeStyle='#1d2330';c.lineWidth=3;c.beginPath();c.arc(960,ys,22,0,7);c.fill();c.stroke();
+  arrow(c,985,ys,985+vs*8,ys,'#1c4fd6',7,20);text(c,'바람',990+vs*8,ys-14,{size:18,col:'#1c4fd6'});
+  if(fr>0){arrow(c,935,ys,935-fr*600,ys,COL.fr,7,20);text(c,'마찰력',935-fr*600,ys-14,{size:18,col:COL.fr,align:'right'});}
+  else text(c,'마찰력 없음',940,ys+52,{size:18,col:COL.sub,align:'center'});
+  c.setLineDash([6,6]);c.strokeStyle='#adb5bd';c.lineWidth=2;c.beginPath();c.moveTo(X0+vs*kx,ys);c.lineTo(935,ys);c.stroke();c.setLineDash([]);
+  $('kV').textContent=s.k<1?'작다':s.k>1?'크다':'보통';$('hV').textContent='약 '+s.h.toFixed(1)+' km';
+  $('zdV').textContent=zs.toFixed(2)+' km';$('vdV').textContent=vs.toFixed(1)+' m/s';$('frV').textContent=fr>0?(fr<0.03?'작다':fr<0.08?'보통':'크다'):'0 (자유 대기)';
+}
+document.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{sf=b.dataset.sf;document.querySelectorAll('[data-sf]').forEach(x=>x.classList.toggle('on',x===b));drawD();});
+$('zD').oninput=()=>drawD();
+
+/* ================= 공통 루프 ================= */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  ['A','B','C','D'].forEach(m=>$('page'+m).classList.toggle('hide',m!==mode));history.replaceState(null,'','#'+mode);});
+let last=performance.now();
+function tick(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(mode==='A'){if(A.gOff){A.vz+=1.2*dt;A.dzOff+=A.vz*dt;}drawA();}
+  if(mode==='B'){
+    if(B.view==='iso'){const ph=phOf(),sp=ph*1000*55;
+      if(B.parts.length<40&&Math.random()<0.25)B.parts.push({x:20,y:90+Math.random()*500});
+      B.parts.forEach(p=>p.x+=sp*dt);B.parts=B.parts.filter(p=>p.x<1190);drawIso();}
+    else{ if(B.step>=4){if(B.parts.length<26&&Math.random()<0.1)B.parts.push({u:Math.random()});B.parts.forEach(p=>p.u=(p.u+dt*0.06)%1);B.parts.forEach(p=>{const[x,y]=loopPos(p.u);p.x=x;p.y=y;});}else B.parts=[]; drawVert();}
+  }
+  if(mode==='C'){
+    if(C.view==='disk'){const om=w();C.theta+=om*dt;
+      C.balls.forEach(b=>{b.r+=VB*dt;b.f=b.phi0-C.theta;b.tr.pts.push([Math.min(b.r,R),b.f]);});
+      C.balls=C.balls.filter(b=>b.r<R);drawDisk();}
+    else drawLat(now);
+  }
+  if(mode==='D')drawD(now);
+  requestAnimationFrame(tick);}
+updCalc();updB();updLat();$('wC').oninput();setStep(0);
+const h0=location.hash.slice(1);if(['A','B','C','D'].includes(h0))document.querySelector(`.tab[data-mode="${h0}"]`).click();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
