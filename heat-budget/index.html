@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지구 열수지와 온실 효과 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Easy Magma 공통 테마(theme.css)와 같은 토큰 · 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f; --accent-ink:#fff;
+  /* 그래프 영역은 다크 모드에서도 밝게 유지 */
+  --p-bg:#ffffff; --p-bg2:#f5f6f8; --p-ink:#1d2330; --p-sub:#5b6475; --p-grid:#e9ecf2; --p-line:#d9dee7;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+  --sun:#f08c00; --ir:#e03131; --heat:#2f9e44; --lat:#1c7ed6; --grid:#e9ecf2; --space:#16213e; --atm:#dbeafe; --ground:#c9a978;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --accent-ink:#16120f; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{display:flex;align-items:flex-end;gap:16px;padding:8px 24px 4px;flex-wrap:wrap;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tab{font:700 17px var(--f-body);padding:8px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg)}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.card:has(> canvas),.card:has(> svg){background:var(--p-bg)}
+.btn{font:700 16px var(--f-body);padding:8px 12px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--ink);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+
+
+
+
+
+
+
+
+main{display:grid;grid-template-columns:1fr 360px;gap:16px;padding:16px 24px;max-width:1520px;margin:0 auto}
+@media (max-width:960px){main{grid-template-columns:1fr;padding:12px 16px}}
+
+.side{display:flex;flex-direction:column;gap:12px}
+.side h2{font-size:17px;margin:0 0 8px;color:var(--sub);font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+
+
+
+.note{font-size:14px;color:var(--sub);line-height:1.55;margin:8px 0 0}
+.hide{display:none!important}
+svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:17px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+td.n{text-align:right;font-weight:800}
+tr.sum td{border-top:2px solid var(--ink);font-weight:800}
+.big{font-size:44px;font-weight:800;letter-spacing:-1px}
+.unit{font-size:20px;color:var(--sub);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.lbl{display:flex;justify-content:space-between;font-size:17px;font-weight:700;margin-top:6px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:17px}
+.stat b{font-size:22px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:800;font-size:16px}
+canvas{width:100%;height:auto;display:block}
+.stepcap{font-size:20px;font-weight:800;min-height:56px;line-height:1.35}
+</style>
+</head>
+<body>
+<a class="back" href="../">← 시뮬레이터 목록</a>
+<header>
+  <div><h1>지구 열수지와 온실 효과</h1><p class="subt">지구시스템과학 · 02. 지구 열수지 (교과서 p.92–96) — 에너지 출입을 따라가며 지구 열수지와 복사 평형을 확인해 보자.</p></div>
+  <div class="tabs">
+    <button class="tab on" data-mode="A">① 지구 열수지</button>
+    <button class="tab" data-mode="B">② 온실 효과와 복사 평형</button>
+  </div>
+</header>
+
+<!-- ===== 탭 A ===== -->
+<main id="pageA">
+  <div class="card"><svg id="svgA" viewBox="0 0 1200 760"></svg></div>
+  <div class="side">
+    <div class="card">
+      <h2>차례대로 보기</h2>
+      <div class="stepcap" id="stepCap">‘다음’을 눌러 에너지의 흐름을 하나씩 확인해 보세요.</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="prev">◀ 이전</button>
+        <button class="btn primary" id="next">다음 ▶</button>
+        <button class="btn" id="all">전체 보기</button>
+        <button class="btn" id="reset">처음</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>열수지 확인하기</h2>
+      <div class="row">
+        <button class="btn" data-reg="earth">지구 전체</button>
+        <button class="btn" data-reg="atm">대기</button>
+        <button class="btn" data-reg="sfc">지표</button>
+      </div>
+      <div id="regTable" style="margin-top:10px"></div>
+    </div>
+    <p class="note">태양 복사 에너지 100 단위 기준 (출처: 교과서 그림 Ⅲ-6, NOAA 2023)</p>
+  </div>
+</main>
+
+<!-- ===== 탭 B ===== -->
+<main id="pageB" class="hide">
+  <div class="side" style="gap:16px">
+    <div class="card"><svg id="svgB" viewBox="0 0 1200 520"></svg></div>
+    <div class="card"><canvas id="cvB" width="1200" height="300"></canvas></div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h2>지표면 평균 온도</h2>
+      <div><span class="big" id="tNow">15.0</span> <span class="unit">°C</span></div>
+      <div id="state" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <div class="lbl"><span>온실 기체의 양</span><span id="epsV">보통</span></div>
+      <input type="range" id="eps" min="0" max="100" value="78">
+      <div class="lbl"><span>지구의 반사율</span><span id="albV">30 %</span></div>
+      <input type="range" id="alb" min="10" max="50" value="30">
+      <div class="row" style="margin-top:10px">
+        <button class="btn" data-pre="none">대기가 없다면</button>
+        <button class="btn" data-pre="now">현재 지구</button>
+        <button class="btn" data-pre="more">온실 기체 증가</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>에너지 출입 (태양 복사 100 단위 기준)</h2>
+      <div class="stat"><span style="color:var(--sun);font-weight:700">흡수하는 태양 복사</span><b id="inV">70</b></div>
+      <div class="stat"><span style="color:var(--ir);font-weight:700">우주로 나가는 지구 복사</span><b id="outV">70</b></div>
+      <div class="stat"><span>차이 (흡수 − 방출)</span><b id="dV">0</b></div>
+      <p class="note">흡수 &gt; 방출이면 온도가 올라가고, 두 값이 같아지면(복사 평형) 온도가 일정해져요.</p>
+      <p class="note">※ 대기를 한 층으로 단순화하고 숨은열·대류를 뺀 모형이라, 화살표 값은 ① 지구 열수지의 값과 다릅니다.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+(()=>{
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.appendChild(e);return e;};
+
+/* ================= 탭 A: 지구 열수지 ================= */
+const A=document.getElementById('svgA');
+const Y={spaceTop:0,spaceBot:120,atmTop:120,atmBot:610,gndTop:610,gndBot:760};
+// 배경
+function bgA(){
+  A.innerHTML='';
+  const defs=el('defs',{},A);
+  ['sun','ir','heat','lat'].forEach(k=>{
+    const m=el('marker',{id:'m-'+k,viewBox:'0 0 10 10',refX:'5',refY:'5',markerWidth:'3.2',markerHeight:'3.2',orient:'auto-start-reverse'},defs);
+    el('path',{d:'M0,0 L10,5 L0,10 z',fill:css('--'+k)},m);
+  });
+  el('rect',{x:0,y:Y.spaceTop,width:1200,height:Y.spaceBot,fill:css('--space')},A);
+  const lg=el('linearGradient',{id:'atmg',x1:0,y1:0,x2:0,y2:1},defs);
+  el('stop',{offset:'0','stop-color':'#eef5ff'},lg); el('stop',{offset:'1','stop-color':'#bcd7fb'},lg);
+  el('rect',{x:0,y:Y.atmTop,width:1200,height:Y.atmBot-Y.atmTop,fill:'url(#atmg)'},A);
+  el('rect',{x:0,y:Y.gndTop,width:1200,height:Y.gndBot-Y.gndTop,fill:css('--ground')},A);
+  const t=(x,y,s,txt,col,anchor='start')=>{const e=el('text',{x,y,'font-size':s,'font-weight':800,fill:col,'text-anchor':anchor},A);e.textContent=txt;};
+  t(18,40,26,'우주','#fff'); t(18,160,26,'대기','#1d3a6e'); t(18,Y.gndBot-18,26,'지표','#4a3416');
+}
+// 흐름 정의: x, y1(시작), y2(끝), 값, 종류, 라벨
+const F=[
+ {id:'solar', x:300,y1:8, y2:150, v:100,k:'sun', lab:'태양 복사 에너지', sub:'100', ly:66, cap:'태양 복사 에너지 100 단위가 지구에 들어온다.', show:'solarIn'},
+ {id:'refl',  x:130, y1:280, y2:8, v:30, k:'sun', lab:'반사·산란', sub:'30', ly:240, cap:'30 단위는 구름, 지표 등에서 반사·산란되어 우주로 나간다.'},
+ {id:'aSol',  x:240,y1:150, y2:340, v:23,k:'sun', lab:'대기 흡수', sub:'23', ly:300, cap:'23 단위는 대기와 구름에 흡수된다.'},
+ {id:'gSol',  x:350,y1:150, y2:Y.gndTop, v:47,k:'sun', lab:'지표 흡수', sub:'47', ly:500, cap:'47 단위는 지표에 흡수된다.'},
+ {id:'sfcIR', x:500,y1:Y.gndTop, y2:300, v:104,k:'ir', lab:'지표면 복사', sub:'104', ly:505, cap:'지표는 지구 복사 에너지 116 단위를 방출하고, 그중 104 단위를 대기가 흡수한다.'},
+ {id:'win',   x:600,y1:Y.gndTop, y2:8, v:12, k:'ir', lab:'우주로 바로', sub:'12', ly:220, cap:'12 단위는 대기를 그대로 통과하여 우주로 나간다. (지표면 복사 = 104 + 12 = 116)'},
+ {id:'back',  x:710,y1:300, y2:Y.gndTop, v:98, k:'ir', lab:'대기의 재복사', sub:'98', ly:505, cap:'대기는 98 단위를 지표로 재복사한다. → 온실 효과'},
+ {id:'atmOut',x:820,y1:330, y2:8, v:58, k:'ir', lab:'대기 → 우주', sub:'58', ly:220, cap:'대기는 58 단위를 우주로 방출한다. (지구 복사 = 58 + 12 = 70)'},
+ {id:'conv',  x:950,y1:Y.gndTop, y2:400, v:5,  k:'heat',lab:'전도·대류', sub:'5', ly:505, cap:'지표는 전도와 대류로 5 단위를 대기에 전달한다.'},
+ {id:'lat',   x:1080,y1:Y.gndTop, y2:400, v:24, k:'lat', lab:'숨은열(잠열)', sub:'24', ly:505, cap:'물이 증발할 때 지표에서 24 단위를 흡수하고, 수증기가 응결할 때 대기로 방출한다. → 지표 방출 요인 중 숨은열의 효과가 가장 크다!'},
+];
+const ORDER=F.map(f=>f.id);
+const REG={
+  earth:{name:'지구 전체',in:[['태양 복사 에너지','solar',100]],out:[['반사·산란','refl',30],['지표 → 우주','win',12],['대기 → 우주','atmOut',58]]},
+  atm:{name:'대기',in:[['태양 복사 흡수','aSol',23],['지표면 복사 흡수','sfcIR',104],['전도·대류','conv',5],['숨은열(응결)','lat',24]],out:[['우주로 방출','atmOut',58],['지표로 재복사','back',98]]},
+  sfc:{name:'지표',in:[['태양 복사 흡수','gSol',47],['대기의 재복사','back',98]],out:[['지표면 복사','sfcIR',104],['(지표면 복사 중 우주로)','win',12],['전도·대류','conv',5],['물의 증발(숨은열)','lat',24]]},
+};
+let step=0, region=null;
+
+function drawA(){
+  bgA();
+  const visible=new Set(ORDER.slice(0,step));
+  const hl=region? new Set([...REG[region].in,...REG[region].out].map(r=>r[1])):null;
+  F.forEach(f=>{
+    if(!visible.has(f.id)) return;
+    const dim= hl && !hl.has(f.id);
+    const g=el('g',{opacity:dim?0.13:1},A);
+    const w=Math.max(5,f.v*0.30);
+    const dir=Math.sign(f.y2-f.y1), hlen=24, hw=w/2+12, ye=f.y2-dir*hlen;
+    el('line',{x1:f.x,y1:f.y1,x2:f.x,y2:ye,stroke:css('--'+f.k),'stroke-width':w},g);
+    el('polygon',{points:`${f.x-hw},${ye} ${f.x+hw},${ye} ${f.x},${f.y2}`,fill:css('--'+f.k)},g);
+    // 흡수 지점 표시
+    // 라벨 박스
+    const tw=Math.max(f.lab.length*19,70)+18, bx=f.x-tw/2, by=f.ly-40;
+    el('rect',{x:bx,y:by,width:tw,height:72,rx:10,fill:'#fff',stroke:css('--'+f.k),'stroke-width':2.5},g);
+    const t1=el('text',{x:f.x,y:by+28,'text-anchor':'middle','font-size':18,'font-weight':700,fill:'#1d2330'},g); t1.textContent=f.lab;
+    const t2=el('text',{x:f.x,y:by+60,'text-anchor':'middle','font-size':28,'font-weight':900,fill:css('--'+f.k)},g); t2.textContent=f.sub;
+    if(step===ORDER.indexOf(f.id)+1 && !region){
+      el('rect',{x:bx-5,y:by-5,width:tw+10,height:82,rx:13,fill:'none',stroke:'#1d2330','stroke-width':3,'stroke-dasharray':'8 6'},g);
+    }
+  });
+  // 지구 복사 70 / 지표면 복사 116 묶음 표시
+  if(visible.has('atmOut')&&visible.has('win')&&(!region||region==='earth')){
+    const g=el('g',{},A);
+    el('path',{d:`M590,${Y.spaceBot+8} L590,${Y.spaceBot+18} L800,${Y.spaceBot+18} L800,${Y.spaceBot+8}`,fill:'none',stroke:'#fff','stroke-width':0},g);
+    const t=el('text',{x:1180,y:50,'text-anchor':'end','font-size':22,'font-weight':900,fill:'#ffb3b3'},g); t.textContent='우주로 나가는 지구 복사';
+    const t2=el('text',{x:1180,y:88,'text-anchor':'end','font-size':26,'font-weight':900,fill:'#ffb3b3'},g); t2.textContent='70 = 12 + 58';
+  }
+  if(visible.has('win')&&(!region||region==='sfc')){
+    const t=el('text',{x:550,y:Y.gndTop+42,'text-anchor':'middle','font-size':20,'font-weight':900,fill:'#7a1f1f'},A); t.textContent='지표면 복사 116 (= 104 + 12)';
+  }
+  // 캡션
+  document.getElementById('stepCap').textContent= region? `${REG[region].name}에 들어오는 에너지와 나가는 에너지를 비교해 보세요.` : step===0? '‘다음’을 눌러 에너지의 흐름을 하나씩 확인해 보세요.' : F[step-1].cap;
+  // 버튼 상태
+  document.querySelectorAll('[data-reg]').forEach(b=>b.classList.toggle('on',b.dataset.reg===region));
+  renderTable();
+}
+// solar arrow: 화살표가 대기 위에서 멈추고 갈라지는 모양을 위해 길이 조정
+
+function renderTable(){
+  const box=document.getElementById('regTable');
+  if(!region){box.innerHTML='<p class="note" style="margin:0">영역을 고르면 들어오는 에너지와 나가는 에너지를 비교해요.</p>';return;}
+  const r=REG[region];
+  const sIn=r.in.reduce((a,x)=>a+x[2],0), sOut=r.out.reduce((a,x)=>a+x[2],0);
+  const rows=(arr,sign,col)=>arr.map(([n,,v])=>`<tr><td>${n}</td><td class="n" style="color:${col}">${sign}${v}</td></tr>`).join('');
+  box.innerHTML=`<table>
+    <tr><th colspan="2" style="color:var(--accent)">들어오는 에너지</th></tr>${rows(r.in,'+','#2457d6')}
+    <tr class="sum"><td>합계</td><td class="n">${sIn}</td></tr>
+    <tr><th colspan="2" style="color:var(--ir);padding-top:14px">나가는 에너지</th></tr>${rows(r.out,'−','#e03131')}
+    <tr class="sum"><td>합계</td><td class="n">${sOut}</td></tr></table>
+    <p style="font-size:20px;font-weight:900;margin:12px 0 0;text-align:center">${sIn} = ${sOut} &nbsp;→ <span style="color:var(--heat)">열수지 평형</span></p>`;
+}
+document.getElementById('next').onclick=()=>{region=null; step=Math.min(ORDER.length,step+1); drawA();};
+document.getElementById('prev').onclick=()=>{region=null; step=Math.max(0,step-1); drawA();};
+document.getElementById('all').onclick=()=>{step=ORDER.length; drawA();};
+document.getElementById('reset').onclick=()=>{step=0; region=null; drawA();};
+document.querySelectorAll('[data-reg]').forEach(b=>b.onclick=()=>{region= region===b.dataset.reg? null : b.dataset.reg; step=ORDER.length; drawA();});
+drawA();
+
+/* ================= 탭 B: 온실 효과와 복사 평형 ================= */
+// 단층 대기 모형: 대기가 지표 복사의 ε만큼 흡수, 위·아래로 절반씩 재복사
+const SIG=5.67e-8, S0=1367, UNIT=S0/4/100; // 100 단위 = S0/4
+let eps=0.78, alb=0.30, Ts=288.0, hist=[], running=true;
+const absorbed=()=>S0/4*(1-alb);
+const Teq=()=>Math.pow(absorbed()/(SIG*(1-eps/2)),0.25);
+const olr=T=>SIG*Math.pow(T,4)*(1-eps/2);
+const sfcEmit=T=>SIG*Math.pow(T,4);
+const backRad=T=>eps*SIG*Math.pow(T,4)/2;
+function epsLabel(e){ if(e<0.05) return '없음'; if(e<0.6) return '적음'; if(e<0.8) return '보통(현재)'; if(e<0.9) return '많음'; return '매우 많음'; }
+
+const B=document.getElementById('svgB');
+function drawB(){
+  B.innerHTML='';
+  const defs=el('defs',{},B);
+  ['sun','ir'].forEach(k=>{const m=el('marker',{id:'mb-'+k,viewBox:'0 0 10 10',refX:'5',refY:'5',markerWidth:'3',markerHeight:'3',orient:'auto-start-reverse'},defs);el('path',{d:'M0,0 L10,5 L0,10 z',fill:css('--'+k)},m);});
+  el('rect',{x:0,y:0,width:1200,height:110,fill:css('--space')},B);
+  const atmOp=0.15+0.75*eps;
+  el('rect',{x:0,y:170,width:1200,height:130,fill:`rgba(120,160,220,${atmOp.toFixed(2)})`},B);
+  el('rect',{x:0,y:420,width:1200,height:100,fill:css('--ground')},B);
+  const T=(x,y,s,txt,col,a='start',w=800)=>{const e=el('text',{x,y,'font-size':s,'font-weight':w,fill:col,'text-anchor':a},B);e.textContent=txt;return e;};
+  T(18,40,24,'우주','#fff'); T(18,292,22,'대기 (온실 기체)','#0b2a5b'); T(18,505,24,'지표','#4a3416');
+  const arrow=(x,y1,y2,val,k,lab)=>{
+    const u=val/UNIT, w=Math.max(3,u*0.32);
+    if(u<0.5) return;
+    el('line',{x1:x,y1,x2:x,y2,stroke:css('--'+k),'stroke-width':w,'marker-end':`url(#mb-${k})`},B);
+    const ym=(y1+y2)/2;
+    const bw=Math.max(lab.length*17,60)+20;
+    el('rect',{x:x+w/2+8,y:ym-34,width:bw,height:62,rx:9,fill:'#fff',stroke:css('--'+k),'stroke-width':2},B);
+    T(x+w/2+8+bw/2,ym-10,16,lab,'#1d2330','middle',700);
+    T(x+w/2+8+bw/2,ym+20,24,Math.round(u),css('--'+k),'middle',900);
+  };
+  const sIn=absorbed();
+  arrow(270,20,415,sIn,'sun','흡수하는 태양 복사');
+  const se=sfcEmit(Ts), tr=(1-eps)*se, ab=eps*se, up=eps*se/2, dn=backRad(Ts);
+  arrow(470,415,20,tr,'ir','지표 → 우주');
+  arrow(720,415,250,ab,'ir','지표면 복사 흡수');
+  arrow(960,240,20,up,'ir','대기 → 우주');
+  arrow(1060,300,415,dn,'ir','재복사');
+  // 지표 온도계 텍스트
+  T(1180,505,30,`${(Ts-273.15).toFixed(1)} °C`,'#4a3416','end',900);
+}
+
+const cv=document.getElementById('cvB'), ctx=cv.getContext('2d');
+function drawGraph(){
+  const W=cv.width,H=cv.height,P={l:80,r:20,t:24,b:44};
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  const tmin=-30,tmax=40, y=t=>P.t+(H-P.t-P.b)*(1-(t-tmin)/(tmax-tmin));
+  ctx.font='600 16px "SUIT Variable","Malgun Gothic",sans-serif'; ctx.fillStyle=css('--p-sub'); ctx.textAlign='right';
+  for(let t=-30;t<=40;t+=10){ctx.strokeStyle=css('--p-grid');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.l,y(t));ctx.lineTo(W-P.r,y(t));ctx.stroke();ctx.fillText(t+' °C',P.l-8,y(t)+5);}
+  ctx.strokeStyle=css('--p-ink');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(P.l,P.t);ctx.lineTo(P.l,H-P.b);ctx.lineTo(W-P.r,H-P.b);ctx.stroke();
+  ctx.textAlign='right';ctx.fillStyle=css('--p-ink');ctx.font='700 17px "SUIT Variable","Malgun Gothic",sans-serif';ctx.fillText('시간 →',W-P.r,H-12);
+  ctx.textAlign='left';ctx.fillText('지표면 평균 온도',P.l+10,P.t+6);
+  // 평형 온도선
+  const te=Teq()-273.15;
+  ctx.setLineDash([8,6]);ctx.strokeStyle=css('--heat');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(P.l,y(te));ctx.lineTo(W-P.r,y(te));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=css('--heat');ctx.textAlign='right';ctx.fillText(`복사 평형 온도 ${te.toFixed(1)} °C`,W-P.r-6,y(te)-8);
+  // 이력
+  const N=600, pw=W-P.l-P.r;
+  ctx.beginPath();
+  hist.forEach((t,i)=>{const x=P.l+pw*i/N, yy=y(t-273.15); i?ctx.lineTo(x,yy):ctx.moveTo(x,yy);});
+  ctx.strokeStyle=css('--ir');ctx.lineWidth=4;ctx.stroke();
+}
+function updB(){
+  const inU=absorbed()/UNIT, outU=olr(Ts)/UNIT, d=inU-outU;
+  document.getElementById('tNow').textContent=(Ts-273.15).toFixed(1);
+  document.getElementById('inV').textContent=inU.toFixed(1);
+  document.getElementById('outV').textContent=outU.toFixed(1);
+  document.getElementById('dV').textContent=(d>0?'+':'')+d.toFixed(1);
+  const st=document.getElementById('state');
+  if(Math.abs(d)<0.3) st.innerHTML='<span class="badge" style="background:#d3f9d8;color:#2b8a3e">복사 평형 — 온도 일정</span>';
+  else if(d>0) st.innerHTML='<span class="badge" style="background:#ffe3e3;color:#c92a2a">에너지 불균형 — 온도 상승 중 ▲</span>';
+  else st.innerHTML='<span class="badge" style="background:#d0ebff;color:#1864ab">에너지 불균형 — 온도 하강 중 ▼</span>';
+  document.getElementById('epsV').textContent=epsLabel(eps);
+  document.getElementById('albV').textContent=Math.round(alb*100)+' %';
+}
+let last=performance.now();
+function tick(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  // 완화: 평형까지 약 3~4초
+  const lam=4*SIG*Math.pow(Ts,3)*(1-eps/2), C=lam*1.1;
+  const N=absorbed()-olr(Ts);
+  Ts+=N/C*dt;
+  if(mode==='B'){
+    hist.push(Ts); if(hist.length>600) hist.shift();
+    drawB(); drawGraph(); updB();
+  }
+  requestAnimationFrame(tick);
+}
+const epsI=document.getElementById('eps'), albI=document.getElementById('alb');
+epsI.oninput=()=>{eps=epsI.value/100;};
+albI.oninput=()=>{alb=albI.value/100;};
+const PRE={none:[0,30],now:[78,30],more:[82,30]};
+document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const [e,a]=PRE[b.dataset.pre]; epsI.value=e; albI.value=a; eps=e/100; alb=a/100;});
+// 시작 상태: 현재 지구 평형
+Ts=Teq(); for(let i=0;i<600;i++)hist.push(Ts);
+
+/* ---------- 탭 전환 ---------- */
+let mode='A';
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('pageA').classList.toggle('hide',mode!=='A');
+  document.getElementById('pageB').classList.toggle('hide',mode!=='B');
+});
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

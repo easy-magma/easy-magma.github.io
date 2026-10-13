@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>복사와 대기의 선택적 흡수 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Easy Magma 공통 테마(theme.css)와 같은 토큰 · 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f; --accent-ink:#fff;
+  /* 그래프 영역은 다크 모드에서도 밝게 유지 */
+  --p-bg:#ffffff; --p-bg2:#f5f6f8; --p-ink:#1d2330; --p-sub:#5b6475; --p-grid:#e9ecf2; --p-line:#d9dee7;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+  --sun:#e8590c; --earth:#c2255c; --grid:#e9ecf2; --o3:#7048e8; --co2:#2b8a3e; --h2o:#1c7ed6; --abs:rgba(80,90,110,.18);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --accent-ink:#16120f; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{display:flex;align-items:flex-end;gap:16px;padding:8px 24px 4px;flex-wrap:wrap;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tab{font:700 17px var(--f-body);padding:8px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg)}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.card:has(> canvas),.card:has(> svg){background:var(--p-bg)}
+.btn{font:700 16px var(--f-body);padding:8px 12px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--ink);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+
+
+
+
+
+
+
+
+main{display:grid;grid-template-columns:1fr 340px;gap:16px;padding:16px 24px;max-width:1500px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:1fr;padding:12px 16px}}
+
+canvas{width:100%;height:auto;display:block}
+.side{display:flex;flex-direction:column;gap:12px}
+.side h2{font-size:17px;margin:0 0 8px;color:var(--sub);font-weight:700}
+.big{font-size:40px;font-weight:800;letter-spacing:-1px}
+.unit{font-size:20px;color:var(--sub);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+
+
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:17px}
+.stat b{font-size:22px}
+.tog{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;padding:8px 10px;border-radius:9px;border:1px solid var(--line);cursor:pointer;user-select:none}
+.tog input{width:22px;height:22px}
+.sw{width:16px;height:16px;border-radius:4px;display:inline-block}
+.note{font-size:14px;color:var(--sub);line-height:1.5}
+.hide{display:none!important}
+.bar{height:22px;border-radius:6px;background:var(--grid);overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%}
+</style>
+</head>
+<body>
+<a class="back" href="../">← 시뮬레이터 목록</a>
+<header>
+  <div><h1>복사와 대기의 선택적 흡수</h1><p class="subt">지구시스템과학 · 01. 지구 대기의 역할 (교과서 p.89–91) — 온도에 따른 복사와 대기의 선택적 흡수를 확인해 보자.</p></div>
+  <div class="tabs">
+    <button class="tab on" data-mode="A">① 온도와 복사</button>
+    <button class="tab" data-mode="B">② 대기의 선택적 흡수</button>
+  </div>
+</header>
+
+<main>
+  <div class="card"><canvas id="cv" width="1400" height="820"></canvas></div>
+
+  <!-- 모드 A -->
+  <div class="side" id="sideA">
+    <div class="card">
+      <h2>표면 온도</h2>
+      <div><span class="big" id="tVal">5800</span> <span class="unit">K</span></div>
+      <input id="tSlider" type="range" min="0" max="1000" value="0">
+      <div class="row" style="margin-top:6px">
+        <button class="btn" data-t="5800">태양 5800 K</button>
+        <button class="btn" data-t="3500">3500 K</button>
+        <button class="btn" data-t="1000">1000 K</button>
+        <button class="btn" data-t="288">지구 288 K</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stat"><span>최대 복사 파장 λ<sub>max</sub></span><b id="lmax">-</b></div>
+      <div class="stat"><span>복사 영역</span><b id="band">-</b></div>
+      <div class="stat"><span>방출 에너지 (태양 = 1)</span><b id="etot">-</b></div>
+      <p class="note" style="font-size:16px;color:var(--ink);font-weight:600">온도가 높을수록<br>· 더 많은 에너지를 방출한다.<br>· 더 짧은 파장의 빛을 주로 방출한다.</p><p class="note">(참고) 빈 법칙 λ<sub>max</sub> = 2898 / T (μm) · 방출 에너지 ∝ T⁴</p>
+    </div>
+    <div class="card">
+      <div class="row">
+        <button class="btn" id="pin">곡선 고정</button>
+        <button class="btn" id="clr">고정 지우기</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="axLin">선형 축</button>
+        <button class="btn" id="axLog">로그 축</button>
+        <button class="btn" id="norm">높이 맞추기</button>
+      </div>
+      <p class="note">지구(288 K)는 태양과 같은 눈금에서는 거의 보이지 않아요. ‘로그 축’과 ‘높이 맞추기’로 비교해 보세요.</p>
+    </div>
+  </div>
+
+  <!-- 모드 B -->
+  <div class="side hide" id="sideB">
+    <div class="card">
+      <h2>흡수하는 기체</h2>
+      <div class="side" style="gap:8px">
+        <label class="tog"><input type="checkbox" id="gO3" checked><span class="sw" style="background:var(--o3)"></span>산소와 오존</label>
+        <label class="tog"><input type="checkbox" id="gCO2" checked><span class="sw" style="background:var(--co2)"></span>이산화 탄소</label>
+        <label class="tog"><input type="checkbox" id="gH2O" checked><span class="sw" style="background:var(--h2o)"></span>수증기</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>대기에 흡수되는 비율</h2>
+      <div class="stat"><span style="color:var(--sun);font-weight:700">태양 복사</span><b id="aSun">-</b></div>
+      <div class="bar"><i id="bSun" style="background:var(--sun)"></i></div>
+      <div class="stat" style="margin-top:10px"><span style="color:var(--earth);font-weight:700">지구 복사</span><b id="aEarth">-</b></div>
+      <div class="bar"><i id="bEarth" style="background:var(--earth)"></i></div>
+      <p class="note">흡수 띠는 교과서 그림 Ⅲ-1을 본뜬 근사 모형이므로 수치는 경향만 보세요.</p>
+    </div>
+    <div class="card">
+      <div class="row">
+        <button class="btn on" id="shAbs">흡수된 부분 표시</button>
+      </div>
+      <p class="note">두 곡선은 각각 최댓값을 같게 맞춘 것이에요. 회색 부분은 대기에 흡수되어 지표(또는 우주)에 도달하지 못하는 복사예요.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+(()=>{
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const W=cv.width, H=cv.height;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- 물리 ----------
+const h=6.626e-34,c=2.998e8,k=1.381e-23;
+function B(lum,T){ // λ in μm, 상대 분광 복사 (per μm)
+  const l=lum*1e-6, x=h*c/(l*k*T);
+  if(x>700) return 0;
+  return (2*h*c*c/Math.pow(l,5))/(Math.expm1(x))*1e-6;
+}
+const lmaxOf=T=>2898/T;
+
+// ---------- 흡수 모형 (교과서 그림 Ⅲ-1 근사) ----------
+const g=(l,c0,w,a)=>a*Math.exp(-0.5*Math.pow(Math.log(l/c0)/w,2));
+const sig=(x,x0,s)=>1/(1+Math.exp(-(x-x0)/s));
+function aO3(l){
+  let a=1-sig(l,0.30,0.006);             // 자외선 (산소·오존)
+  a+=g(l,0.60,0.12,0.06)+g(l,0.76,0.01,0.5)+g(l,9.6,0.035,0.9);
+  return Math.min(1,a);
+}
+function aCO2(l){
+  let a=g(l,2.0,0.02,0.35)+g(l,2.7,0.03,0.7)+g(l,4.3,0.04,1)+g(l,15,0.16,1);
+  a+=sig(l,17,1.5)*0.9;
+  return Math.min(1,a);
+}
+function aH2O(l){
+  let a=g(l,0.94,0.03,0.6)+g(l,1.13,0.03,0.6)+g(l,1.38,0.04,0.9)+g(l,1.87,0.04,0.95)
+       +g(l,2.7,0.06,1)+g(l,6.3,0.16,1)+0.15*sig(l,4,0.5);
+  a+=sig(l,22,3)*1.0;
+  return Math.min(1,a);
+}
+const gas={O3:true,CO2:true,H2O:true};
+function aTot(l){
+  let t=1;
+  if(gas.O3) t*=1-aO3(l);
+  if(gas.CO2) t*=1-aCO2(l);
+  if(gas.H2O) t*=1-aH2O(l);
+  return 1-t;
+}
+function absorbedFrac(T){
+  let num=0,den=0;
+  for(let i=0;i<4000;i++){
+    const l=Math.exp(Math.log(0.1)+(Math.log(200)-Math.log(0.1))*i/3999);
+    const b=B(l,T)*l; // d(ln λ) 적분
+    num+=b*aTot(l); den+=b;
+  }
+  return num/den;
+}
+
+// ---------- 상태 ----------
+let mode='A', T=5800, axis='lin', norm=false, pins=[], showAbs=true;
+const sl=document.getElementById('tSlider');
+const TMIN=200,TMAX=7000;
+const t2s=t=>Math.round(1000*Math.log(t/TMIN)/Math.log(TMAX/TMIN));
+const s2t=s=>Math.round(TMIN*Math.pow(TMAX/TMIN,s/1000));
+sl.value=t2s(T);
+
+// ---------- 그리기 도구 ----------
+const P={l:120,r:40,t:40,b:110};
+const pw=()=>W-P.l-P.r, ph=()=>H-P.t-P.b;
+function font(px,w=600){ctx.font=`${w} ${px}px "SUIT Variable","Malgun Gothic",sans-serif`}
+function spectrumStrip(xOf,y,hgt){
+  const stops=[[0.38,'#7b2ff7'],[0.45,'#2f5bff'],[0.49,'#00b3ff'],[0.53,'#21c35b'],[0.58,'#f5e12a'],[0.62,'#ff9a1f'],[0.75,'#e3262c']];
+  const x0=xOf(0.38),x1=xOf(0.75);
+  const gr=ctx.createLinearGradient(x0,0,x1,0);
+  stops.forEach(([l,col])=>gr.addColorStop((xOf(l)-x0)/(x1-x0),col));
+  ctx.fillStyle=gr; ctx.fillRect(x0,y,x1-x0,hgt);
+}
+function regionLabels(xOf,xmin,xmax){
+  const y=H-P.b+62;
+  font(20,700); ctx.textAlign='center';
+  const seg=[['자외선',xmin,0.38,'#7048e8'],['가시광선',0.38,0.75,'#1d2330'],['적외선',0.75,xmax,'#c92a2a']];
+  seg.forEach(([name,a,b,col])=>{
+    a=Math.max(a,xmin); b=Math.min(b,xmax); if(b<=a) return;
+    const xa=xOf(a),xb=xOf(b); if(xb-xa<30) return;
+    ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(xa+4,y); ctx.lineTo(xb-4,y); ctx.stroke();
+    ctx.fillStyle=css('--p-bg'); const tw=ctx.measureText(name).width+16;
+    ctx.fillRect((xa+xb)/2-tw/2,y-14,tw,28);
+    ctx.fillStyle=col; ctx.fillText(name,(xa+xb)/2,y+7);
+  });
+}
+
+// ---------- 모드 A ----------
+function drawA(){
+  const temps=[...pins.filter(p=>p!==T),T];
+  const tlow=Math.min(...temps);
+  let xmin,xmax,xOf;
+  if(axis==='lin'){
+    xmin=0; xmax=Math.max(3,lmaxOf(tlow)*4);
+    xmax=niceMax(xmax);
+    xOf=l=>P.l+pw()*(l-xmin)/(xmax-xmin);
+  }else{
+    xmin=0.1; xmax=100;
+    xOf=l=>P.l+pw()*Math.log(l/xmin)/Math.log(xmax/xmin);
+  }
+  // 데이터
+  const N=900, curves=temps.map(t=>{
+    const pts=[];
+    for(let i=0;i<=N;i++){
+      const l=axis==='lin'? Math.max(1e-3,xmin+(xmax-xmin)*i/N) : xmin*Math.pow(xmax/xmin,i/N);
+      pts.push([l,B(l,t)]);
+    }
+    const pk=B(lmaxOf(t),t);
+    return {t,pts,pk};
+  });
+  const ymax=norm?1.08:Math.max(...curves.map(c=>c.pk))*1.08;
+
+  frame();
+  spectrumStrip(xOf,P.t,ph()); ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(255,255,255,.80)'; ctx.fillRect(xOf(0.38),P.t,xOf(0.75)-xOf(0.38),ph());
+  spectrumStrip(xOf,H-P.b+4,14);
+
+  // x축
+  font(18,500); ctx.fillStyle=css('--p-sub'); ctx.textAlign='center';
+  const ticks=axis==='lin'? linTicks(xmax): [0.1,0.2,0.5,1,2,5,10,20,50,100];
+  ticks.forEach(v=>{
+    const x=xOf(v); ctx.strokeStyle=css('--p-grid'); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,H-P.b); ctx.stroke();
+    ctx.fillText(fmt(v),x,H-P.b+40);
+  });
+  font(20,700); ctx.textAlign='right'; ctx.fillStyle=css('--p-ink');
+  ctx.fillText('파장(μm)',W-P.r,H-P.b+92);
+  regionLabels(xOf,Math.max(xmin,0.1),xmax);
+  ylabel(norm?'상대 세기 (각 곡선 최댓값 = 1)':'복사 에너지 세기');
+
+  // 곡선
+  curves.forEach((cu,i)=>{
+    const cur=cu.t===T, col=colorOfT(cu.t);
+    ctx.beginPath();
+    cu.pts.forEach(([l,b],j)=>{
+      const y=H-P.b-ph()*((norm?b/cu.pk:b)/ymax);
+      j?ctx.lineTo(xOf(l),y):ctx.moveTo(xOf(l),y);
+    });
+    ctx.strokeStyle=col; ctx.lineWidth=cur?5:3; ctx.setLineDash(cur?[]:[10,7]); ctx.stroke(); ctx.setLineDash([]);
+    // 봉우리
+    const lm=lmaxOf(cu.t);
+    if(lm>=xmin && lm<=xmax){
+      const x=xOf(lm), y=H-P.b-ph()*((norm?1:cu.pk)/ymax);
+      if(y>P.t-5){
+        ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,cur?8:6,0,7); ctx.fill();
+        font(cur?22:18,800); ctx.textAlign='center';
+        const lab=`${cu.t} K`;
+        ctx.fillText(lab,x,Math.max(P.t+22,y-16));
+        if(cur){ctx.setLineDash([6,6]); ctx.strokeStyle=col; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,H-P.b); ctx.stroke(); ctx.setLineDash([]);}
+      }
+    }
+  });
+  // 정보
+  const lm=lmaxOf(T);
+  document.getElementById('tVal').textContent=T;
+  document.getElementById('lmax').textContent=(lm<1?lm.toFixed(2):lm<10?lm.toFixed(1):lm.toFixed(0))+' μm';
+  document.getElementById('band').textContent= lm<0.38?'자외선':lm<0.75?'가시광선':'적외선';
+  const e=Math.pow(T/5800,4);
+  document.getElementById('etot').textContent= e>=0.01? e.toFixed(e<1?3:1) : (()=>{const [m,x]=e.toExponential(1).split('e');const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};return m+' × 10'+[...x].map(ch=>sup[ch]||'').join('');})();
+}
+
+// ---------- 모드 B ----------
+function drawB(){
+  const xmin=0.1,xmax=100;
+  const xOf=l=>P.l+pw()*Math.log(l/xmin)/Math.log(xmax/xmin);
+  const top=P.t, curveH=ph()*0.56, gap=26, absTop=top+curveH+gap, absH=ph()-curveH-gap;
+  frame();
+  // 가시광선 띠
+  spectrumStrip(xOf,top,curveH); ctx.fillStyle='rgba(255,255,255,.80)';
+  ctx.fillRect(xOf(0.38),top,xOf(0.75)-xOf(0.38),curveH);
+  spectrumStrip(xOf,H-P.b+4,14);
+  // 그리드
+  font(18,500); ctx.fillStyle=css('--p-sub'); ctx.textAlign='center';
+  [0.1,0.2,0.5,1,2,5,10,20,50,100].forEach(v=>{
+    const x=xOf(v); ctx.strokeStyle=css('--p-grid'); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,H-P.b); ctx.stroke();
+    ctx.fillText(fmt(v),x,H-P.b+40);
+  });
+  font(20,700); ctx.textAlign='right'; ctx.fillStyle=css('--p-ink'); ctx.fillText('파장(μm)',W-P.r,H-P.b+92);
+  regionLabels(xOf,xmin,xmax);
+  // 구분선
+  ctx.strokeStyle=css('--p-line'); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(P.l,absTop-gap/2); ctx.lineTo(W-P.r,absTop-gap/2); ctx.stroke();
+
+  // 복사 곡선 (각각 정규화)
+  const N=1200;
+  [[5800,'--sun','태양 복사'],[288,'--earth','지구 복사']].forEach(([t,cv_,name])=>{
+    const pk=B(lmaxOf(t),t), col=css(cv_);
+    const yOf=v=>top+curveH-curveH*0.8*v;
+    // 흡수 부분
+    if(showAbs){
+      ctx.beginPath();
+      for(let i=0;i<=N;i++){const l=xmin*Math.pow(xmax/xmin,i/N); const v=B(l,t)/pk; const x=xOf(l); i?ctx.lineTo(x,yOf(v)):ctx.moveTo(x,yOf(v));}
+      for(let i=N;i>=0;i--){const l=xmin*Math.pow(xmax/xmin,i/N); const v=B(l,t)/pk*(1-aTot(l)); ctx.lineTo(xOf(l),yOf(v));}
+      ctx.closePath(); ctx.fillStyle=css('--abs'); ctx.fill();
+      // 통과 부분
+      ctx.beginPath(); ctx.moveTo(xOf(xmin),yOf(0));
+      for(let i=0;i<=N;i++){const l=xmin*Math.pow(xmax/xmin,i/N); ctx.lineTo(xOf(l),yOf(B(l,t)/pk*(1-aTot(l))));}
+      ctx.lineTo(xOf(xmax),yOf(0)); ctx.closePath();
+      ctx.globalAlpha=.28; ctx.fillStyle=col; ctx.fill(); ctx.globalAlpha=1;
+    }
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){const l=xmin*Math.pow(xmax/xmin,i/N); const x=xOf(l),y=yOf(B(l,t)/pk); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.strokeStyle=col; ctx.lineWidth=4; ctx.stroke();
+    font(22,800); ctx.fillStyle=col; ctx.textAlign='center';
+    ctx.fillText(name,xOf(lmaxOf(t)),yOf(1)-14);
+  });
+
+  // 흡수율 행
+  const rows=[['산소와 오존',aO3,'--o3','O3'],['이산화 탄소',aCO2,'--co2','CO2'],['수증기',aH2O,'--h2o','H2O'],['전체 대기',null,'--p-ink','ALL']];
+  const rh=absH/rows.length;
+  rows.forEach(([name,f,cvar,key],r)=>{
+    const y0=absTop+r*rh, hh=rh-8, on= key==='ALL'||gas[key];
+    ctx.fillStyle=css('--p-bg2'); ctx.fillRect(P.l,y0,pw(),hh);
+    ctx.beginPath(); ctx.moveTo(xOf(xmin),y0+hh);
+    for(let i=0;i<=N;i++){const l=xmin*Math.pow(xmax/xmin,i/N); const a=f?f(l):aTot(l); ctx.lineTo(xOf(l),y0+hh-hh*a);}
+    ctx.lineTo(xOf(xmax),y0+hh); ctx.closePath();
+    ctx.globalAlpha=on?0.85:0.12; ctx.fillStyle=css(cvar); ctx.fill(); ctx.globalAlpha=1;
+    font(18,700); ctx.textAlign='right'; ctx.fillStyle=on?css(cvar):css('--p-sub');
+    ctx.fillText(name,P.l-10,y0+hh/2+6);
+  });
+
+  // 대기의 창
+  if(gas.CO2&&gas.H2O){
+    const x0=xOf(8),x1=xOf(12.5);
+    ctx.strokeStyle=css('--earth'); ctx.lineWidth=2; ctx.setLineDash([6,5]);
+    ctx.strokeRect(x0,absTop-4,x1-x0,absH-4); ctx.setLineDash([]);
+    font(17,800); ctx.fillStyle=css('--earth'); ctx.textAlign='center';
+    const tw=ctx.measureText('대기의 창').width+12; ctx.fillStyle=css('--p-bg'); ctx.fillRect((x0+x1)/2-tw/2,absTop-gap+1,tw,22); ctx.fillStyle=css('--earth'); ctx.fillText('대기의 창',(x0+x1)/2,absTop-gap+18);
+  }
+
+  const s=absorbedFrac(5800), e=absorbedFrac(288);
+  document.getElementById('aSun').textContent=Math.round(s*100)+' %';
+  document.getElementById('aEarth').textContent=Math.round(e*100)+' %';
+  document.getElementById('bSun').style.width=(s*100)+'%';
+  document.getElementById('bEarth').style.width=(e*100)+'%';
+}
+
+// ---------- 공통 ----------
+function frame(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=css('--p-bg'); ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=css('--p-ink'); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(P.l,P.t); ctx.lineTo(P.l,H-P.b); ctx.lineTo(W-P.r,H-P.b); ctx.stroke();
+}
+function ylabel(t){font(20,700); ctx.save(); ctx.translate(40,P.t+ph()/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle=css('--p-ink'); ctx.fillText(t,0,0); ctx.restore();}
+function niceMax(v){const s=[1,2,3,5]; let p=Math.pow(10,Math.floor(Math.log10(v)));
+  for(const m of [1,2,3,5,10]) if(m*p>=v) return m*p; return 10*p;}
+function linTicks(xmax){const st=xmax/6; const p=Math.pow(10,Math.floor(Math.log10(st)));
+  const step=[1,2,5,10].map(m=>m*p).find(s=>s>=st); const a=[]; for(let v=0;v<=xmax+1e-9;v+=step)a.push(+v.toFixed(6)); return a;}
+function fmt(v){return v>=1? String(+v.toFixed(1)) : String(+v.toFixed(2));}
+function colorOfT(t){
+  if(t>=5000) return '#e8590c'; if(t>=3000) return '#d9480f';
+  if(t>=1000) return '#c92a2a'; return '#c2255c';
+}
+function draw(){mode==='A'?drawA():drawB(); syncBtns();}
+function syncBtns(){
+  document.getElementById('axLin').classList.toggle('on',axis==='lin');
+  document.getElementById('axLog').classList.toggle('on',axis==='log');
+  document.getElementById('norm').classList.toggle('on',norm);
+  document.getElementById('shAbs').classList.toggle('on',showAbs);
+}
+
+// ---------- 이벤트 ----------
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('sideA').classList.toggle('hide',mode!=='A');
+  document.getElementById('sideB').classList.toggle('hide',mode!=='B');
+  draw();
+});
+sl.oninput=()=>{T=s2t(+sl.value); draw();};
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{T=+b.dataset.t; sl.value=t2s(T); draw();});
+document.getElementById('pin').onclick=()=>{if(!pins.includes(T)){pins.push(T); if(pins.length>5)pins.shift();} draw();};
+document.getElementById('clr').onclick=()=>{pins=[]; draw();};
+document.getElementById('axLin').onclick=()=>{axis='lin'; draw();};
+document.getElementById('axLog').onclick=()=>{axis='log'; draw();};
+document.getElementById('norm').onclick=()=>{norm=!norm; draw();};
+document.getElementById('shAbs').onclick=()=>{showAbs=!showAbs; draw();};
+['O3','CO2','H2O'].forEach(kk=>document.getElementById('g'+kk).onchange=e=>{gas[kk]=e.target.checked; draw();});
+draw();
+})();
+</script>
+</body>
+</html>
