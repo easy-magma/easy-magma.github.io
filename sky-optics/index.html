@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하늘의 색과 빛의 비밀 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+/* Easy Magma 공통 테마(theme.css)와 같은 토큰 · 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f; --accent-ink:#fff;
+  --p-bg:#ffffff; --p-ink:#1d2330; --p-sub:#5b6475; --p-grid:#e9ecf2;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --accent-ink:#16120f; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{display:flex;align-items:flex-end;gap:16px;padding:8px 24px 4px;flex-wrap:wrap;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;max-width:1520px;margin:10px auto 0;padding:0 24px}
+.tab{font:700 17px var(--f-body);padding:8px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg)}
+main{display:grid;grid-template-columns:1fr 370px;gap:16px;padding:16px 24px;max-width:1520px;margin:0 auto}
+@media (max-width:960px){main{grid-template-columns:1fr;padding:12px 16px}.tabs{padding:0 16px}}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.card.plot{background:var(--p-bg);padding:8px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:17px;margin:0 0 8px;color:var(--sub);font-weight:800}
+.q{font-size:22px;font-weight:900;line-height:1.35;margin:0}
+.btn{font:700 16px var(--f-body);padding:8px 12px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.lbl{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-top:6px}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.note{font-size:15px;color:var(--sub);line-height:1.6;margin:8px 0 0}
+.key{font-size:18px;font-weight:800;line-height:1.55;margin:0}
+.key b{color:var(--accent)}
+canvas{width:100%;height:auto;display:block;border-radius:8px}
+.hide{display:none!important}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.bar{display:grid;grid-template-columns:72px 1fr 52px;align-items:center;gap:8px;font-weight:800;font-size:16px}
+.bar .t{height:18px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar .t i{display:block;height:100%}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums}
+.big{font-size:34px;font-weight:900;letter-spacing:-.02em}
+.cap{font-size:14px;font-weight:800;color:var(--p-sub);margin:2px 6px 6px}
+</style>
+</head>
+<body>
+<a class="back" href="../">← 시뮬레이터 목록</a>
+<header>
+  <div><h1>하늘의 색과 빛의 비밀</h1>
+  <p class="subt">지구시스템과학 · 02. 지구 열수지 (교과서 p.92) — 햇빛이 대기를 지나며 <b>산란</b>되고 <b>굴절</b>되면 어떤 일이 생길까?</p></div>
+</header>
+<nav class="tabs">
+  <button class="tab on" data-t="sky">① 하늘은 왜 파랗고, 노을은 왜 붉을까?</button>
+  <button class="tab" data-t="belt">② 비너스의 벨트</button>
+  <button class="tab" data-t="mirage">③ 신기루</button>
+  <button class="tab" data-t="bow">④ 무지개</button>
+</nav>
+
+<!-- ① 하늘색과 노을 -->
+<main id="p-sky">
+  <div class="col">
+    <div class="card plot"><div class="cap">해를 바라본 하늘</div><canvas id="skyView" width="1200" height="430"></canvas></div>
+    <div class="card plot"><div class="cap">옆에서 본 모습 — 햇빛이 지나는 대기의 길이 (대기 두께는 과장)</div><canvas id="skyDiag" width="1200" height="400"></canvas></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <p class="q">하늘은 왜 파랗고,<br>노을은 왜 붉을까?</p>
+      <div class="lbl"><span>태양의 고도</span><span id="hV">60°</span></div>
+      <input type="range" id="h" min="-4" max="90" step="0.5" value="60">
+      <div class="row">
+        <button class="btn" data-h="60">한낮</button>
+        <button class="btn" data-h="15">오후</button>
+        <button class="btn" data-h="2">해 질 무렵</button>
+        <button class="btn" data-h="-2">해 진 직후</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="mars">지구 ↔ 화성</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>관측자에게 도달하는 햇빛</h2>
+      <div class="stat"><span class="big" id="mV">1.2</span> <span style="font-weight:800;color:var(--sub)">배 (한낮 천정 기준)</span><br><span style="font-size:14px;color:var(--sub)">햇빛이 지나는 대기의 길이</span></div>
+      <div class="bars" id="bars"></div>
+      <p class="note">파장이 짧은 빛(파랑·보라)일수록 대기 분자에 더 많이 <b>산란</b>된다.</p>
+    </div>
+    <div class="card"><p class="key" id="skyKey"></p></div>
+  </div>
+</main>
+
+<!-- ② 비너스의 벨트 -->
+<main id="p-belt" class="hide">
+  <div class="col">
+    <div class="card plot"><div class="cap">해가 진 뒤, 해의 반대쪽(동쪽) 하늘</div><canvas id="beltView" width="1200" height="430"></canvas></div>
+    <div class="card plot"><div class="cap">옆에서 본 모습 (지구 크기와 대기 두께는 과장)</div><canvas id="beltDiag" width="1200" height="420"></canvas></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <p class="q">해가 진 뒤 동쪽 하늘의<br>분홍빛 띠는 무엇일까?</p>
+      <div class="lbl"><span>해가 지평선 아래로 내려간 각</span><span id="dV">2°</span></div>
+      <input type="range" id="d" min="0" max="8" step="0.1" value="2">
+    </div>
+    <div class="card"><p class="key">
+      <b>비너스의 벨트</b>: 해가 진 직후, 해 반대쪽 하늘에 보이는 분홍빛 띠<br><br>
+      ① 지평선 근처의 검푸른 띠 = <b>지구의 그림자</b><br>
+      ② 그 위 분홍 띠 = 대기를 아주 길게 지나며 파란빛을 잃은 <b>붉은 햇빛</b>이 높은 하늘을 비추고, 다시 <b>산란</b>되어 우리 눈에 온 빛<br><br>
+      해가 더 내려갈수록 그림자가 올라오며 띠가 사라진다.
+    </p></div>
+  </div>
+</main>
+
+<!-- ③ 신기루 -->
+<main id="p-mirage" class="hide">
+  <div class="col">
+    <div class="card plot"><div class="cap">옆에서 본 빛의 경로 (세로 방향을 크게 늘려 그림)</div><canvas id="mirDiag" width="1200" height="430"></canvas></div>
+    <div class="card plot"><div class="cap">관측자의 눈에 보이는 모습</div><canvas id="mirView" width="1200" height="300"></canvas></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <p class="q">뜨거운 도로 위에<br>왜 물웅덩이가 보일까?</p>
+      <div class="row" style="margin-top:8px">
+        <button class="btn on" data-mm="hot">뜨거운 도로 (아래 신기루)</button>
+        <button class="btn" data-mm="cold">차가운 바다 (위 신기루)</button>
+      </div>
+      <div class="lbl"><span id="tLab">지면과 공기의 온도 차</span><span id="tV">15 °C</span></div>
+      <input type="range" id="dt" min="0" max="25" step="1" value="15">
+      <div class="row" style="margin-top:8px"><button class="btn" id="rays">광선 보기 켜기/끄기</button></div>
+    </div>
+    <div class="card"><p class="key" id="mirKey"></p></div>
+  </div>
+</main>
+
+<!-- ④ 무지개 -->
+<main id="p-bow" class="hide">
+  <div class="col">
+    <div class="card plot"><div class="cap">물방울 하나에 들어간 햇빛</div><canvas id="drop" width="1200" height="560"></canvas></div>
+    <div class="card plot"><div class="cap">물방울에서 나온 빛이 햇빛과 이루는 각 (무지개 각)</div><canvas id="bowGraph" width="1200" height="300"></canvas></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <p class="q">무지개는 왜 생길까?</p>
+      <div class="lbl"><span>빛이 들어가는 위치</span><span id="bV">0.86</span></div>
+      <input type="range" id="b" min="0" max="0.99" step="0.01" value="0.86">
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="bMin">가장 많이 모이는 빛</button>
+        <button class="btn" id="bMany">빛 여러 개 쏘기</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn on" data-k="1">무지개 (반사 1번)</button>
+        <button class="btn" data-k="2">쌍무지개 (반사 2번)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>나오는 빛의 각</h2>
+      <div class="bars" id="angBars"></div>
+    </div>
+    <div class="card"><p class="key" id="bowKey"></p></div>
+  </div>
+</main>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const FONT='"SUIT Variable","Malgun Gothic",sans-serif';
+function txt(c,s,x,y,size=18,col='#1d2330',align='left',w=800){c.font=`${w} ${size}px ${FONT}`;c.fillStyle=col;c.textAlign=align;c.fillText(s,x,y);}
+function rgb(a){return `rgb(${a.map(v=>Math.round(clamp(v,0,1)*255)).join(',')})`;}
+const gam=v=>Math.pow(clamp(v,0,1),1/2.2);
+
+/* ---------- 탭 ---------- */
+let tab='sky';
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  ['sky','belt','mirage','bow'].forEach(t=>$('p-'+t).classList.toggle('hide',t!==tab));
+  draw();
+});
+
+/* ======================= ① 하늘색과 노을 ======================= */
+const LAM=[680,550,450];               // R, G, B 대표 파장(nm)
+let planet='earth';
+function beta(){ // 연직 방향 광학적 두께
+  return planet==='earth' ? LAM.map(l=>0.11*Math.pow(550/l,4))      // 레일리 산란: 1/λ⁴
+                          : LAM.map(l=>0.13*Math.pow(l/550,1.6)); // 화성 먼지: 붉은빛을 더 산란
+}
+function airmass(h){ const hh=Math.max(h,-0.3); return Math.min(40,1/(Math.sin(hh*D2R)+0.50572*Math.pow(hh+6.07995,-1.6364))); }
+function sunT(h){ const m=airmass(h), b=beta(); const dark=h<0?Math.exp(h*0.9):1; return b.map(v=>Math.exp(-v*m)*dark); }
+function skyCol(e,az,h){ // e: 보는 고도, az: 해와의 방위 차(도)
+  const b=beta(), T=sunT(h), m=airmass(Math.max(e,0.3));
+  const cosg=Math.cos(e*D2R)*Math.cos(Math.max(h,0)*D2R)*Math.cos(az*D2R)+Math.sin(e*D2R)*Math.sin(Math.max(h,0)*D2R);
+  const ang=Math.acos(clamp(cosg,-1,1))*R2D;
+  const glow= planet==='earth' ? 1.2*Math.exp(-ang/10)+0.9*Math.exp(-ang/35)*(h<15?1:0.3) : 2.2*Math.exp(-ang/8);
+  return b.map((bv,i)=>{
+    let fwd = planet==='mars' ? glow*Math.pow(LAM[i]/550,-2.2) : glow; // 화성: 해 주변은 파란빛이 앞으로 잘 산란
+    return T[i]*(1-Math.exp(-bv*m))*(1+fwd)*1.15;
+  });
+}
+function expo(h){ return h>8?1:h>0?0.75+h/32:Math.max(0.12,0.75+h*0.16); }
+const skyView=$('skyView'), sv=skyView.getContext('2d');
+const skyDiag=$('skyDiag'), sd=skyDiag.getContext('2d');
+function drawSkyView(h){
+  const W=skyView.width,H=skyView.height,G=70, top=50; // 화면 위쪽 = 고도 50°
+  const img=sv.createImageData(W,H-G); const ex=expo(h);
+  for(let y=0;y<H-G;y++){
+    const e=top*(1-y/(H-G));
+    for(let x=0;x<W;x+=4){
+      const az=(x-W/2)/W*100;
+      const c=skyCol(e,az,h).map(v=>gam(v*ex*2.3));
+      for(let k=0;k<4;k++){const p=(y*W+x+k)*4; img.data[p]=c[0]*255; img.data[p+1]=c[1]*255; img.data[p+2]=c[2]*255; img.data[p+3]=255;}
+    }
+  }
+  sv.putImageData(img,0,0);
+  // 태양
+  if(h>-0.6){
+    const T=sunT(h), mx=Math.max(...T);
+    const sc=T.map(v=>gam(v/mx*0.98));
+    const y=(H-G)*(1-h/top), r=22;
+    const g=sv.createRadialGradient(W/2,y,0,W/2,y,r*3.2);
+    g.addColorStop(0,rgb(sc)); g.addColorStop(0.32,rgb(sc)); g.addColorStop(1,'rgba(255,255,255,0)');
+    sv.save(); sv.beginPath(); sv.rect(0,0,W,H-G); sv.clip(); sv.fillStyle=g; sv.beginPath(); sv.arc(W/2,y,r*3.2,0,7); sv.fill(); sv.restore();
+  }
+  // 지면
+  const gl=expo(h)*(h>0?0.55:0.35);
+  sv.fillStyle=planet==='earth'?rgb([0.25*gl,0.32*gl,0.2*gl]):rgb([0.45*gl,0.25*gl,0.15*gl]);
+  sv.fillRect(0,H-G,W,G);
+  txt(sv,planet==='earth'?'지구':'화성',16,H-G/2+8,22,'#fff');
+}
+function drawSkyDiag(h){
+  const c=sd, W=skyDiag.width, H=skyDiag.height;
+  c.fillStyle='#0f1730'; c.fillRect(0,0,W,H);
+  const cx=W/2, R=900, cy=H-90+R, A=150; // 대기 두께 과장
+  c.fillStyle='rgba(120,170,255,.35)'; c.beginPath(); c.arc(cx,cy,R+A,0,7); c.fill();
+  c.fillStyle=planet==='earth'?'#3e6b3a':'#9a4f2c'; c.beginPath(); c.arc(cx,cy,R,0,7); c.fill();
+  const ox=cx, oy=cy-R;
+  // 햇빛 경로: 관측자에게 고도 h로 들어오는 직선
+  const hh=Math.max(h,0.2)*D2R, dx=-Math.cos(hh), dy=-Math.sin(hh); // 관측자 → 태양 방향
+  // 대기 바깥 경계까지 거리
+  const fx=ox-cx, fy=oy-cy, bq=fx*dx+fy*dy, cq=fx*fx+fy*fy-(R+A)*(R+A), L=-bq+Math.sqrt(bq*bq-cq);
+  const sx=ox+dx*L, sy=oy+dy*L;
+  // 대기 밖 햇빛
+  c.strokeStyle='#fff7d6'; c.lineWidth=10; c.beginPath(); c.moveTo(sx+dx*400,sy+dy*400); c.lineTo(sx,sy); c.stroke();
+  // 대기 안: 점점 붉어짐
+  const N=40; const b=beta(); const mTot=airmass(Math.max(h,0.2));
+  for(let i=0;i<N;i++){
+    const f0=i/N, f1=(i+1)/N;
+    const T=b.map(v=>Math.exp(-v*mTot*f1)); const mx=Math.max(...T);
+    c.strokeStyle=rgb(T.map(v=>gam(v/mx))); c.lineWidth=10;
+    c.beginPath(); c.moveTo(sx+(ox-sx)*f0,sy+(oy-sy)*f0); c.lineTo(sx+(ox-sx)*f1,sy+(oy-sy)*f1); c.stroke();
+  }
+  // 산란되어 빠져나가는 빛
+  const nArrow=Math.min(14,Math.round(L/45));
+  for(let i=1;i<nArrow;i++){
+    const f=i/nArrow, px=sx+(ox-sx)*f, py=sy+(oy-sy)*f;
+    const ang=(i*137)%360*D2R, len=34;
+    const col= planet==='earth' ? (i%4===0?'#8f6bff':'#4dabf7') : (i%3===0?'#ffa94d':'#ff6b6b');
+    c.strokeStyle=col; c.lineWidth=3; c.beginPath(); c.moveTo(px,py); c.lineTo(px+Math.cos(ang)*len,py+Math.sin(ang)*len); c.stroke();
+    c.fillStyle=col; c.beginPath(); c.arc(px+Math.cos(ang)*len,py+Math.sin(ang)*len,4,0,7); c.fill();
+  }
+  // 관측자
+  c.fillStyle='#fff'; c.beginPath(); c.arc(ox,oy-8,8,0,7); c.fill(); c.fillRect(ox-3,oy-2,6,14);
+  txt(c,'관측자',ox+14,oy+4,18,'#fff');
+  txt(c,'대기',cx+R*0.55,cy-R-A*0.35-60,20,'#cfe0ff');
+  txt(c,'햇빛',Math.max(20,sx+dx*300),Math.max(28,sy+dy*300-14),20,'#fff7d6');
+  txt(c,(planet==='earth'?'산란되어 퍼져 나가는 파란빛':'산란되어 퍼져 나가는 붉은빛'),20,30,20,planet==='earth'?'#74c0fc':'#ff8787');
+}
+function updSky(){
+  const h=+$('h').value; $('hV').textContent=h+'°';
+  drawSkyView(h); drawSkyDiag(h);
+  const m=airmass(Math.max(h,0)); $('mV').textContent=(h<0?'40 이상':m.toFixed(1));
+  const T=sunT(Math.max(h,0)), names=['빨강','초록','파랑'], cols=['#e03131','#2f9e44','#1c7ed6'];
+  $('bars').innerHTML=T.map((v,i)=>`<div class="bar"><span style="color:${cols[i]}">${names[i]}</span><span class="t"><i style="width:${(v*100).toFixed(0)}%;background:${cols[i]}"></i></span><span class="v">${(v*100).toFixed(0)}%</span></div>`).join('');
+  let k;
+  if(planet==='mars') k='화성의 먼지는 <b>붉은빛</b>을 더 많이 산란시켜 낮 하늘이 누르스름하고, 해 질 녘 해 주변은 오히려 <b>푸르게</b> 보인다.';
+  else if(h>=20) k='햇빛이 대기를 <b>짧게</b> 지난다.<br>파장이 짧은 <b>파란빛이 가장 많이 산란</b>되어 하늘 전체로 퍼지므로 → 하늘이 <b>파랗다</b>.';
+  else if(h>=-0.5) k='햇빛이 대기를 <b>길게</b> 지난다.<br>오는 동안 파란빛은 대부분 <b>산란되어 빠져나가고</b>, 붉은빛이 상대적으로 많이 남아 → 해와 하늘이 <b>붉다</b>(노을).';
+  else k='해가 진 뒤에도 높은 하늘은 아직 햇빛을 받는다. 아주 긴 경로를 지나온 빛이라 붉은빛만 남는다.';
+  $('skyKey').innerHTML=k;
+}
+$('h').oninput=updSky;
+document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{$('h').value=b.dataset.h; updSky();});
+$('mars').onclick=()=>{planet=planet==='earth'?'mars':'earth'; $('mars').classList.toggle('on',planet==='mars'); updSky();};
+
+/* ======================= ② 비너스의 벨트 ======================= */
+const beltView=$('beltView'), bv=beltView.getContext('2d');
+const beltDiag=$('beltDiag'), bd=beltDiag.getContext('2d');
+function drawBelt(){
+  const d=+$('d').value; $('dV').textContent=d.toFixed(1)+'°';
+  const W=beltView.width,H=beltView.height,G=70,top=40;
+  const shadow=0.9*d+0.4;            // 지구 그림자 윗선의 고도(도)
+  const beltTop=shadow+7+d*0.6;      // 분홍 띠 윗선
+  const fade=Math.exp(-d/3.2);       // 해가 더 내려갈수록 어두워짐
+  for(let y=0;y<H-G;y++){
+    const e=top*(1-y/(H-G));
+    let c;
+    const blue=[0.36,0.52,0.84], pink=[1.0,0.66,0.72], sh=[0.22,0.27,0.45];
+    if(e<shadow){ c=sh.map(v=>v*(0.55+0.45*fade)); }
+    else if(e<beltTop){ const t=(e-shadow)/(beltTop-shadow); const s=Math.sin(Math.PI*Math.min(1,t*1.1));
+      c=pink.map((v,i)=>v*(0.35+0.65*fade)*(0.75+0.25*s)*(1-t*0.4)+blue[i]*t*0.45*fade); }
+    else { const t=Math.min(1,(e-beltTop)/12); c=blue.map((v,i)=>(v*(0.55+0.45*fade))*(0.85+0.15*t)); }
+    // 경계 부드럽게
+    bv.fillStyle=rgb(c); bv.fillRect(0,y,W,1);
+  }
+  // 경계 블렌딩
+  const yS=(H-G)*(1-shadow/top);
+  const g=bv.createLinearGradient(0,yS-10,0,yS+10); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(.5,'rgba(40,40,80,.18)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  bv.fillStyle=g; bv.fillRect(0,yS-10,W,20);
+  bv.fillStyle='#1f2a22'; bv.fillRect(0,H-G,W,G);
+  // 라벨
+  const yB=(H-G)*(1-(shadow+beltTop)/2/top);
+  if(fade>0.12){
+    txt(bv,'비너스의 벨트 (분홍 띠)',W-24,yB+8,24,'#5a1f33','right',900);
+  }
+  txt(bv,'지구의 그림자',W-24,Math.min(H-G-10,(yS+(H-G))/2+8),22,'#e8ecff','right',900);
+  txt(bv,'동쪽 (해의 반대쪽)',16,H-G/2+8,20,'#cfd8cf');
+
+  // 옆모습
+  const c=bd, Wd=beltDiag.width, Hd=beltDiag.height;
+  c.fillStyle='#0b1124'; c.fillRect(0,0,Wd,Hd);
+  const R=560, cx=420, cy=170+R, A=60;
+  // 지구 그림자 (햇빛은 왼쪽에서 수평으로)
+  c.fillStyle='#04060d'; c.fillRect(cx,cy-R,Wd,2*R);
+  // 대기
+  c.save(); c.beginPath(); c.arc(cx,cy,R+A,0,7); c.clip();
+  c.fillStyle='rgba(110,160,255,.30)'; c.fillRect(0,0,Wd,Hd);
+  c.fillStyle='rgba(4,6,13,.85)'; c.fillRect(cx,cy-R,Wd,2*R);
+  c.restore();
+  c.fillStyle='#2e5a37'; c.beginPath(); c.arc(cx,cy,R,0,7); c.fill();
+  // 햇빛: 지구를 스치는 광선은 붉게
+  for(let i=0;i<9;i++){
+    const y=cy-R-6-i*9;
+    const red=Math.max(0,1-i/7);
+    const col=rgb([1,0.92-0.45*red,0.78-0.6*red]);
+    c.strokeStyle=col; c.lineWidth=3;
+    c.beginPath(); c.moveTo(10,y); c.lineTo(Wd-10,y); c.stroke();
+  }
+  txt(c,'햇빛 →',16,cy-R-92,22,'#fff3c4');
+  txt(c,'지표를 스치며 대기를 길게 지난 빛 → 붉은빛만 남음',16,32,18,'#ffb4a8');
+  // 관측자: 낮 경계(맨 위)에서 d만큼 밤 쪽으로 (보이도록 6배 과장)
+  const a=(d*6)*D2R, ox=cx+R*Math.sin(a), oy=cy-R*Math.cos(a);
+  c.fillStyle='#fff'; c.beginPath(); c.arc(ox,oy,7,0,7); c.fill();
+  txt(c,'관측자',ox+10,oy+24,18,'#fff');
+  // 동쪽을 바라보는 시선
+  const hz=a; // 지평선 방향 각
+  c.setLineDash([8,6]); c.lineWidth=2.5;
+  for(const el of [10,22,36]){
+    const t=hz-el*D2R, dx=Math.cos(t), dy=Math.sin(t);
+    for(let s=0;s<560;s+=6){ const x=ox+dx*s, y=oy+dy*s, x2=ox+dx*(s+6), y2=oy+dy*(s+6);
+      const inSh = y>cy-R && x>cx; c.strokeStyle= inSh?'#5c6b99':'#ffc2d4';
+      c.beginPath(); c.moveTo(x,y); c.lineTo(x2,y2); c.stroke(); }
+  }
+  c.setLineDash([]);
+  txt(c,'관측자의 시선 (동쪽 하늘)',ox+170,oy-150,18,'#ffc2d4');
+  txt(c,'지구의 그림자 (햇빛이 닿지 않는 공간)',Wd-16,cy-R+150,20,'#aab4d6','right');
+  txt(c,'해가 지평선 아래 '+d.toFixed(1)+'°  (그림은 6배 과장)',Wd-16,Hd-16,18,'#cfd8ff','right');
+}
+$('d').oninput=drawBelt;
+
+/* ======================= ③ 신기루 ======================= */
+let mm='hot', showRays=true;
+const mirDiag=$('mirDiag'), md=mirDiag.getContext('2d');
+const mirView=$('mirView'), mv=mirView.getContext('2d');
+const XMAX=300, YMAX=7, OBJX=280;
+const eyeH=()=>mm==='hot'?1.2:1.6;
+const EXAG=()=>mm==='hot'?14:40; // 굴절 효과 과장 배율
+function dndy(y){ // 높이에 따른 굴절률 변화율 (1/m)
+  const dT=+$('dt').value;
+  // n-1 ∝ 1/T, dn/dT ≈ -1.0e-6 /K
+  if(mm==='hot'){ const L=0.6; return 1.0e-6*dT/L*Math.exp(-y/L)*EXAG(); }     // 아래가 뜨거움 → 위로 갈수록 n 증가
+  else { const L=2.2; return -1.0e-6*dT/L*Math.exp(-y/L)*EXAG(); }          // 아래가 차가움 → 위로 갈수록 n 감소
+}
+function objectAt(y){ // 먼 곳 물체(나무 또는 배)의 높이별 색
+  if(mm==='hot'){ if(y<0) return null; if(y<1.2) return [0.42,0.28,0.16]; if(y<4.0){const t=(y-1.2)/2.8; return [0.05+0.8*t,0.33+0.5*t,0.10];} if(y<4.5) return [0.9,0.15,0.15]; return null; }
+  else { if(y<0) return null; if(y<1.2) return [0.75,0.18,0.15]; if(y<2.4) return [0.95,0.95,0.92]; if(y<4.4) return [0.3,0.3,0.36]; return null; }
+}
+function trace(ang){ // 눈에서 각 ang(rad)로 출발한 광선 추적 (작은 각 근사)
+  let x=0,y=eyeH(),s=Math.tan(ang); const dx=0.25; const pts=[[x,y]];
+  while(x<XMAX){
+    s+=dndy(Math.max(y,0))*dx; y+=s*dx; x+=dx; pts.push([x,y]);
+    if(y<=0) return {hit:'ground',pts,x,y:0};
+    if(x>=OBJX && x<OBJX+dx){ const c=objectAt(y); if(c) return {hit:'obj',pts,x,y,c}; }
+    if(y>YMAX) return {hit:'sky',pts,x,y};
+  }
+  return {hit:'sky',pts,x,y};
+}
+const groundCol=()=>mm==='hot'?[0.42,0.42,0.44]:[0.15,0.35,0.55];
+const skyC=e=>[0.55-e*0.6,0.72-e*0.4,0.95];
+function drawMirage(){
+  const dT=+$('dt').value; $('tV').textContent=dT+' °C';
+  $('tLab').textContent= mm==='hot' ? '지면이 공기보다 뜨거운 정도' : '해수면이 공기보다 차가운 정도';
+  const W=mirDiag.width,H=mirDiag.height, X=x=>40+x/XMAX*(W-80), Y=y=>H-40-y/YMAX*(H-80);
+  const c=md;
+  // 공기 온도 표시 (배경)
+  for(let i=0;i<H-40;i++){
+    const y=(H-40-i)/(H-80)*YMAX;
+    let t = mm==='hot' ? dT*Math.exp(-y/0.6) : -dT*Math.exp(-y/2.2);
+    const r=clamp(t/25,-1,1);
+    const col= r>0 ? [1,1-0.45*r,1-0.6*r] : [1+0.55*r,1+0.35*r,1];
+    c.fillStyle=rgb(col.map(v=>0.86+v*0.14)); c.fillRect(0,i,W,1);
+  }
+  c.fillStyle=mm==='hot'?'#6b6b70':'#2e5f8a'; c.fillRect(0,H-40,W,40);
+  txt(c,mm==='hot'?'뜨거운 도로':'차가운 바다',W/2,H-14,18,'#fff','center');
+  txt(c,mm==='hot'?'지면 근처 공기가 뜨거움 (밀도 작음)':'해수면 근처 공기가 차가움 (밀도 큼)',W/2,30,20,'#7a2e1f','center');
+  // 물체
+  for(let y=0;y<YMAX;y+=0.05){const col=objectAt(y); if(col){const w=mm==='hot'?(y<1.2?12:y<4?60:24):80; c.fillStyle=rgb(col); c.fillRect(X(OBJX)-w/2,Y(y+0.05),w,Y(y)-Y(y+0.05)+1);} }
+  // 관측자
+  c.fillStyle='#1d2330'; c.beginPath(); c.arc(X(0),Y(eyeH()),8,0,7); c.fill(); c.fillRect(X(0)-3,Y(eyeH()),6,Y(0)-Y(eyeH()));
+  txt(c,'눈',X(0)+12,Y(eyeH())-10,18,'#1d2330');
+  if(showRays){
+    for(let k=0;k<=24;k++){
+      const ang= mm==='hot' ? -0.021+k*0.0013 : -0.003+k*0.001;
+      const r=trace(ang);
+      c.strokeStyle= r.hit==='obj' ? (mm==='hot'?(r.y<1.2?'#a0522d':r.y<4?'#2f9e44':'#e03131'):(r.y<1.2?'#c92a2a':r.y<2.4?'#adb5bd':'#495057')) : r.hit==='ground' ? '#868e96' : '#4dabf7';
+      c.lineWidth= r.hit==='obj'?3:1.6; c.globalAlpha=r.hit==='obj'?1:0.6;
+      c.beginPath(); r.pts.forEach(([x,y],i)=>i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y))); c.stroke(); c.globalAlpha=1;
+    }
+  }
+  // 보이는 모습
+  const Wv=mirView.width,Hv=mirView.height, AMIN=mm==='hot'?-0.024:-0.008, AMAX=mm==='hot'?0.014:0.024;
+  for(let j=0;j<Hv;j++){
+    const ang=AMAX-(AMAX-AMIN)*j/Hv; const r=trace(ang);
+    let col;
+    if(r.hit==='obj') col=r.c; else if(r.hit==='ground') col=groundCol(); else col=skyC(clamp(ang*20,0,0.4));
+    // 배경 줄
+    mv.fillStyle=rgb(r.hit==='obj'?skyC(clamp(ang*20,0,0.4)):col); mv.fillRect(0,j,Wv,1);
+    if(r.hit==='obj'){ mv.fillStyle=rgb(r.c); const w=mm==='hot'?(r.y<1.2?16:r.y<4?110:44):170; mv.fillRect(Wv/2-w/2,j,w,1); }
+  }
+  // 평지선(눈높이 방향)
+  const j0=Hv*(AMAX)/(AMAX-AMIN);
+  mv.setLineDash([6,6]); mv.strokeStyle='rgba(0,0,0,.45)'; mv.beginPath(); mv.moveTo(0,j0); mv.lineTo(Wv,j0); mv.stroke(); mv.setLineDash([]);
+  txt(mv,'눈높이',10,j0-6,16,'rgba(0,0,0,.6)');
+  // 설명 라벨
+  let firstObj=-1,lastObj=-1,lastSkyBelow=-1;
+  for(let j=0;j<Hv;j++){const ang=AMAX-(AMAX-AMIN)*j/Hv; const r=trace(ang); if(r.hit==='obj'){if(firstObj<0)firstObj=j; lastObj=j;} if(r.hit==='sky'&&ang<0) lastSkyBelow=j;}
+  if(+$('dt').value>=3){
+    if(mm==='hot'){
+      if(lastSkyBelow>j0||lastObj>j0) txt(mv,'하늘빛이 비친 ‘물웅덩이’',20,Math.min(Hv-40,Math.max(lastSkyBelow,lastObj)-14),22,'#0b3d91','left',900);
+      if(lastObj>j0) txt(mv,'← 거꾸로 보이는 나무',Wv/2+70,lastObj-10,22,'#7a1f1f','left',900);
+    } else if(firstObj>=0){ txt(mv,'← 실제보다 떠올라 보이는 배',Wv/2+100,firstObj+40,22,'#7a1f1f','left',900); }
+  }
+  const k= mm==='hot'
+    ? (dT<3 ? '지면과 공기의 온도 차가 작으면 빛이 거의 곧게 나아가 <b>신기루가 생기지 않는다</b>.'
+            : '지면 근처 공기가 뜨거워 <b>밀도가 작다</b>. 빛은 밀도가 다른 공기층을 지나며 <b>굴절</b>되어 위로 휘어진다.<br><br>→ 하늘에서 온 빛이 땅에서 오는 것처럼 보여 도로 위에 <b>물웅덩이(하늘)</b>가 보이고, 물체는 <b>거꾸로 된 모습</b>이 아래에 보인다. (아래 신기루)')
+    : (dT<3 ? '온도 차가 작으면 빛이 거의 곧게 나아간다.'
+            : '해수면 근처 공기가 차가워 <b>밀도가 크다</b>. 빛은 아래로 휘어진다(<b>굴절</b>).<br><br>→ 먼 곳의 배가 실제보다 <b>떠올라</b> 보인다. (위 신기루)');
+  $('mirKey').innerHTML=k+'<br><span style="font-size:14px;color:var(--sub)">※ 휘어짐을 잘 보이도록 굴절 효과를 과장했어요.</span>';
+}
+$('dt').oninput=drawMirage;
+$('rays').onclick=()=>{showRays=!showRays; drawMirage();};
+document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{mm=b.dataset.mm; document.querySelectorAll('[data-mm]').forEach(x=>x.classList.toggle('on',x===b)); drawMirage();});
+
+/* ======================= ④ 무지개 ======================= */
+const COLS=[{n:1.3310,c:'#e03131',name:'빨강'},{n:1.3330,c:'#f76707',name:''},{n:1.3345,c:'#f2c200',name:''},{n:1.3360,c:'#2f9e44',name:''},{n:1.3380,c:'#1c7ed6',name:''},{n:1.3400,c:'#3b5bdb',name:''},{n:1.3430,c:'#7048e8',name:'보라'}];
+let K=1, many=false;
+function bowAngle(b,n,k){ const i=Math.asin(b), r=Math.asin(b/n);
+  const D=2*(i-r)+k*(Math.PI-2*r); // 총 편향각
+  return k===1 ? (Math.PI-D)*R2D : (D-Math.PI)*R2D; }
+function bMin(n,k){ return Math.sqrt((( k+1)*(k+1)-n*n)/((k+1)*(k+1)-1)); }
+const drop=$('drop'), dc=drop.getContext('2d');
+function refr(d,nrm,n1,n2){ // d, nrm 단위벡터 (nrm은 입사쪽을 향함)
+  const ci=-(d[0]*nrm[0]+d[1]*nrm[1]), eta=n1/n2, k=1-eta*eta*(1-ci*ci);
+  if(k<0) return null; const t=eta*ci-Math.sqrt(k); return [eta*d[0]+t*nrm[0],eta*d[1]+t*nrm[1]];
+}
+function hitCircle(p,d,cx,cy,R){ const fx=p[0]-cx,fy=p[1]-cy, b=fx*d[0]+fy*d[1], c=fx*fx+fy*fy-R*R; const disc=b*b-c; if(disc<0) return null; const t=-b+Math.sqrt(disc); return [p[0]+d[0]*t,p[1]+d[1]*t]; }
+function rayPath(b,n,k,cx,cy,R){
+  const p0=[cx-R*Math.sqrt(1-b*b),cy-R*b];
+  const pts=[[p0[0]-700,p0[1]],p0];
+  let nrm=[(p0[0]-cx)/R,(p0[1]-cy)/R]; let d=refr([1,0],nrm,1,n); let p=p0;
+  for(let j=0;j<k;j++){ const q=hitCircle([p[0]+d[0]*1e-6,p[1]+d[1]*1e-6],d,cx,cy,R); pts.push(q);
+    const nn=[(q[0]-cx)/R,(q[1]-cy)/R]; const dot=d[0]*nn[0]+d[1]*nn[1]; d=[d[0]-2*dot*nn[0],d[1]-2*dot*nn[1]]; p=q; }
+  const q=hitCircle([p[0]+d[0]*1e-6,p[1]+d[1]*1e-6],d,cx,cy,R); pts.push(q);
+  const nn=[-(q[0]-cx)/R,-(q[1]-cy)/R]; const out=refr(d,nn,n,1)||d;
+  pts.push([q[0]+out[0]*900,q[1]+out[1]*900]);
+  return pts;
+}
+function drawBow(){
+  const b=+$('b').value; $('bV').textContent=b.toFixed(2);
+  const W=drop.width,H=drop.height,cx=W*0.5,cy=H*0.5,R=200;
+  const c=dc; c.fillStyle='#0f1730'; c.fillRect(0,0,W,H);
+  c.fillStyle='rgba(120,190,255,.18)'; c.strokeStyle='#a5d8ff'; c.lineWidth=3; c.beginPath(); c.arc(cx,cy,R,0,7); c.fill(); c.stroke();
+  txt(c,'물방울',cx,cy+R+34,20,'#a5d8ff','center');
+  txt(c,'햇빛 →',20,40,22,'#fff3c4');
+  const draw=(bb,col,lw,alpha)=>{ const pts=rayPath(bb,col.n,K,cx,cy,R);
+    c.globalAlpha=alpha; c.strokeStyle=col.c; c.lineWidth=lw;
+    c.beginPath(); pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); c.stroke(); c.globalAlpha=1; };
+  if(many){
+    for(let bb=0.05;bb<0.99;bb+=0.04) draw(bb,COLS[0],1.6,0.55);
+  } else {
+    // 들어오는 흰빛
+    const p0=[cx-R*Math.sqrt(1-b*b),cy-R*b];
+    c.strokeStyle='#fff'; c.lineWidth=5; c.beginPath(); c.moveTo(0,p0[1]); c.lineTo(p0[0],p0[1]); c.stroke();
+    COLS.forEach(col=>draw(b,col,2.6,0.95));
+    // 반사 지점 표시
+    const pts=rayPath(b,COLS[0].n,K,cx,cy,R);
+    for(let j=2;j<2+K;j++){ c.fillStyle='#fff'; c.beginPath(); c.arc(pts[j][0],pts[j][1],6,0,7); c.fill(); }
+    txt(c,'굴절',p0[0]-60,p0[1]-12,18,'#fff');
+    txt(c,K===1?'반사':'반사 2번',pts[2][0]+12,pts[2][1]+(pts[2][1]>cy?24:-10),18,'#fff');
+    const pe=pts[pts.length-2]; txt(c,'굴절 (색이 나뉨)',pe[0]+12,pe[1]+(pe[1]>cy?26:-10),18,'#fff');
+  }
+  // 각도 막대
+  const angs=[COLS[0],COLS[6]].map(col=>({col,a:bowAngle(b,col.n,K)}));
+  $('angBars').innerHTML=angs.map(o=>`<div class="bar"><span style="color:${o.col.c}">${o.col.name}</span><span class="t"><i style="width:${clamp(o.a/60*100,0,100)}%;background:${o.col.c}"></i></span><span class="v">${o.a.toFixed(1)}°</span></div>`).join('')
+    + `<p class="note">가장 많이 모이는 각: 빨강 ${bowAngle(bMin(COLS[0].n,K),COLS[0].n,K).toFixed(1)}°, 보라 ${bowAngle(bMin(COLS[6].n,K),COLS[6].n,K).toFixed(1)}°</p>`;
+  drawBowGraph(b);
+  $('bowKey').innerHTML = K===1
+    ? '햇빛이 물방울에 들어가며 <b>굴절</b>, 안쪽 면에서 <b>반사</b>, 나오며 다시 <b>굴절</b>된다.<br><br>색마다 굴절 정도가 달라 빛이 나뉜다(분산). 빨강은 약 <b>42°</b>, 보라는 약 <b>40°</b>에 빛이 가장 많이 모인다 → 바깥쪽이 빨강인 무지개.<br><br>그래서 무지개는 <b>해를 등지고</b> 서야 보인다.'
+    : '물방울 안에서 <b>두 번 반사</b>되면 약 <b>51°</b> 근처에 더 흐린 무지개(쌍무지개)가 생긴다.<br><br>반사가 한 번 더 일어나 <b>색의 순서가 반대</b>(바깥쪽이 보라)이다.';
+}
+const bg=$('bowGraph'), gc=bg.getContext('2d');
+function drawBowGraph(b){
+  const W=bg.width,H=bg.height,P={l:70,r:20,t:20,b:40};
+  gc.fillStyle='#fff'; gc.fillRect(0,0,W,H);
+  const amin=K===1?0:40, amax=K===1?45:70;
+  const X=v=>P.l+(W-P.l-P.r)*v, Y=a=>P.t+(H-P.t-P.b)*(1-(a-amin)/(amax-amin));
+  gc.strokeStyle='#e9ecf2'; gc.lineWidth=1; gc.font=`700 15px ${FONT}`; gc.fillStyle='#5b6475'; gc.textAlign='right';
+  for(let a=amin;a<=amax;a+=5){ gc.beginPath(); gc.moveTo(P.l,Y(a)); gc.lineTo(W-P.r,Y(a)); gc.stroke(); gc.fillText(a+'°',P.l-8,Y(a)+5); }
+  gc.textAlign='center'; gc.fillText('빛이 들어가는 위치 (물방울 중심 0 → 가장자리 1)',(W+P.l)/2,H-10);
+  [COLS[0],COLS[6]].forEach(col=>{ gc.strokeStyle=col.c; gc.lineWidth=3; gc.beginPath();
+    for(let i=0;i<=200;i++){ const v=i/200*0.995; const a=bowAngle(v,col.n,K); i?gc.lineTo(X(v),Y(a)):gc.moveTo(X(v),Y(a)); } gc.stroke(); });
+  gc.strokeStyle='#1d2330'; gc.lineWidth=2; gc.setLineDash([6,5]); gc.beginPath(); gc.moveTo(X(b),P.t); gc.lineTo(X(b),H-P.b); gc.stroke(); gc.setLineDash([]);
+  gc.textAlign='left'; gc.fillStyle='#1d2330'; gc.font=`800 16px ${FONT}`;
+  gc.fillText(K===1?'곡선이 평평한 곳(꼭대기) = 빛이 많이 모이는 각':'곡선이 평평한 곳(바닥) = 빛이 많이 모이는 각',P.l+10,P.t+18);
+}
+$('b').oninput=()=>{many=false; $('bMany').classList.remove('on'); drawBow();};
+$('bMin').onclick=()=>{many=false; $('bMany').classList.remove('on'); $('b').value=bMin(COLS[0].n,K).toFixed(2); drawBow();};
+$('bMany').onclick=()=>{many=!many; $('bMany').classList.toggle('on',many); drawBow();};
+document.querySelectorAll('[data-k]').forEach(btn=>btn.onclick=()=>{K=+btn.dataset.k; document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('on',x===btn)); $('b').value=bMin(COLS[0].n,K).toFixed(2); drawBow();});
+
+/* ---------- 공통 ---------- */
+function draw(){ if(tab==='sky') updSky(); else if(tab==='belt') drawBelt(); else if(tab==='mirage') drawMirage(); else drawBow(); }
+// 주소 해시로 탭 열기 (#belt, #mirage, #bow)
+const hsh=location.hash.slice(1); if(['sky','belt','mirage','bow'].includes(hsh)) document.querySelector(`.tab[data-t="${hsh}"]`).click(); else draw();
+})();
+</script>
+</body>
+</html>
