@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>생명 가능 지대와 지구 열수지 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+/* Easy Magma 공통 테마(theme.css)와 같은 토큰 · 굵은 외곽선 + 오프셋 그림자 */
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f; --accent-ink:#fff;
+  --p-bg:#ffffff;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --accent-ink:#16120f; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{padding:8px 24px 4px;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+main{display:grid;grid-template-columns:1fr 380px;gap:16px;padding:16px 24px;max-width:1520px;margin:0 auto}
+@media (max-width:960px){main{grid-template-columns:1fr;padding:12px 16px}}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.card.plot{background:var(--p-bg);padding:8px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:17px;margin:0 0 6px;color:var(--sub);font-weight:800}
+.btn{font:700 16px var(--f-body);padding:8px 12px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.lbl{display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-top:8px}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:17px;font-weight:700}
+.stat b{font-size:24px;font-variant-numeric:tabular-nums}
+.big{font-size:44px;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:900;font-size:18px}
+.note{font-size:15px;color:var(--sub);line-height:1.6;margin:8px 0 0}
+.key{font-size:18px;font-weight:800;line-height:1.55;margin:0}
+.key b{color:var(--accent)}
+canvas{width:100%;height:auto;display:block;border-radius:8px}
+.cap{font-size:14px;font-weight:800;color:#5b6475;margin:2px 6px 6px}
+</style>
+</head>
+<body>
+<a class="back" href="../">← 시뮬레이터 목록</a>
+<header>
+  <h1>생명 가능 지대와 지구 열수지</h1>
+  <p class="subt">지구시스템과학 · 01. 지구 대기의 역할(p.91) ~ 02. 지구 열수지(p.93) — 행성의 온도는 무엇으로 정해질까? 거리 · 반사율 · 온실 효과</p>
+</header>
+<main>
+  <div class="col">
+    <div class="card plot"><div class="cap">위에서 본 행성계 — 초록 띠: 생명 가능 지대 (물이 액체로 존재할 수 있는 거리)</div><canvas id="map" width="1200" height="480"></canvas></div>
+    <div class="card plot"><div class="cap">행성의 표면 온도와 물의 상태</div><canvas id="thermo" width="1200" height="230"></canvas></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h2>행성 고르기</h2>
+      <div class="row">
+        <button class="btn" data-p="venus">금성</button>
+        <button class="btn on" data-p="earth">지구</button>
+        <button class="btn" data-p="mars">화성</button>
+        <button class="btn" data-p="bare">대기 없는 지구</button>
+      </div>
+      <div class="lbl"><span>중심별까지 거리</span><span id="dV">1.00 AU</span></div>
+      <input type="range" id="d" min="0.2" max="3" step="0.01" value="1">
+      <div class="lbl"><span>반사율</span><span id="aV">30 %</span></div>
+      <input type="range" id="a" min="0" max="90" step="1" value="30">
+      <div class="lbl"><span>온실 효과</span><span id="gV">지구 정도</span></div>
+      <input type="range" id="g" min="0" max="100" step="0.5" value="10.3">
+    </div>
+    <div class="card">
+      <h2>중심별 바꾸기</h2>
+      <div class="row">
+        <button class="btn" data-l="0.25">어두운 별</button>
+        <button class="btn on" data-l="1">태양</button>
+        <button class="btn" data-l="4">밝은 별</button>
+      </div>
+      <div class="lbl"><span>중심별의 광도 (태양 = 1)</span><span id="lV">1.00</span></div>
+      <input type="range" id="l" min="-0.7" max="0.7" step="0.01" value="0">
+    </div>
+    <div class="card">
+      <div><span class="big" id="tS">15</span> <span style="font-size:20px;font-weight:800;color:var(--sub)">°C 표면 온도</span></div>
+      <div id="badge" style="margin:6px 0 4px"></div>
+      <div class="stat"><span>받는 복사 에너지 (지구 = 100)</span><b id="fV">100</b></div>
+      <div class="stat"><span>대기가 없을 때 (복사 평형 온도)</span><b id="tE">-18 °C</b></div>
+      <div class="stat"><span>온실 효과로 올라간 온도</span><b id="tG">+33 °C</b></div>
+    </div>
+    <div class="card"><p class="key" id="key"></p></div>
+  </div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const FONT='"SUIT Variable","Malgun Gothic",sans-serif';
+const PRE={ venus:{d:0.72,a:77,g:100}, earth:{d:1,a:30,g:10.3}, mars:{d:1.52,a:25,g:0.6}, bare:{d:1,a:30,g:0} };
+let planet='earth';
+const L=()=>Math.pow(10,+$('l').value);
+const Nlay=g=>Math.pow(10,g/100*2.05)-1;            // 온실 효과 세기(대기층 수에 해당)
+function gLabel(g){ if(g<0.3) return '없음'; if(g<6) return '약함'; if(g<16) return '지구 정도'; if(g<70) return '강함'; return '금성 정도'; }
+function temps(){
+  const d=+$('d').value, A=+$('a').value/100, l=L(), N=Nlay(+$('g').value);
+  const Te=278.6*Math.pow(l*(1-A),0.25)/Math.sqrt(d);
+  const Ts=Te*Math.pow(1+N,0.25);
+  return {d,A,l,Te:Te-273.15,Ts:Ts-273.15,flux:100*l/(d*d)};
+}
+const hz=l=>[0.95*Math.sqrt(l),1.37*Math.sqrt(l)];
+function txt(c,s,x,y,size=18,col='#1d2330',align='left',w=800){c.font=`${w} ${size}px ${FONT}`;c.fillStyle=col;c.textAlign=align;c.fillText(s,x,y);}
+
+const map=$('map'), mc=map.getContext('2d');
+function drawMap(t){
+  const W=map.width,H=map.height, x0=70, cy=H/2, sc=(W-110)/3; // 0~3 AU
+  mc.fillStyle='#0b1124'; mc.fillRect(0,0,W,H);
+  // 별(배경)
+  for(let i=0;i<90;i++){ const x=(i*977)%W, y=(i*613)%H; mc.fillStyle='rgba(255,255,255,.35)'; mc.fillRect(x,y,2,2); }
+  // 생명 가능 지대
+  const [r1,r2]=hz(t.l);
+  mc.save(); mc.beginPath(); mc.rect(0,0,W,H); mc.clip();
+  mc.fillStyle='rgba(64,192,87,.35)'; mc.beginPath(); mc.arc(x0,cy,r2*sc,0,2*Math.PI); mc.moveTo(x0+r1*sc,cy); mc.arc(x0,cy,r1*sc,0,2*Math.PI); mc.fill('evenodd');
+  // 너무 뜨거움 / 너무 차가움
+  mc.fillStyle='rgba(255,107,107,.13)'; mc.beginPath(); mc.arc(x0,cy,r1*sc,0,2*Math.PI); mc.fill();
+  mc.restore();
+  txt(mc,'너무 뜨거움',x0+r1*sc/2+8,40,18,'#ff8787','center');
+  txt(mc,'생명 가능 지대',x0+(r1+r2)/2*sc,(r2-r1)*sc<170?72:40,20,'#8ce99a','center',900);
+  txt(mc,'너무 차가움',Math.min(W-80,x0+r2*sc+110),40,18,'#74c0fc','center');
+  // 태양계 행성 궤도(참고)
+  [[0.72,'금성'],[1,'지구'],[1.52,'화성']].forEach(([r,n])=>{ mc.strokeStyle='rgba(255,255,255,.28)'; mc.setLineDash([5,6]); mc.lineWidth=1.5; mc.beginPath(); mc.arc(x0,cy,r*sc,-0.8,0.8); mc.stroke(); mc.setLineDash([]);
+    const an=Math.asin(Math.min(0.8,150/(r*sc))); txt(mc,n+' 궤도',x0+r*sc*Math.cos(an)+6,cy+150,14,'rgba(255,255,255,.65)'); });
+  // 중심별
+  const rs=16+12*Math.log10(t.l*10);
+  const sg=mc.createRadialGradient(x0,cy,0,x0,cy,rs*2.4); sg.addColorStop(0,'#fff7d6'); sg.addColorStop(.4,t.l<0.6?'#ffa94d':t.l>2?'#d0ebff':'#ffd43b'); sg.addColorStop(1,'rgba(255,212,59,0)');
+  mc.fillStyle=sg; mc.beginPath(); mc.arc(x0,cy,rs*2.4,0,7); mc.fill();
+  // 거리 눈금
+  mc.strokeStyle='rgba(255,255,255,.5)'; mc.lineWidth=1.5; mc.beginPath(); mc.moveTo(x0,H-34); mc.lineTo(x0+3*sc,H-34); mc.stroke();
+  for(let a=0;a<=3;a+=0.5){ const x=x0+a*sc; mc.beginPath(); mc.moveTo(x,H-40); mc.lineTo(x,H-28); mc.stroke(); txt(mc,a+' AU',x,H-10,14,'rgba(255,255,255,.7)','center',700); }
+  // 행성
+  const px=x0+t.d*sc, col= t.Ts<0?'#a5d8ff': t.Ts<=100?'#4dabf7':'#ff922b';
+  mc.fillStyle=col; mc.beginPath(); mc.arc(px,cy,15,0,7); mc.fill();
+  if(t.Ts>=0&&t.Ts<=100){ mc.fillStyle='#51cf66'; mc.beginPath(); mc.arc(px-4,cy-3,6,0,7); mc.fill(); }
+  mc.strokeStyle='#fff'; mc.lineWidth=2; mc.beginPath(); mc.arc(px,cy,15,0,7); mc.stroke();
+  const names={venus:'금성',earth:'지구',mars:'화성',bare:'대기 없는 지구',custom:'나의 행성'};
+  txt(mc,names[planet],px,cy-26,18,'#fff','center',900);
+  // 받는 에너지 화살표
+  const n=Math.max(1,Math.min(9,Math.round(t.flux/25)));
+  for(let i=0;i<n;i++){ const yy=cy-30+i*60/Math.max(1,n-1)*(n>1?1:0); mc.strokeStyle='rgba(255,212,59,.75)'; mc.lineWidth=2; mc.beginPath(); mc.moveTo(px-70,yy); mc.lineTo(px-20,yy); mc.stroke(); }
+}
+const th=$('thermo'), tc=th.getContext('2d');
+function drawThermo(t){
+  const W=th.width,H=th.height,P=60, tmin=-150, tmax=500, X=v=>P+(W-2*P)*(Math.max(tmin,Math.min(tmax,v))-tmin)/(tmax-tmin);
+  tc.fillStyle='#fff'; tc.fillRect(0,0,W,H);
+  const y=90, h=44;
+  tc.fillStyle='#d0ebff'; tc.fillRect(X(tmin),y,X(0)-X(tmin),h);
+  tc.fillStyle='#8ce99a'; tc.fillRect(X(0),y,X(100)-X(0),h);
+  tc.fillStyle='#ffd8a8'; tc.fillRect(X(100),y,X(tmax)-X(100),h);
+  txt(tc,'얼음',(X(tmin)+X(0))/2,y+30,20,'#1864ab','center',900);
+  txt(tc,'물(액체)',(X(0)+X(100))/2,y+30,18,'#2b8a3e','center',900);
+  txt(tc,'수증기',(X(100)+X(tmax))/2,y+30,20,'#d9480f','center',900);
+  for(let v=-150;v<=500;v+=50){ txt(tc,v+'°C',X(v),y+h+26,14,'#5b6475','center',700); tc.fillStyle='#adb5bd'; tc.fillRect(X(v)-1,y+h,2,8); }
+  // 복사 평형 온도
+  tc.setLineDash([6,5]); tc.strokeStyle='#868e96'; tc.lineWidth=3; tc.beginPath(); tc.moveTo(X(t.Te),y-26); tc.lineTo(X(t.Te),y+h); tc.stroke(); tc.setLineDash([]);
+  txt(tc,'대기가 없다면 '+Math.round(t.Te)+'°C',X(t.Te),y-32,16,'#495057','center',800);
+  // 실제 표면 온도
+  tc.fillStyle='#e03131'; tc.beginPath(); tc.moveTo(X(t.Ts),y+h+2); tc.lineTo(X(t.Ts)-12,y+h+22); tc.lineTo(X(t.Ts)+12,y+h+22); tc.fill();
+  tc.fillRect(X(t.Ts)-2,y-6,4,h+8);
+  txt(tc,'표면 온도 '+Math.round(t.Ts)+'°C',Math.min(W-90,Math.max(90,X(t.Ts))),y+h+60,20,'#c92a2a','center',900);
+  if(t.Ts-t.Te>2){ tc.strokeStyle='#e03131'; tc.lineWidth=3; tc.beginPath(); tc.moveTo(X(t.Te),y-12); tc.lineTo(X(t.Ts)-6,y-12); tc.stroke();
+    tc.fillStyle='#e03131'; tc.beginPath(); tc.moveTo(X(t.Ts),y-12); tc.lineTo(X(t.Ts)-12,y-19); tc.lineTo(X(t.Ts)-12,y-5); tc.fill(); }
+}
+function upd(){
+  const t=temps();
+  $('dV').textContent=t.d.toFixed(2)+' AU'; $('aV').textContent=$('a').value+' %'; $('gV').textContent=gLabel(+$('g').value); $('lV').textContent=t.l.toFixed(2);
+  $('tS').textContent=Math.round(t.Ts); $('fV').textContent=Math.round(t.flux);
+  $('tE').textContent=Math.round(t.Te)+' °C'; $('tG').textContent='+'+Math.round(t.Ts-t.Te)+' °C';
+  const [r1,r2]=hz(t.l), inHZ=t.d>=r1&&t.d<=r2;
+  const st= t.Ts<0?['물이 얼음 상태','#d0ebff','#1864ab']: t.Ts<=100?['액체 상태의 물 존재 가능','#d3f9d8','#2b8a3e']:['물이 수증기 상태','#ffe8cc','#d9480f'];
+  $('badge').innerHTML=`<span class="badge" style="background:${st[1]};color:${st[2]}">${st[0]}</span> <span class="badge" style="background:${inHZ?'#d3f9d8':'#f1f3f5'};color:${inHZ?'#2b8a3e':'#495057'}">생명 가능 지대 ${inHZ?'안':'밖'}</span>`;
+  let k;
+  if(planet==='venus') k='금성은 반사율이 매우 커서(약 77 %) <b>대기가 없다면 지구보다 차가웠을 것</b>이다. 하지만 두꺼운 이산화 탄소 대기의 <b>강한 온실 효과</b>로 표면 온도가 약 460 °C에 이른다.';
+  else if(planet==='mars') k='화성은 태양에서 멀어 받는 에너지가 지구의 약 43 %이고, 대기가 매우 얇아 <b>온실 효과가 거의 없다</b>. → 물은 대부분 <b>얼음</b>으로 존재한다.';
+  else if(planet==='bare') k='지구에 대기가 없다면 흡수한 만큼 바로 우주로 방출하여 평균 약 <b>-18 °C</b>(복사 평형 온도). 대기의 <b>온실 효과</b> 덕분에 실제로는 약 15 °C이다.';
+  else if(planet==='earth') k='지구는 <b>생명 가능 지대</b> 안에 있고, 대기의 <b>온실 효과</b>까지 더해져 액체 상태의 물이 존재한다.';
+  else k='중심별에 가까울수록 받는 복사 에너지가 많다(거리²에 반비례). 표면 온도는 <b>거리</b>뿐 아니라 <b>반사율</b>과 <b>온실 효과</b>에 따라서도 달라진다.';
+  k+='<br><br><span style="font-size:15px;color:var(--sub)">중심별의 광도가 클수록 생명 가능 지대는 <b>멀어지고 넓어진다</b>.</span>';
+  $('key').innerHTML=k;
+  drawMap(t); drawThermo(t);
+}
+function setPlanet(p){ planet=p; document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  if(PRE[p]){ $('d').value=PRE[p].d; $('a').value=PRE[p].a; $('g').value=PRE[p].g; $('l').value=0; document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l==='1')); } upd(); }
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>setPlanet(b.dataset.p));
+['d','a','g'].forEach(id=>$(id).oninput=()=>{ planet='custom'; document.querySelectorAll('[data-p]').forEach(b=>b.classList.remove('on')); upd(); });
+$('l').oninput=()=>{ document.querySelectorAll('[data-l]').forEach(b=>b.classList.remove('on')); upd(); };
+document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{ $('l').value=Math.log10(+b.dataset.l); document.querySelectorAll('[data-l]').forEach(x=>x.classList.toggle('on',x===b)); upd(); });
+const h=location.hash.slice(1); if(PRE[h]) setPlanet(h); else upd();
+})();
+</script>
+</body>
+</html>
