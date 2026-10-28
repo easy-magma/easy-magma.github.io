@@ -85,7 +85,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 <section class="blk" id="s-dir">
   <h2>① 동서남북 · 방위각 · 고도 <small>익숙한 한반도 지도에서 시작해서 밤하늘까지, 한 단계씩</small></h2>
   <div class="row steptabs" id="dirTabs" style="margin-bottom:12px">
-    <button class="btn on" data-p="1">1. 지도에서 동서남북</button><button class="btn" data-p="2">2. 서울에서 바라보기 · 방위각</button><button class="btn" data-p="3">3. 고도 · 손으로 재기</button><button class="btn" data-p="4">4. 별 찾기 게임</button>
+    <button class="btn on" data-p="1">1. 지도에서 동서남북</button><button class="btn" data-p="2">2. 서울에서 바라보기 · 방위각</button><button class="btn" data-p="3">3. 고도</button><button class="btn" data-p="4">4. 별 찾기 게임</button>
   </div>
   <div class="dpanel" data-p="1">
     <div class="grid2">
@@ -121,11 +121,6 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
       <div class="col">
         <div class="card"><p class="key"><b>고도</b> = 땅(지평선)에서 위로 잰 각<br>지평선 0° · 머리 위 90°</p>
           <p class="note">도심에서는 고도 20° 아래가 건물에 가리기 쉽다.<br>서울에서 북극성의 고도는 37.5° = 서울의 위도.</p></div>
-        <div class="card"><h3>✊ 팔을 쭉 뻗고 손으로 재기</h3>
-          <div class="stat"><span>주먹 하나</span><b>약 10°</b></div>
-          <div class="stat"><span>활짝 편 손 (엄지 끝~새끼 끝)</span><b>약 20°</b></div>
-          <div class="stat" style="border:0"><span>새끼손가락 굵기</span><b>약 1°</b></div>
-          <p class="note">"남동쪽, 고도 30°" = 남동쪽을 보고, 지평선에서 주먹 3개 위.</p></div>
         <button class="btn" data-next="4" style="align-self:flex-end">다음: 별 찾기 게임 →</button>
       </div>
     </div>
@@ -367,14 +362,11 @@ function drawAltv(){
   const L = 560, a = altA * D2R, tx = ex + L * Math.cos(a), ty = ey - L * Math.sin(a);
   c.strokeStyle = '#ffb547'; c.lineWidth = 6; c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex + 70 * Math.cos(a), ey - 70 * Math.sin(a)); c.stroke();
   c.lineWidth = 2.5; c.setLineDash([3,6]); c.beginPath(); c.moveTo(ex, ey); c.lineTo(tx, ty); c.stroke(); c.setLineDash([]);
-  // 주먹 쌓기 (10°마다)
-  const R = 230; c.fillStyle = '#ff5a1f';
-  for (let k = 0; k < Math.floor(altA / 10); k++){ const m = (k + 0.5) * 10 * D2R; c.beginPath(); c.arc(ex + R * Math.cos(m), ey - R * Math.sin(m), 17, 0, 7); c.fill(); c.fillStyle = '#fff'; c.font = '18px sans-serif'; c.textAlign = 'center'; c.fillText('✊', ex + R * Math.cos(m), ey - R * Math.sin(m) + 6); c.fillStyle = '#ff5a1f'; }
   c.textAlign = 'left';
   c.strokeStyle = '#ff5a1f'; c.lineWidth = 3; c.beginPath(); c.arc(ex, ey, 120, -a, 0); c.stroke();
   c.fillStyle = '#ffb547'; c.font = `900 30px ${FONT}`; c.fillText(`${Math.round(altA)}°`, ex + 130 * Math.cos(a / 2) + 6, ey - 130 * Math.sin(a / 2) + 10);
   c.fillStyle = '#ffd43b'; c.beginPath(); c.arc(tx, ty, 10, 0, 7); c.fill();
-  c.fillStyle = '#ffffff'; c.font = `800 22px ${FONT}`; c.fillText(`고도 ${Math.round(altA)}° ≈ 주먹 ${(altA / 10).toFixed(1).replace('.0', '')}개`, 20, 40);
+  c.fillStyle = '#ffffff'; c.font = `800 22px ${FONT}`; c.fillText(`고도 ${Math.round(altA)}°`, 20, 40);
   if (altA < 20){ c.fillStyle = '#ff8a8a'; c.font = `700 18px ${FONT}`; c.fillText('도심에서는 건물에 가리기 쉬운 높이', 20, 68); }
   $('altV').textContent = `${Math.round(altA)}°`;
 }
@@ -390,8 +382,8 @@ function gNew(){ gList = GT.filter(([, k]) => gPos(k).alt > 8).sort(() => Math.r
 function gPromptSet(){
   const best = ls.get('em-astro-dir-best');
   if (gi >= gList.length){ $('gPrompt').innerHTML = `🏁 끝! <b>${gPts}점</b> / 500` + (best ? ` · 최고 ${Math.max(best, gPts)}점` : ''); ls.set('em-astro-dir-best', Math.max(best || 0, gPts)); $('gRound').textContent = '완료'; $('gScore').textContent = gPts + '점'; return; }
-  const [n, k] = gList[gi], p = gPos(k), fist = Math.round(p.alt / 10);
-  $('gPrompt').innerHTML = `<b>${n}</b>은(는) 방위각 <b>${p.az.toFixed(0)}°</b>(${dname(p.az)}쪽), 고도 <b>${p.alt.toFixed(0)}°</b>(주먹 약 ${fist}개)에 있습니다. 어디일까요?`;
+  const [n, k] = gList[gi], p = gPos(k);
+  $('gPrompt').innerHTML = `<b>${n}</b>은(는) 방위각 <b>${p.az.toFixed(0)}°</b>(${dname(p.az)}쪽), 고도 <b>${p.alt.toFixed(0)}°</b>에 있습니다. 어디일까요?`;
   $('gRound').textContent = `${gi + 1} / ${gList.length}`; $('gScore').textContent = gPts + '점';
 }
 const PW = 1440, PH = 460, PL = 40, PT = 20, PB = 50;
@@ -426,7 +418,7 @@ $('pano').addEventListener('click', e => {
   const cosd = Math.sin(alt * D2R) * Math.sin(p.alt * D2R) + Math.cos(alt * D2R) * Math.cos(p.alt * D2R) * Math.cos((az - p.az) * D2R);
   const err = Math.acos(Math.max(-1, Math.min(1, cosd))) / D2R, pts = Math.max(0, Math.round(100 - err * 4));
   gPts += pts; gAns = { x, y }; drawPano(); $('gScore').textContent = gPts + '점';
-  $('gFb').innerHTML = `오차 <b>${err.toFixed(0)}°</b> (주먹 ${(err / 10).toFixed(1)}개) → <b>+${pts}점</b> ${err < 5 ? '🎯 완벽!' : err < 12 ? '👍 좋아요' : '🧭 방위각부터 다시 확인!'} — 한 번 더 누르면 다음 문제`;
+  $('gFb').innerHTML = `오차 <b>${err.toFixed(0)}°</b> → <b>+${pts}점</b> ${err < 5 ? '🎯 완벽!' : err < 12 ? '👍 좋아요' : '🧭 방위각부터 다시 확인!'} — 한 번 더 누르면 다음 문제`;
 });
 $('gNew').addEventListener('click', gNew);
 
@@ -912,7 +904,7 @@ sph.addEventListener('pointerup', () => { drag = null; sph.style.cursor = 'grab'
 /* ───── ⑤ 퀴즈 ───── */
 const QZ = [
   ['남쪽을 바라보고 섰을 때, 동쪽은 어디일까?', ['앞','뒤','왼쪽','오른쪽'], 2, '남쪽을 보면 왼쪽이 동쪽, 오른쪽이 서쪽. 그래서 별은 왼쪽에서 떠서 오른쪽으로 진다.'],
-  ['방위각 270°, 고도 30°인 별은 어디에 있을까?', ['북쪽, 주먹 3개 높이','동쪽, 주먹 3개 높이','서쪽, 주먹 3개 높이','서쪽, 머리 위'], 2, '방위각은 북 0° → 동 90° → 남 180° → 서 270°. 팔을 뻗은 주먹 하나 ≈ 10°.'],
+  ['방위각 270°, 고도 30°인 별은 어디에 있을까?', ['북쪽 하늘 낮은 곳','동쪽 하늘 낮은 곳','서쪽 하늘, 지평선에서 30° 위','서쪽, 머리 위'], 2, '방위각은 북 0° → 동 90° → 남 180° → 서 270°. 고도는 지평선 0°, 머리 위 90°.'],
   ['서울에서 부산은 어느 쪽일까?', ['북서쪽','북동쪽','남서쪽','남동쪽'], 3, '지도에서 부산은 서울보다 아래(남)이고 오른쪽(동)이다 → 남동쪽. 방위각으로는 약 145°.'],
   ['북쪽 하늘을 바라볼 때, 북극성 주변의 별들은 어느 방향으로 돌까?', ['시계 방향','시계 반대 방향','움직이지 않는다','북극성 쪽으로 다가온다'], 1, '지구가 서→동(북극 위에서 보면 시계 반대)으로 자전하므로, 북쪽 하늘의 별은 북극성을 중심으로 시계 반대 방향으로 돈다.'],
   ['별은 1시간에 약 몇 도씩 움직여 보일까?', ['1°','4°','15°','30°'], 2, '하루 24시간에 360° → 1시간에 15°.'],
