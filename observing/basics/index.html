@@ -268,7 +268,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
     <div class="row" style="margin-top:10px"><button class="btn" id="qn" style="display:none">다음 문제 →</button><button class="btn" id="qr" style="display:none">다시 풀기</button></div>
   </div>
 </section>
-<footer>별 위치는 J2000 좌표를 사용한 계산 결과입니다. 공전 그림의 크기와 거리는 실제 비율이 아닙니다.</footer>
+<footer>지구 표면 사진: NASA Visible Earth 「Blue Marble」(공공 저작물). 별 위치는 J2000 좌표를 사용한 계산 결과입니다. 공전 그림의 크기와 거리는 실제 비율이 아닙니다.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -557,6 +557,10 @@ function init3D(){
     return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, transparent: op < 1, opacity: op }));
   }
   const ring = (n, fn) => Array.from({ length: n + 1 }, (_, i) => fn(i / n * 2 * Math.PI));
+  const ALLV = [];
+  const earthTex = new THREE.TextureLoader().load('../assets/earth-blue-marble.jpg', () => ALLV.forEach(v => v.draw()));
+  earthTex.anisotropy = 8;
+  const earthMat = () => new THREE.MeshLambertMaterial({ map: earthTex });
   function viewer(canvas, o){
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
@@ -578,7 +582,7 @@ function init3D(){
       if (v.mode === 'orbit'){ v.theta = d.th - dx; v.phi = Math.max(-1.45, Math.min(1.45, d.ph + dy)); } else { v.yaw = d.yw + dx * 0.5; v.pitch = Math.max(-1.3, Math.min(1.45, d.pt + dy * 0.5)); } v.draw(); });
     canvas.addEventListener('pointerup', () => { d = null; canvas.style.cursor = 'grab'; });
     if (window.ResizeObserver) new ResizeObserver(() => { v.size(); v.draw(); }).observe(canvas);
-    v.size(); return v;
+    v.size(); ALLV.push(v); return v;
   }
   const loc = (alt, az, r) => V3(r * Math.cos(alt * D2R) * Math.sin(az * D2R), r * Math.sin(alt * D2R), -r * Math.cos(alt * D2R) * Math.cos(az * D2R));
   let dLat = LAT;
@@ -596,16 +600,16 @@ function init3D(){
     Gv.target.copy(P0); const camDir = U.clone().multiplyScalar(0.75).add(N.clone().multiplyScalar(-0.55)).add(E.clone().multiplyScalar(0.25)).normalize();
     Gv.theta = Math.atan2(camDir.x, camDir.z); Gv.phi = Math.asin(camDir.y);
     const sc = Gv.scene; sc.add(new THREE.AmbientLight(0xffffff, 0.75)); const dl = new THREE.DirectionalLight(0xffffff, 0.5); dl.position.copy(U.clone().multiplyScalar(10).add(V3(3, 4, 2))); sc.add(dl);
-    sc.add(new THREE.Mesh(new THREE.SphereGeometry(RG, 96, 64), new THREE.MeshLambertMaterial({ color: 0x3b7fc4 })));
+    sc.add(new THREE.Mesh(new THREE.SphereGeometry(RG, 128, 96), earthMat()));
     for (let la = -60; la <= 80; la += 10) sc.add(line(Array.from({ length: 181 }, (_, i) => ll(la, i * 2, RG * 1.001)), 0xcfe3ff, la ? 0.18 : 0.6));
     for (let lo = 0; lo < 360; lo += 10) sc.add(line(Array.from({ length: 91 }, (_, i) => ll(-90 + i * 2, lo, RG * 1.001)), 0xcfe3ff, 0.18));
     // 한반도 (면 + 해안선)
     const shape = new THREE.Shape(KR.map(([lo, la]) => new THREE.Vector2(lo, la)));
     const sg = new THREE.ShapeGeometry(shape); const pos = sg.attributes.position;
     for (let i = 0; i < pos.count; i++){ const v = ll(pos.getY(i), pos.getX(i), RG * 1.003); pos.setXYZ(i, v.x, v.y, v.z); }
-    sg.computeVertexNormals(); sc.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: 0xf3e6c8, side: THREE.DoubleSide })));
-    sc.add(line([...KR, KR[0]].map(([lo, la]) => ll(la, lo, RG * 1.004)), 0x8a7a5a, 1));
-    { const j = []; for (let i = 0; i <= 24; i++){ const t = i / 24 * 2 * Math.PI; j.push(ll(33.38 + 0.15 * Math.sin(t), 126.55 + 0.35 * Math.cos(t), RG * 1.004)); } sc.add(line(j, 0x8a7a5a, 1)); }
+    
+    
+    
     for (const [n, lo, la] of CITIES.filter(c => !['대전', '광주'].includes(c[0]))){ const d = new THREE.Mesh(new THREE.SphereGeometry(0.018, 12, 8), new THREE.MeshBasicMaterial({ color: 0x1f1a17 })); d.position.copy(ll(la, lo, RG * 1.005)); sc.add(d);
       const l = label(n, '#ffffff', 0.5); l.position.copy(ll(la + 0.12, lo, RG * 1.006)); sc.add(l); }
     for (const [n, lo, la] of [['동해', 131.2, 38.8], ['서해', 124.4, 36.2], ['남해', 128.2, 33.6]]){ const l = label(n, '#d0e6ff', 0.55); l.position.copy(ll(la, lo, RG * 1.004)); sc.add(l); }
@@ -659,7 +663,7 @@ function init3D(){
   const oSunL = label('천구 위 태양의 위치', '#ffd43b', 0.8); O.scene.add(oSunL);
   const oRays = new THREE.Group(); O.scene.add(oRays);
   const earth = new THREE.Group(); O.scene.add(earth);
-  earth.add(new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32), new THREE.MeshLambertMaterial({ color: 0x2f7fd0 })));
+  { const em = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), earthMat()); em.rotation.y = -LON * D2R; earth.add(em); }
   for (let la = -60; la <= 60; la += 30){ const r = Math.cos(la * D2R), y = Math.sin(la * D2R); earth.add(line(ring(96, a => V3(1.003 * r * Math.cos(a), 1.003 * y, 1.003 * r * Math.sin(a))), la ? 0xa5d8ff : 0xffffff, la ? 0.3 : 0.8)); }
   for (let lo = 0; lo < 180; lo += 30) earth.add(line(ring(96, a => V3(1.003 * Math.cos(a) * Math.cos(lo * D2R), 1.003 * Math.sin(a), 1.003 * Math.cos(a) * Math.sin(lo * D2R))), 0xa5d8ff, 0.3));
   O.scene.add(line([V3(0, -1.7, 0), V3(0, 1.7, 0)], 0xffffff, 0.7, true));
@@ -782,7 +786,7 @@ function init3D(){
   { const l = label('공전 방향 →', '#ffffff', 0.7); l.position.copy(eL(150, RO - 1.6, 0.4)); Y.scene.add(l); }
   const yEarth = new THREE.Group(); Y.scene.add(yEarth);
   { const tilt = new THREE.Group(); tilt.quaternion.setFromUnitVectors(V3(0, 1, 0), AX); yEarth.add(tilt);
-    tilt.add(new THREE.Mesh(new THREE.SphereGeometry(0.75, 32, 16), new THREE.MeshLambertMaterial({ color: 0x2f7fd0 })));
+    tilt.add(new THREE.Mesh(new THREE.SphereGeometry(0.75, 48, 32), earthMat()));
     tilt.add(line(ring(60, a => V3(0.77 * Math.cos(a), 0, 0.77 * Math.sin(a))), 0xffffff, 0.8));
     tilt.add(line([V3(0, -1.4, 0), V3(0, 1.4, 0)], 0xffffff, 0.9));
     const l = label('지구 (자전축 23.5° 기울어짐)', '#a5d8ff', 0.7); l.position.set(0, 1.7, 0); tilt.add(l); }
@@ -806,7 +810,7 @@ function init3D(){
   { const l1 = label('황도 (태양이 1년 동안 지나는 길)', '#ff922b', 0.55); l1.position.copy(eL(45, CR * 0.97, 1.5)); J.scene.add(l1);
     const p = EQ.clone().multiplyScalar(Math.cos(2.4)).add(WQ.clone().multiplyScalar(Math.sin(2.4))).multiplyScalar(CR * 0.97); const l2 = label('천구 적도', '#74c0fc', 0.6); l2.position.copy(p).add(V3(0, 0.4, 0)); J.scene.add(l2); }
   const jEarth = new THREE.Group(); J.scene.add(jEarth);
-  jEarth.add(new THREE.Mesh(new THREE.SphereGeometry(0.6, 24, 12), new THREE.MeshLambertMaterial({ color: 0x2f7fd0 })));
+  jEarth.add(new THREE.Mesh(new THREE.SphereGeometry(0.6, 48, 32), earthMat()));
   jEarth.add(line([AX.clone().multiplyScalar(-CR), AX.clone().multiplyScalar(CR)], 0xffffff, 0.5, true));
   { const l = label('천구 북극', '#ffffff', 0.6); l.position.copy(AX.clone().multiplyScalar(CR + 0.4)); jEarth.add(l); const l2 = label('지구', '#a5d8ff', 0.6); l2.position.set(0, 0.95, 0); jEarth.add(l2); }
   const jSun = new THREE.Mesh(new THREE.SphereGeometry(0.4, 24, 12), new THREE.MeshBasicMaterial({ color: 0xffd43b })); J.scene.add(jSun);
