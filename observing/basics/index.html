@@ -50,6 +50,12 @@ input[type=range]{width:100%;accent-color:var(--accent);height:28px}
 .note{font-size:14px;color:var(--sub);line-height:1.6;margin:8px 0 0}
 canvas{display:block;width:100%;height:auto;border-radius:10px}
 canvas.drag{touch-action:none;cursor:grab}
+section.blk[hidden]{display:none}
+nav.jump a.cur{background:var(--ink);color:var(--bg)}
+details.more{margin-top:18px;border:2px dashed var(--line);border-radius:14px;padding:10px 14px}
+details.more>summary{cursor:pointer;font-weight:900;font-size:17px;color:var(--sub)}
+details.more[open]>summary{margin-bottom:12px}
+.stepnav{display:flex;justify-content:space-between;gap:8px;margin-top:22px}
 canvas.three{aspect-ratio:640/560;background:#0b1020}
 table.ana{border-collapse:collapse;width:100%;font-size:15px}
 table.ana th,table.ana td{border-bottom:1px dashed var(--line);padding:6px 4px;text-align:left}
@@ -76,9 +82,9 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
   <h1>별 보기 기초 개념: 방위 · 자전 · 공전 · 적경 · 적위</h1>
   <p class="subt">천체관측회 전에 — 하늘에서 방향은 어떻게 찾고, 별은 왜 움직이고, 계절마다 왜 다른 별자리가 보이며, 별의 "주소"는 어떻게 쓸까?</p>
 </header>
-<nav class="jump">
-  <a href="#s-dir">① 동서남북 · 방위각 · 고도</a><a href="#s-coord">② 위도·경도 → 적경·적위</a><a href="#s-rot">③ 자전 → 일주 운동 · 남중 고도</a><a href="#s-rev">④ 공전 → 연주 운동</a><a href="#s-quiz">⑤ 확인 퀴즈</a>
-  <a class="next" href="../">다음: 관측회 하늘 미리보기 →</a>
+<nav class="jump" id="steps">
+  <a href="#s-dir">① 동서남북</a><a href="#s-coord">② 위도·경도 → 적위</a><a href="#s-rot">③ 일주 운동</a><a href="#s-culm">④ 남중 고도</a><a href="#s-rev">⑤ 연주 운동</a><a href="#s-quiz">⑥ 퀴즈</a>
+  <a class="next" href="../">관측회 하늘 미리보기 →</a>
 </nav>
 
 <!-- ① 방위 -->
@@ -158,7 +164,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
       </div>
     </div>
   </div>
-  <h3 style="font-size:18px;font-weight:900;margin:4px 0 10px">🌐 천구에서는 → 적위 · 적경</h3>
+  <details class="more"><summary>🌐 더 알아보기 — 천구 위 별의 주소: 적위와 적경</summary>
   <div class="grid2">
     <div class="card"><div class="cap">천구 — 드래그해서 돌려 보세요 (가운데 = 지구, 주황 사람 = 관측자)</div><canvas id="sphere" class="drag" width="900" height="640" style="background:#0b1020"></canvas></div>
     <div class="col">
@@ -186,11 +192,12 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
       </div>
     </div>
   </div>
+  </details>
 </section>
 
 <!-- ③ 자전 -->
 <section class="blk" id="s-rot">
-  <h2>③ 지구의 자전 → 태양과 별의 일주 운동 <small>우주에서 본 지구 ↔ 서울에서 본 하늘, 같은 순간을 나란히</small></h2>
+  <h2>③ 지구의 자전 → 태양의 일주 운동 <small>우주에서 본 지구 ↔ 서울에서 본 하늘, 같은 순간을 나란히</small></h2>
   <div class="grid">
     <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 우주에서 본 지구 (드래그로 회전)</div><canvas id="d3out" class="drag three"></canvas></div>
     <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 서울에서 본 하늘 (드래그로 회전)</div><canvas id="d3in" class="drag three"></canvas>
@@ -206,15 +213,15 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
         <input type="range" id="dDay" min="0" max="364" step="1" value="309" aria-label="날짜">
         <div class="row" id="dDays"><button class="btn" data-dd="79">춘분</button><button class="btn" data-dd="171">하지</button><button class="btn" data-dd="265">추분</button><button class="btn" data-dd="354">동지</button><button class="btn on" data-dd="309">11/6</button></div>
         <div class="stat" style="margin-top:8px"><span>태양 고도 · 방위</span><b id="dAlt">–</b></div>
-        <div class="stat"><span>해 뜸 / 해 짐 (태양시)</span><b id="dRise">–</b></div>
-        <div class="stat"><span>남중 고도 = 90° − 위도 + 적위</span><b id="dCulm">–</b></div>
-        <div class="stat" style="border:0"><span>낮의 길이</span><b id="dLen">–</b></div>
+        <div class="stat" style="border:0"><span>해 뜸 / 해 짐</span><b id="dRise">–</b></div>
+        <div class="stat" style="display:none"><span></span><b id="dCulm">–</b></div>
+        <div class="stat" style="display:none"><span></span><b id="dLen">–</b></div>
       </div>
       <div class="card"><p class="key">지구가 <b>서→동</b>으로 자전 → 서울에서는 태양이 <b>동쪽에서 떠서 남쪽 하늘을 지나 서쪽으로</b> 진다 (태양의 일주 운동).</p>
-        <p class="note">태양시: 태양이 남중하는 때 = 12시. 서울의 시계(KST)는 동경 135° 기준이라 실제 남중은 약 12시 30분 무렵이다.<br>날짜를 바꾸면 태양 경로의 높이가 바뀐다 — 다음 단원(공전)에서 이유를 확인!</p></div>
+        <p class="note">시각은 태양이 정남쪽에 오는 때를 12시로 잡은 태양시.</p></div>
     </div>
   </div>
-  <h3 style="font-size:18px;font-weight:900;margin:22px 0 10px">⭐ 밤에는 별도 같은 이유로 돈다 — 별의 일주 운동</h3>
+  <details class="more"><summary>⭐ 더 알아보기 — 밤에는 별도 같은 이유로 돈다 (별의 일주 운동)</summary>
   <div class="grid">
     <div class="card"><div class="cap">북극 위에서 내려다본 지구 (태양은 오른쪽 멀리)</div><canvas id="earthTop" width="640" height="560"></canvas></div>
     <div class="card"><div class="cap" id="skyCap">서울에서 본 북쪽 하늘</div><canvas id="rotSky" width="640" height="560" style="background:#0b1020"></canvas></div>
@@ -230,7 +237,12 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
         <p class="note">북극성은 지구 자전축을 연장한 곳에 거의 딱 놓여 있어서 밤새 움직이지 않는다. 남쪽 하늘의 별은 동쪽에서 떠서 남쪽 하늘을 지나 서쪽으로 진다.</p></div>
     </div>
   </div>
-  <h3 style="font-size:18px;font-weight:900;margin:22px 0 10px">📐 남중 고도 — 정남쪽에 왔을 때 가장 높다</h3>
+  </details>
+</section>
+
+<!-- ④ 남중 고도 -->
+<section class="blk" id="s-culm">
+  <h2>④ 남중 고도 <small>태양과 별은 정남쪽에 왔을 때 가장 높다</small></h2>
   <div class="grid2">
     <div class="card"><div class="cap">관측자에서 본 남북 방향 단면 — 하루 동안 지나는 길을 옆에서 본 모습</div><canvas id="meri" width="640" height="600" style="max-width:640px;margin:0 auto"></canvas></div>
     <div class="col">
@@ -255,7 +267,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 
 <!-- ④ 공전 -->
 <section class="blk" id="s-rev">
-  <h2>④ 지구의 공전 → 태양의 연주 운동 · 태양의 적위 변화 <small>태양은 1년 동안 별자리 사이를 서→동으로 한 바퀴 돈다</small></h2>
+  <h2>⑤ 지구의 공전 → 태양의 연주 운동 · 태양의 적위 변화 <small>태양은 1년 동안 별자리 사이를 서→동으로 한 바퀴 돈다</small></h2>
   <div class="grid">
     <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 태양계를 밖에서 본 모습 (드래그로 회전)</div><canvas id="y3out" class="drag three"></canvas></div>
     <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 지구에서 본 천구와 태양 (드래그로 회전)</div><canvas id="y3in" class="drag three"></canvas>
@@ -279,7 +291,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 
 <!-- ④ 퀴즈 -->
 <section class="blk" id="s-quiz">
-  <h2>⑤ 확인 퀴즈</h2>
+  <h2>⑥ 확인 퀴즈</h2>
   <div class="card" style="max-width:880px">
     <div class="dots" id="dots"></div>
     <div class="q" id="qq"></div>
@@ -1099,7 +1111,17 @@ function qRender(){
 $('qn').addEventListener('click', () => { qi++; qRender(); });
 $('qr').addEventListener('click', () => { qi = 0; res = []; qRender(); });
 
-kPick('부산'); showStep(1); gNew(); drawRot(); setCoord(); setMeri(); qRender(); init3D();
+kPick('부산'); showStep(1);
+const STEPS = ['s-dir','s-coord','s-rot','s-culm','s-rev','s-quiz'];
+STEPS.forEach((id, i) => { const sec = $(id), nav = document.createElement('div'); nav.className = 'stepnav';
+  nav.innerHTML = (i ? `<button class="btn" data-goto="${STEPS[i-1]}">← 이전</button>` : '<span></span>') + (i < STEPS.length - 1 ? `<button class="btn" data-goto="${STEPS[i+1]}" style="background:var(--ink);color:var(--bg)">다음 단계 →</button>` : `<a class="btn" href="../" style="text-decoration:none">관측회 하늘 미리보기 →</a>`);
+  sec.appendChild(nav); });
+function showMain(id){ if (!STEPS.includes(id)) id = STEPS[0]; STEPS.forEach(x => $(x).hidden = x !== id);
+  document.querySelectorAll('#steps a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + id));
+  if (history.replaceState) history.replaceState(null, '', '#' + id); window.scrollTo({ top: 0, behavior: 'smooth' }); window.dispatchEvent(new Event('resize')); }
+document.querySelectorAll('#steps a[href^="#"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showMain(a.getAttribute('href').slice(1)); }));
+document.addEventListener('click', e => { const b = e.target.closest('[data-goto]'); if (b) showMain(b.dataset.goto); });
+showMain(location.hash.slice(1)); gNew(); drawRot(); setCoord(); setMeri(); qRender(); init3D();
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { drawKmap(); drawAltv(); drawRot(); setCoord(); drawMeri(); });
 })();
 </script>
