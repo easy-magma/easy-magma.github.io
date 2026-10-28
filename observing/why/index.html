@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관측 원리 · Easy Magma</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+:root{
+  --bg:#fff8ef; --panel:#ffffff; --ink:#1f1a17; --sub:#6b5f55; --line:#e7dccd; --accent:#ff5a1f;
+  --ok:#12b886; --bad:#e03131; --star:#ffc93c;
+  --f-body:'SUIT Variable','SUIT','Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16120f; --panel:#221c17; --ink:#f4ece3; --sub:#b1a395; --line:#3d332a; --accent:#ff7a45; --ok:#38d9a9; --bad:#ff8787; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+body{background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:22px 22px}
+a.back{display:inline-block;font-size:14px;color:var(--sub);text-decoration:none;margin:16px 24px 0}
+a.back:hover{color:var(--accent)}
+header{padding:8px 24px 4px;max-width:1520px;margin:0 auto}
+header h1{font-size:clamp(26px,3.4vw,38px);margin:0;font-weight:900;letter-spacing:-.02em}
+header .subt{color:var(--sub);font-size:15px;margin:4px 0 0}
+nav.jump{display:flex;gap:8px;flex-wrap:wrap;max-width:1520px;margin:10px auto 0;padding:0 24px}
+nav.jump a{font-weight:800;font-size:14px;text-decoration:none;color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;background:var(--panel)}
+nav.jump a:hover{background:var(--star);color:#1f1a17}
+nav.jump a.next{background:var(--ink);color:var(--bg)}
+section.blk{max-width:1520px;margin:0 auto;padding:16px 24px}
+section.blk>h2{font-size:22px;font-weight:900;margin:8px 0 10px}
+section.blk>h2 small{font-size:14px;color:var(--sub);font-weight:700;margin-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 380px;gap:16px}
+@media (max-width:960px){.grid2{grid-template-columns:1fr} section.blk,header{padding-left:16px;padding-right:16px} nav.jump{padding:0 16px}}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink);min-width:0}
+.card h3{font-size:17px;margin:0 0 8px;color:var(--sub);font-weight:800}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.btn{font:700 15px var(--f-body);padding:6px 11px;border-radius:10px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lbl{display:flex;justify-content:space-between;font-size:16px;font-weight:800;margin-top:8px}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:15px;font-weight:700}
+.stat b{font-size:17px;font-variant-numeric:tabular-nums;text-align:right}
+.key{font-size:17px;font-weight:800;line-height:1.6;margin:0}
+.key b{color:var(--accent)}
+.note{font-size:14px;color:var(--sub);line-height:1.6;margin:8px 0 0}
+canvas{display:block;width:100%;height:auto;border-radius:10px;background:#0b1020}
+.q{font-size:18px;font-weight:900;margin:4px 0 10px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:600px){.opts{grid-template-columns:1fr}}
+.opt{font:700 16px var(--f-body);text-align:left;padding:10px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.opt:hover{border-color:var(--accent)}
+.opt.ok{background:#b2f2bb;color:#10261d}
+.opt.no{background:#ffc9c9;color:#3b0d0d}
+.fb{margin-top:10px;font-size:15px;font-weight:700;min-height:24px}
+.dots{display:flex;gap:6px;margin-bottom:8px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.dots i.ok{background:var(--ok)} .dots i.no{background:var(--bad)} .dots i.cur{background:var(--star)}
+footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;color:var(--sub)}
+</style>
+</head>
+<body>
+<a class="back" href="../../#s=astro">← 시뮬레이터 목록</a>
+<header>
+  <h1>관측 원리: 하늘은 왜 그렇게 보일까</h1>
+  <p class="subt">관측회 현장에서 생기는 네 가지 궁금증 — 별은 왜 시야에서 도망가고, 자동 망원경은 어떻게 별을 찾으며, 토성은 왜 지금 저녁에 보이고, 11월 6일엔 왜 달이 없을까?</p>
+</header>
+<nav class="jump">
+  <a href="../basics/">← ⓪ 기초 개념</a>
+  <a href="#s-drift">① 별이 시야에서 흘러가는 이유</a><a href="#s-goto">② 자동 망원경(GoTo)의 원리</a><a href="#s-saturn">③ 토성은 왜 저녁에?</a><a href="#s-moon">④ 11/6엔 왜 달이 없을까?</a><a href="#s-quiz">⑤ 확인 퀴즈</a>
+  <a class="next" href="../">관측회 하늘 미리보기 →</a>
+</nav>
+
+<!-- ① 일주 운동과 접안렌즈 표류 -->
+<section class="blk" id="s-drift">
+  <h2>① 별이 시야에서 흘러가는 이유 <small>지구 자전 = 하늘이 1시간에 15°씩 도는 것처럼 보임</small></h2>
+  <div class="grid2">
+    <div class="card"><canvas id="ep" width="900" height="560" aria-label="접안렌즈 시야에서 별이 흘러가는 모습"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <h3>접안렌즈 고르기</h3>
+        <div class="row" id="epBtns"></div>
+        <div class="lbl"><span>배율</span><span id="magV">26배</span></div>
+        <input type="range" id="mag" min="10" max="200" step="1" value="26" aria-label="배율">
+        <div class="lbl"><span>대상의 적위</span><span id="decV">+1° (토성)</span></div>
+        <input type="range" id="dec2" min="-30" max="89" step="1" value="1" aria-label="적위">
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="spd">▶ 실제 속도</button>
+          <button class="btn" id="reset">↺ 가운데로</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat"><span>실시야 (겉보기 시야 50° ÷ 배율)</span><b id="tfov">–</b></div>
+        <div class="stat"><span>가운데 → 가장자리까지</span><b id="drift">–</b></div>
+        <p class="key" id="dKey"></p>
+        <p class="note">하늘은 <b>1시간에 15°</b>(= 1초에 15″) 돈다. 배율을 올리면 시야가 좁아져서 같은 속도라도 훨씬 빨리 빠져나간다. 천구의 북극에 가까운 별(적위가 클수록)은 작은 원을 그리므로 느리게 움직인다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ② GoTo -->
+<section class="blk" id="s-goto">
+  <h2>② 자동 망원경(GoTo)의 원리 <small>별의 "주소"(적경·적위)는 그대로, 보이는 위치(방위각·고도)는 시간에 따라 바뀐다</small></h2>
+  <div class="grid2">
+    <div class="card"><canvas id="dome" width="900" height="760" aria-label="11월 6일 밤 하늘에서 대상의 위치 변화"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <h3>대상 고르기 (11/6 융합과학교육원)</h3>
+        <div class="row" id="tgBtns"></div>
+        <div class="lbl"><span>시각</span><span id="tV">19:00</span></div>
+        <input type="range" id="tm" min="1080" max="1320" step="5" value="1140" aria-label="시각">
+      </div>
+      <div class="card">
+        <div class="stat"><span>적경 · 적위 (별의 주소)</span><b id="gRD">–</b></div>
+        <div class="stat"><span>방위각 · 고도 (지금 보이는 곳)</span><b id="gAA">–</b></div>
+        <div class="stat"><span>10분 동안 움직인 각도</span><b id="gMv">–</b></div>
+        <p class="key">적경·적위는 <b>바뀌지 않는다</b>. 방위각·고도는 <b>계속 바뀐다</b>.</p>
+        <p class="note"><b>정렬</b>이란 망원경에게 "지금 이 별이 여기에 있다"를 2~3번 알려 주는 것이다. 날짜·시각·위치와 합쳐 <b>적경·적위 → 방위각·고도</b> 변환식이 완성되면, 망원경은 어떤 대상이든 스스로 찾아가고(GoTo), 모터로 일주 운동을 따라간다(추적). Seestar는 사진 속 별 배치를 분석해 이 과정을 자동으로 한다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 토성 -->
+<section class="blk" id="s-saturn">
+  <h2>③ 토성은 왜 지금 저녁에 보일까 <small>외행성과 지구·태양의 위치 관계 (북극 위에서 내려다본 모습)</small></h2>
+  <div class="grid2">
+    <div class="card"><canvas id="orb" width="900" height="760" aria-label="태양, 지구, 토성의 위치 관계"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <div class="lbl"><span>날짜</span><span id="sDV">2026-11-06</span></div>
+        <input type="range" id="sD" min="-160" max="200" step="1" value="0" aria-label="날짜">
+        <div class="row" style="margin-top:8px">
+          <button class="btn" data-sd="-33">충 (10/4)</button><button class="btn" data-sd="0">관측회 (11/6)</button><button class="btn" data-sd="140">약 5개월 뒤</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat"><span>위치 관계</span><b id="sCfg">–</b></div>
+        <div class="stat"><span>태양–지구–토성 각 (이각)</span><b id="sEl">–</b></div>
+        <div class="stat"><span>해 지고 1시간 뒤 토성</span><b id="sSky">–</b></div>
+        <p class="note">지구가 토성보다 빨리 공전하므로 위치 관계는 <b>충 → 동구 → 합 → 서구 → 충</b> 순서로 바뀐다(약 1년 13일 주기).<br><b>충</b>: 태양 반대편 → 밤새 보임. <b>동구</b>: 태양의 동쪽 90° → 초저녁 남쪽 하늘. <b>합</b>: 태양과 같은 방향 → 안 보임. <b>서구</b>: 새벽 남쪽 하늘.<br>그림의 <b>초저녁 관측자</b>는 막 해가 진 사람이다. 그 사람의 머리 위쪽 반원이 볼 수 있는 하늘이다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 달 -->
+<section class="blk" id="s-moon">
+  <h2>④ 11월 6일엔 왜 달이 없을까 <small>달의 위상과 뜨는 시각 (북극 위에서 내려다본 모습, 햇빛은 오른쪽에서)</small></h2>
+  <div class="grid2">
+    <div class="card"><canvas id="moonC" width="900" height="620" aria-label="태양, 지구, 달의 위치와 달의 위상"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <div class="lbl"><span>날짜</span><span id="mDV">2026-11-06</span></div>
+        <input type="range" id="mD" min="-17" max="24" step="1" value="0" aria-label="날짜">
+      </div>
+      <div class="card">
+        <div class="stat"><span>달의 모양</span><b id="mPh">–</b></div>
+        <div class="stat"><span>달 뜨는 시각 / 지는 시각</span><b id="mRS">–</b></div>
+        <div class="stat"><span>관측 시간(18:30~21:30) 달</span><b id="mObs">–</b></div>
+        <p class="note">달은 하루에 약 50분씩 늦게 뜬다. <b>보름달</b>은 해가 질 때 뜨고, <b>하현달</b>은 한밤중에, <b>그믐달</b>은 새벽에 뜬다. 11월 6일은 삭(11/9) 직전의 그믐 무렵이라 달이 새벽에야 뜬다.<br>→ 달빛이 없는 <b>어두운 하늘</b>! 희미한 성단·은하를 보기에는 오히려 좋은 날이다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 퀴즈 -->
+<section class="blk" id="s-quiz">
+  <h2>⑤ 확인 퀴즈</h2>
+  <div class="card" style="max-width:880px">
+    <div class="dots" id="qDots"></div>
+    <p class="q" id="qQ"></p>
+    <div class="opts" id="qOpts"></div>
+    <p class="fb" id="qFb"></p>
+    <div class="row"><button class="btn" id="qNext">다음 문제 →</button></div>
+  </div>
+</section>
+
+<footer>천문 계산: Astronomy Engine(행성·달·해 위치). 관측 위치는 서울특별시교육청융합과학교육원(북위 37.47°, 동경 126.95°). 궤도 그림의 크기와 거리는 비율이 아닙니다.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const A = Astronomy;
+const OBS = new A.Observer(37.47, 126.95, 80);
+const D2R = Math.PI / 180, FONT = "'SUIT Variable','Noto Sans KR',sans-serif";
+const kstDate = (y, m, d, hh = 0, mm = 0) => new Date(Date.UTC(y, m - 1, d, hh - 9, mm));
+const EVENT = kstDate(2026, 11, 6, 0, 0);
+const addDays = (dt, n) => new Date(dt.getTime() + n * 86400000);
+const ymd = dt => { const k = new Date(dt.getTime() + 9 * 3600000); return `${k.getUTCFullYear()}-${String(k.getUTCMonth() + 1).padStart(2, '0')}-${String(k.getUTCDate()).padStart(2, '0')}`; };
+const hm = dt => { const k = new Date(dt.getTime() + 9 * 3600000); return `${String(k.getUTCHours()).padStart(2, '0')}:${String(k.getUTCMinutes()).padStart(2, '0')}`; };
+const md = dt => { const k = new Date(dt.getTime() + 9 * 3600000); return `${k.getUTCMonth() + 1}/${k.getUTCDate()}`; };
+const dirName = az => ['북', '북동', '동', '남동', '남', '남서', '서', '북서'][Math.round(((az % 360) + 360) % 360 / 45) % 8];
+function horOf(body, dt){ const t = A.MakeTime(dt); const e = A.Equator(body, t, OBS, true, true); return A.Horizon(t, OBS, e.ra, e.dec, 'normal'); }
+function horRD(ra, dec, dt){ return A.Horizon(A.MakeTime(dt), OBS, ra, dec, 'normal'); }
+
+/* ───────── ① 접안렌즈 표류 ───────── */
+const ep = $('ep'), ex = ep.getContext('2d');
+const PRESETS = [['NexStar 25mm', 26], ['NexStar 10mm', 66], ['고배율', 150]];
+let mag = 26, dec2 = 1, real = false, off = 0, lastT = performance.now();
+PRESETS.forEach(([n, m]) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = `${n} (${m}배)`; b.onclick = () => { $('mag').value = m; setMag(); }; $('epBtns').appendChild(b); });
+function setMag(){ mag = +$('mag').value; $('magV').textContent = `${mag}배`; document.querySelectorAll('#epBtns .btn').forEach((b, i) => b.classList.toggle('on', PRESETS[i][1] === mag)); calcDrift(); }
+function setDec(){ dec2 = +$('dec2').value; const nm = dec2 >= 88 ? ' (북극성 근처)' : dec2 === 1 ? ' (토성)' : dec2 === 24 ? ' (플레이아데스)' : dec2 === 39 ? ' (베가)' : ''; $('decV').textContent = `${dec2 >= 0 ? '+' : ''}${dec2}°${nm}`; calcDrift(); }
+let tfovDeg = 0, crossSec = 0;
+function calcDrift(){
+  tfovDeg = 50 / mag;
+  const rate = 15.041 * Math.cos(dec2 * D2R); // arcsec per second
+  crossSec = (tfovDeg / 2) * 3600 / Math.max(rate, 1e-6);
+  $('tfov').textContent = tfovDeg >= 1 ? `${tfovDeg.toFixed(2)}°` : `${(tfovDeg * 60).toFixed(0)}′`;
+  $('drift').textContent = crossSec > 3600 ? '1시간 이상' : crossSec >= 120 ? `약 ${(crossSec / 60).toFixed(1)}분` : `약 ${crossSec.toFixed(0)}초`;
+  $('dKey').innerHTML = crossSec > 3600 ? '거의 움직이지 않는다 — 천구의 북극 근처라서!' :
+    `돕소니언은 <b>${Math.max(5, Math.round(crossSec / 3))}초</b>마다 조금씩 밀어 주어야 한다. NexStar·Seestar는 모터가 자동으로 따라간다.`;
+}
+$('mag').oninput = setMag; $('dec2').oninput = setDec;
+$('spd').onclick = () => { real = !real; $('spd').classList.toggle('on', real); $('spd').textContent = real ? '⏸ 멈춤' : '▶ 실제 속도'; lastT = performance.now(); };
+$('reset').onclick = () => { off = 0; };
+function drawEp(now){
+  const W = ep.width, H = ep.height, cx = W / 2, cy = H / 2 - 6, R = 220;
+  if (real){ off += (now - lastT) / 1000 / crossSec; if (off > 1.25) off = -1; }
+  lastT = now;
+  ex.fillStyle = '#05070d'; ex.fillRect(0, 0, W, H);
+  ex.save(); ex.beginPath(); ex.arc(cx, cy, R, 0, 7); ex.clip();
+  ex.fillStyle = '#0b1530'; ex.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+  // 배경 별: 시야에 고정된 하늘 패턴(배율에 따라 간격 바뀜)
+  const seed = i => { const x = Math.sin(i * 127.1) * 43758.5453; return x - Math.floor(x); };
+  const span = tfovDeg; // deg across diameter
+  for (let i = 0; i < 160; i++){
+    const sx = (seed(i) - 0.5) * 4, sy = (seed(i + 500) - 0.5) * 4; // degrees field 4x4
+    const px = cx + (sx / span) * 2 * R - off * R, py = cy + (sy / span) * 2 * R;
+    if (Math.abs(px - cx) > R + 4 || Math.abs(py - cy) > R + 4) continue;
+    ex.fillStyle = 'rgba(255,255,255,.75)'; ex.beginPath(); ex.arc(px, py, 1.2 + seed(i + 900) * 1.4, 0, 7); ex.fill();
+  }
+  // 대상
+  const tx = cx - off * R;
+  ex.fillStyle = '#ffd43b'; ex.shadowColor = '#ffd43b'; ex.shadowBlur = 18; ex.beginPath(); ex.arc(tx, cy, 9, 0, 7); ex.fill(); ex.shadowBlur = 0;
+  ex.restore();
+  ex.strokeStyle = '#adb5bd'; ex.lineWidth = 4; ex.beginPath(); ex.arc(cx, cy, R, 0, 7); ex.stroke();
+  // 방향 화살표
+  ex.fillStyle = '#ffc93c'; ex.font = `800 22px ${FONT}`; ex.textAlign = 'center';
+  ex.fillText('← 별이 흘러가는 방향 (하늘의 서쪽)', cx, cy + R + 34);
+  ex.fillStyle = '#ced4da'; ex.font = `700 18px ${FONT}`;
+  ex.fillText(`실시야 ${tfovDeg >= 1 ? tfovDeg.toFixed(2) + '°' : (tfovDeg * 60).toFixed(0) + '′'} · 보름달 ${tfovDeg > 0.5 ? (tfovDeg / 0.5).toFixed(1) + '개 폭' : '보다 좁음'}`, cx, 34);
+  if (real){ ex.textAlign = 'left'; ex.fillStyle = '#ff8787'; ex.fillText('● 실제 속도로 움직이는 중', 18, H - 18); }
+  requestAnimationFrame(drawEp);
+}
+
+/* ───────── ② GoTo: 방위각·고도 변화 ───────── */
+const dome = $('dome'), dx = dome.getContext('2d');
+const TG = [
+  { n: '토성', body: 'Saturn' },
+  { n: '베가', ra: 18.6156, dec: 38.783 },
+  { n: '알비레오', ra: 19.5120, dec: 27.960 },
+  { n: '안드로메다 은하', ra: 0.7123, dec: 41.269 },
+  { n: '플레이아데스', ra: 3.7900, dec: 24.117 },
+  { n: '북극성', ra: 2.5303, dec: 89.264 },
+];
+let tg = 0, tmin = 1140;
+TG.forEach((o, i) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = o.n; b.onclick = () => { tg = i; drawDome(); }; $('tgBtns').appendChild(b); });
+function rdOf(o, dt){ if (o.body){ const e = A.Equator(o.body, A.MakeTime(dt), OBS, true, true); return { ra: e.ra, dec: e.dec }; } return { ra: o.ra, dec: o.dec }; }
+function hAt(o, dt){ const r = rdOf(o, dt); return horRD(r.ra, r.dec, dt); }
+const evMin = m => kstDate(2026, 11, 6, 0, m);
+function skyXY(az, alt, cx, cy, R){ const r = R * (90 - alt) / 90, a = az * D2R; return [cx - r * Math.sin(a), cy - r * Math.cos(a)]; } // 위쪽=북, 왼쪽=동(하늘을 올려다본 모습)
+function drawDome(){
+  tmin = +$('tm').value; $('tV').textContent = `${String(Math.floor(tmin / 60)).padStart(2, '0')}:${String(tmin % 60).padStart(2, '0')}`;
+  document.querySelectorAll('#tgBtns .btn').forEach((b, i) => b.classList.toggle('on', i === tg));
+  const W = dome.width, H = dome.height, cx = W / 2, cy = H / 2, R = 305;
+  dx.fillStyle = '#05070d'; dx.fillRect(0, 0, W, H);
+  dx.fillStyle = '#0b1530'; dx.beginPath(); dx.arc(cx, cy, R, 0, 7); dx.fill();
+  dx.strokeStyle = 'rgba(255,255,255,.18)'; dx.lineWidth = 1;
+  for (const a of [30, 60]){ dx.beginPath(); dx.arc(cx, cy, R * (90 - a) / 90, 0, 7); dx.stroke(); }
+  for (let az = 0; az < 360; az += 45){ const [x, y] = skyXY(az, 0, cx, cy, R); dx.beginPath(); dx.moveTo(cx, cy); dx.lineTo(x, y); dx.stroke(); }
+  dx.strokeStyle = '#adb5bd'; dx.lineWidth = 3; dx.beginPath(); dx.arc(cx, cy, R, 0, 7); dx.stroke();
+  dx.fillStyle = '#ffc93c'; dx.font = `800 24px ${FONT}`; dx.textAlign = 'center'; dx.textBaseline = 'middle';
+  [['북', 0], ['동', 90], ['남', 180], ['서', 270]].forEach(([n, az]) => { const [x, y] = skyXY(az, -9, cx, cy, R); dx.fillText(n, x, y); });
+  dx.fillStyle = '#868e96'; dx.font = `700 15px ${FONT}`; dx.fillText('고도 30°', cx + 6, cy - R * 60 / 90 + 14); dx.fillText('60°', cx + 6, cy - R * 30 / 90 + 14); dx.fillText('천정', cx, cy + 16);
+  const o = TG[tg];
+  // 18:00~22:00 궤적
+  dx.strokeStyle = 'rgba(255,212,59,.55)'; dx.lineWidth = 3; dx.setLineDash([6, 6]); dx.beginPath(); let started = false;
+  for (let m = 1080; m <= 1320; m += 5){ const h = hAt(o, evMin(m)); if (h.altitude < 0){ started = false; continue; } const [x, y] = skyXY(h.azimuth, h.altitude, cx, cy, R); if (!started){ dx.moveTo(x, y); started = true; } else dx.lineTo(x, y); }
+  dx.stroke(); dx.setLineDash([]);
+  for (let m = 1080; m <= 1320; m += 60){ const h = hAt(o, evMin(m)); if (h.altitude < 0) continue; const [x, y] = skyXY(h.azimuth, h.altitude, cx, cy, R); dx.fillStyle = '#ced4da'; dx.beginPath(); dx.arc(x, y, 4, 0, 7); dx.fill(); dx.font = `700 15px ${FONT}`; dx.fillText(`${m / 60}시`, x, y - 16); }
+  const now = evMin(tmin), h = hAt(o, now), rd = rdOf(o, now), h10 = hAt(o, evMin(tmin + 10));
+  if (h.altitude >= 0){ const [x, y] = skyXY(h.azimuth, h.altitude, cx, cy, R); dx.fillStyle = '#ffd43b'; dx.shadowColor = '#ffd43b'; dx.shadowBlur = 16; dx.beginPath(); dx.arc(x, y, 11, 0, 7); dx.fill(); dx.shadowBlur = 0; dx.fillStyle = '#fff'; dx.font = `800 20px ${FONT}`; dx.fillText(o.n, x, y + 26); }
+  else { dx.fillStyle = '#ff8787'; dx.font = `800 22px ${FONT}`; dx.fillText(`${o.n}: 지금은 지평선 아래`, cx, 30); }
+  dx.fillStyle = '#ced4da'; dx.font = `700 15px ${FONT}`; dx.textAlign = 'left'; dx.fillText('하늘을 올려다본 모습 (위=북, 왼쪽=동)', 14, H - 16);
+  const raH = Math.floor(rd.ra), raM = Math.round((rd.ra - raH) * 60);
+  $('gRD').textContent = `${raH}h ${String(raM).padStart(2, '0')}m · ${rd.dec >= 0 ? '+' : ''}${rd.dec.toFixed(1)}°`;
+  $('gAA').textContent = `${h.azimuth.toFixed(0)}°(${dirName(h.azimuth)}) · ${h.altitude.toFixed(1)}°`;
+  // 10분 이동 각거리
+  const a1 = h.altitude * D2R, a2 = h10.altitude * D2R, dz = (h10.azimuth - h.azimuth) * D2R;
+  const ang = Math.acos(Math.min(1, Math.sin(a1) * Math.sin(a2) + Math.cos(a1) * Math.cos(a2) * Math.cos(dz))) / D2R;
+  $('gMv').textContent = `${ang.toFixed(2)}° (보름달 ${(ang / 0.5).toFixed(1)}개)`;
+}
+$('tm').oninput = drawDome;
+
+/* ───────── ③ 토성 위치 관계 ───────── */
+const orb = $('orb'), ox = orb.getContext('2d');
+let sOff = 0;
+document.querySelectorAll('[data-sd]').forEach(b => b.onclick = () => { $('sD').value = b.dataset.sd; drawOrb(); });
+function cfgName(el, vis){
+  if (el < 15) return '합 부근 — 태양과 같은 방향, 안 보임';
+  if (el > 170) return '충 — 밤새 보임';
+  const side = vis === 'evening' ? '동' : '서';
+  if (el >= 80 && el <= 100) return vis === 'evening' ? '동구 — 초저녁 남쪽 하늘' : '서구 — 새벽 남쪽 하늘';
+  if (el > 100) return vis === 'evening' ? '충과 동구 사이 — 초저녁 동쪽~남쪽 하늘' : '서구와 충 사이 — 한밤~새벽';
+  return vis === 'evening' ? '동구와 합 사이 — 초저녁 서쪽 낮은 하늘' : '합과 서구 사이 — 새벽 동쪽 낮은 하늘';
+}
+function drawOrb(){
+  sOff = +$('sD').value; const day = addDays(EVENT, sOff); $('sDV').textContent = ymd(day);
+  const t = A.MakeTime(addDays(day, 0.5));
+  const e = A.HelioVector('Earth', t), s = A.HelioVector('Saturn', t);
+  const ae = Math.atan2(e.y, e.x), as = Math.atan2(s.y, s.x);
+  const W = orb.width, H = orb.height, cx = W / 2, cy = H / 2, Re = 140, Rs = 330;
+  ox.fillStyle = '#05070d'; ox.fillRect(0, 0, W, H);
+  ox.strokeStyle = 'rgba(255,255,255,.25)'; ox.lineWidth = 2; ox.setLineDash([5, 7]);
+  ox.beginPath(); ox.arc(cx, cy, Re, 0, 7); ox.stroke(); ox.beginPath(); ox.arc(cx, cy, Rs, 0, 7); ox.stroke(); ox.setLineDash([]);
+  // 태양
+  ox.fillStyle = '#ffd43b'; ox.shadowColor = '#ffa94d'; ox.shadowBlur = 30; ox.beginPath(); ox.arc(cx, cy, 26, 0, 7); ox.fill(); ox.shadowBlur = 0;
+  const E = [cx + Re * Math.cos(ae), cy - Re * Math.sin(ae)], Sp = [cx + Rs * Math.cos(as), cy - Rs * Math.sin(as)];
+  // 지구–태양, 지구–토성 선
+  ox.strokeStyle = 'rgba(255,212,59,.5)'; ox.lineWidth = 2; ox.beginPath(); ox.moveTo(E[0], E[1]); ox.lineTo(cx, cy); ox.stroke();
+  ox.strokeStyle = 'rgba(242,212,138,.8)'; ox.beginPath(); ox.moveTo(E[0], E[1]); ox.lineTo(Sp[0], Sp[1]); ox.stroke();
+  // 지구: 낮/밤
+  const sunDir = Math.atan2(-(cy - E[1]), cx - E[0]); // 화면 좌표 기준 각(위쪽 +)
+  const er = 22;
+  ox.fillStyle = '#1c2a4a'; ox.beginPath(); ox.arc(E[0], E[1], er, 0, 7); ox.fill();
+  ox.fillStyle = '#4dabf7'; ox.beginPath(); ox.arc(E[0], E[1], er, -sunDir - Math.PI / 2, -sunDir + Math.PI / 2); ox.fill();
+  // 초저녁 관측자: 태양 방향에서 반시계 90°(자전 방향으로 막 밤이 되는 곳)
+  const dusk = sunDir + Math.PI / 2, ux = Math.cos(dusk), uy = -Math.sin(dusk);
+  const P = [E[0] + er * ux, E[1] + er * uy];
+  ox.strokeStyle = '#69db7c'; ox.lineWidth = 3; ox.beginPath(); ox.moveTo(P[0] - uy * 70, P[1] + ux * 70); ox.lineTo(P[0] + uy * 70, P[1] - ux * 70); ox.stroke(); // 지평선
+  ox.fillStyle = '#69db7c'; ox.beginPath(); ox.arc(P[0], P[1], 6, 0, 7); ox.fill();
+  ox.font = `800 17px ${FONT}`; ox.textAlign = 'center'; ox.fillText('초저녁 관측자', P[0] + ux * 62, P[1] + uy * 62);
+  // 토성
+  ox.fillStyle = '#f2d48a'; ox.beginPath(); ox.arc(Sp[0], Sp[1], 14, 0, 7); ox.fill();
+  ox.strokeStyle = '#f2d48a'; ox.lineWidth = 3; ox.beginPath(); ox.ellipse(Sp[0], Sp[1], 26, 8, -0.4, 0, 7); ox.stroke();
+  ox.fillStyle = '#fff'; ox.font = `800 20px ${FONT}`; ox.fillText('토성', Sp[0], Sp[1] - 28); ox.fillText('지구', E[0] - ux * (er + 26), E[1] - uy * (er + 26) + 7); ox.fillText('태양', cx, cy + 46);
+  ox.fillStyle = '#ced4da'; ox.font = `700 15px ${FONT}`; ox.textAlign = 'left';
+  ox.fillText('지구·토성 모두 반시계 방향으로 공전 (거리 비율 아님)', 14, H - 16);
+  const el = A.Elongation('Saturn', t);
+  $('sCfg').textContent = cfgName(el.elongation, el.visibility);
+  $('sEl').textContent = `${el.elongation.toFixed(0)}° (${el.visibility === 'evening' ? '태양의 동쪽' : '태양의 서쪽'})`;
+  try {
+    const ss = A.SearchRiseSet('Sun', OBS, -1, A.MakeTime(addDays(day, 0.1)), 1);
+    const d1 = new Date(ss.date.getTime() + 3600000), hh = horOf('Saturn', d1);
+    $('sSky').textContent = hh.altitude > 0 ? `${hm(d1)} ${dirName(hh.azimuth)}쪽 고도 ${hh.altitude.toFixed(0)}°` : `${hm(d1)} 지평선 아래`;
+  } catch (err){ $('sSky').textContent = '–'; }
+}
+$('sD').oninput = drawOrb;
+
+/* ───────── ④ 달 ───────── */
+const mc = $('moonC'), mx = mc.getContext('2d');
+function phaseName(p){ return p < 10 || p > 350 ? '삭(신월)' : p < 80 ? '초승달' : p < 100 ? '상현달' : p < 170 ? '상현~보름' : p < 190 ? '보름달' : p < 260 ? '보름~하현' : p < 280 ? '하현달' : '그믐달'; }
+function drawPhaseDisc(c, x, y, r, phase){
+  // phase: 0 삭, 90 상현, 180 보름, 270 하현 (북반구에서 본 모양)
+  c.fillStyle = '#2b2f36'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+  const k = (1 - Math.cos(phase * D2R)) / 2; // 밝은 비율
+  const waxing = phase < 180;
+  c.fillStyle = '#f1f3f5'; c.beginPath();
+  // 밝은 쪽 반원
+  if (waxing) c.arc(x, y, r, -Math.PI / 2, Math.PI / 2); else c.arc(x, y, r, Math.PI / 2, 3 * Math.PI / 2);
+  // 명암 경계(타원)
+  const ew = r * Math.abs(1 - 2 * k);
+  if (k < 0.5){ c.ellipse(x, y, ew, r, 0, waxing ? Math.PI / 2 : -Math.PI / 2, waxing ? -Math.PI / 2 : Math.PI / 2, true); }
+  else { c.ellipse(x, y, ew, r, 0, waxing ? Math.PI / 2 : -Math.PI / 2, waxing ? 3 * Math.PI / 2 : Math.PI / 2, false); }
+  c.fill();
+}
+function drawMoon(){
+  const off = +$('mD').value, day = addDays(EVENT, off); $('mDV').textContent = ymd(day);
+  const t19 = A.MakeTime(kstDate(2026, 11, 6 + off, 19, 0));
+  const ph = A.MoonPhase(t19);
+  const W = mc.width, H = mc.height, cx = 330, cy = H / 2, Rm = 200;
+  mx.fillStyle = '#05070d'; mx.fillRect(0, 0, W, H);
+  // 햇빛 화살표
+  mx.strokeStyle = 'rgba(255,212,59,.35)'; mx.lineWidth = 2;
+  for (let i = -4; i <= 4; i++){ const y = cy + i * 55; mx.beginPath(); mx.moveTo(W - 20, y); mx.lineTo(W - 120, y); mx.stroke(); mx.beginPath(); mx.moveTo(W - 120, y); mx.lineTo(W - 108, y - 6); mx.moveTo(W - 120, y); mx.lineTo(W - 108, y + 6); mx.stroke(); }
+  mx.fillStyle = '#ffd43b'; mx.font = `800 20px ${FONT}`; mx.textAlign = 'center'; mx.fillText('← 햇빛 (태양은 오른쪽 멀리)', W - 150, 26);
+  mx.strokeStyle = 'rgba(255,255,255,.25)'; mx.setLineDash([5, 7]); mx.beginPath(); mx.arc(cx, cy, Rm, 0, 7); mx.stroke(); mx.setLineDash([]);
+  // 지구 낮(오른쪽)/밤(왼쪽)
+  const er = 34; mx.fillStyle = '#1c2a4a'; mx.beginPath(); mx.arc(cx, cy, er, 0, 7); mx.fill();
+  mx.fillStyle = '#4dabf7'; mx.beginPath(); mx.arc(cx, cy, er, -Math.PI / 2, Math.PI / 2); mx.fill();
+  // 시각 표시: 정오(오른쪽), 해질녘(위), 자정(왼쪽), 해뜰녘(아래) — 반시계 자전
+  mx.fillStyle = '#ced4da'; mx.font = `700 15px ${FONT}`;
+  [['정오', 0], ['해 질 녘(18시)', 90], ['자정', 180], ['해 뜰 녘(6시)', 270]].forEach(([n, a]) => mx.fillText(n, cx + (er + 34) * Math.cos(a * D2R), cy - (er + 34) * Math.sin(a * D2R) + 5));
+  // 관측 시간대(18:30~21:30) 부채꼴: 자전으로 해질녘(90°)에서 자정(180°) 쪽
+  mx.fillStyle = 'rgba(105,219,124,.18)'; mx.beginPath(); mx.moveTo(cx, cy); mx.arc(cx, cy, Rm + 40, -(90 + 7.5) * D2R, -(90 + 52.5) * D2R, true); mx.closePath(); mx.fill();
+  mx.fillStyle = '#69db7c'; mx.font = `800 15px ${FONT}`; mx.fillText('관측 시간에 보이는 쪽', cx - 120, cy - Rm - 18);
+  // 달 위치: 위상각만큼 태양 방향(오른쪽)에서 반시계
+  const ma = ph * D2R, M = [cx + Rm * Math.cos(ma), cy - Rm * Math.sin(ma)], r = 20;
+  mx.fillStyle = '#2b2f36'; mx.beginPath(); mx.arc(M[0], M[1], r, 0, 7); mx.fill();
+  mx.fillStyle = '#f1f3f5'; mx.beginPath(); mx.arc(M[0], M[1], r, -Math.PI / 2, Math.PI / 2); mx.fill();
+  mx.fillStyle = '#fff'; mx.font = `800 18px ${FONT}`; mx.fillText('달', M[0], M[1] - r - 10);
+  // 지구에서 본 모양
+  const bx = 760, by = 470;
+  mx.fillStyle = '#ced4da'; mx.font = `800 17px ${FONT}`; mx.fillText('우리 눈에 보이는 모양', bx, by - 78);
+  drawPhaseDisc(mx, bx, by, 55, ph);
+  $('mPh').textContent = `${phaseName(ph)} (밝은 부분 ${(A.Illumination('Moon', t19).phase_fraction * 100).toFixed(0)}%)`;
+  // 뜨고 지는 시각 (그날 정오 이후 첫 월출·월몰)
+  const noon = A.MakeTime(kstDate(2026, 11, 6 + off, 12, 0));
+  let rs = '';
+  try { const r1 = A.SearchRiseSet('Moon', OBS, +1, noon, 1.5); rs += r1 ? `${md(r1.date)} ${hm(r1.date)} 뜸` : ''; } catch (e){}
+  try { const s1 = A.SearchRiseSet('Moon', OBS, -1, noon, 1.5); rs += s1 ? ` / ${md(s1.date)} ${hm(s1.date)} 짐` : ''; } catch (e){}
+  $('mRS').textContent = rs || '–';
+  let best = -90; for (let m = 1110; m <= 1290; m += 15){ const h = horOf('Moon', kstDate(2026, 11, 6 + off, 0, m)); best = Math.max(best, h.altitude); }
+  $('mObs').textContent = best > 5 ? `보임 (최고 고도 ${best.toFixed(0)}°)` : best > 0 ? '지평선 근처, 거의 안 보임' : '안 보임 — 지평선 아래';
+}
+$('mD').oninput = drawMoon;
+
+/* ───────── ⑤ 퀴즈 ───────── */
+const QZ = [
+  ['NexStar에서 25mm 접안렌즈를 10mm로 바꾸면, 별이 시야를 빠져나가는 시간은?', ['약 2.5배 짧아진다', '약 2.5배 길어진다', '변하지 않는다', '별이 반대로 움직인다'], 0, '배율이 26배 → 66배로 약 2.5배 커지면 실시야가 2.5배 좁아진다. 하늘이 도는 속도는 같으니 2.5배 빨리 빠져나간다.'],
+  ['접안렌즈 속에서 북극성이 거의 움직이지 않는 이유는?', ['천구의 북극 바로 근처에 있어서', '가장 밝은 별이라서', '지구에서 가장 가까워서', '북쪽 하늘은 자전하지 않아서'], 0, '모든 별은 천구의 북극을 중심으로 돈다. 북극성은 그 중심 근처라 아주 작은 원만 그린다.'],
+  ['시간이 지나도 변하지 않는 것은?', ['적경·적위', '방위각·고도', '둘 다 변한다', '둘 다 변하지 않는다'], 0, '적경·적위는 천구에 고정된 "주소"라 그대로다. 관측자 기준인 방위각·고도는 일주 운동 때문에 계속 바뀐다. 자동 망원경은 이 둘을 계속 변환한다.'],
+  ['11월 6일 저녁에 토성이 잘 보이는 까닭은?', ['10월 초 충을 지나 태양의 동쪽(이각 약 145°)에 있어서', '토성이 지구보다 빨리 공전해서', '합 위치라 태양과 같은 방향이라서', '서구 위치라 새벽에 떠서'], 0, '토성은 10/4 충을 지나 지금은 충과 동구 사이에 있다. 해가 지면 이미 동쪽~남동쪽 하늘에 떠 있고, 밤이 깊을수록 남쪽으로 높아진다.'],
+  ['11월 6일 관측 시간에 달이 보이지 않는 까닭은?', ['그믐 무렵이라 새벽에야 뜨기 때문', '보름달이라 너무 밝아서', '상현달이라 낮에만 떠서', '달이 지구 그림자에 가려서(월식)'], 0, '삭(11/9) 직전의 그믐 무렵 달은 태양 바로 서쪽에 있어서 새벽 5시쯤 뜬다. 덕분에 달빛 없는 어두운 하늘에서 관측할 수 있다.'],
+];
+let qi = 0, qres = [];
+function drawQ(){
+  const [q, opts, ans, exp] = QZ[qi];
+  $('qDots').innerHTML = QZ.map((_, i) => `<i class="${qres[i] === true ? 'ok' : qres[i] === false ? 'no' : i === qi ? 'cur' : ''}"></i>`).join('');
+  $('qQ').textContent = `Q${qi + 1}. ${q}`; $('qFb').textContent = '';
+  const order = opts.map((_, i) => i).sort(() => Math.random() - 0.5);
+  $('qOpts').innerHTML = '';
+  order.forEach(i => { const b = document.createElement('button'); b.className = 'opt'; b.textContent = opts[i];
+    b.onclick = () => { if (qres[qi] !== undefined) return; const ok = i === ans; qres[qi] = ok; b.classList.add(ok ? 'ok' : 'no');
+      if (!ok) [...$('qOpts').children].forEach(c => { if (c.textContent === opts[ans]) c.classList.add('ok'); });
+      $('qFb').textContent = (ok ? '정답! ' : '아쉬워요. ') + exp; drawDots(); };
+    $('qOpts').appendChild(b); });
+}
+function drawDots(){ $('qDots').innerHTML = QZ.map((_, i) => `<i class="${qres[i] === true ? 'ok' : qres[i] === false ? 'no' : i === qi ? 'cur' : ''}"></i>`).join(''); }
+$('qNext').onclick = () => { qi = (qi + 1) % QZ.length; let msg = '';
+  if (qi === 0 && qres.length === QZ.length){ msg = `지난 회차 ${qres.filter(Boolean).length}/${QZ.length}개 정답 — 다시 풀어 보세요!`; qres = []; }
+  drawQ(); if (msg) $('qFb').textContent = msg; };
+
+setMag(); setDec(); requestAnimationFrame(drawEp);
+drawDome(); drawOrb(); drawMoon(); drawQ();
+</script>
+</body>
+</html>
