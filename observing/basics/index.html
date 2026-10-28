@@ -77,8 +77,8 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
   <p class="subt">천체관측회 전에 — 하늘에서 방향은 어떻게 찾고, 별은 왜 움직이고, 계절마다 왜 다른 별자리가 보이며, 별의 "주소"는 어떻게 쓸까?</p>
 </header>
 <nav class="jump">
-  <a href="#s-dir">① 동서남북 · 방위각 · 고도</a><a href="#s-rot">② 자전 → 태양·별의 일주 운동</a><a href="#s-rev">③ 공전 → 태양의 연주 운동</a><a href="#s-coord">④ 천구와 적경·적위</a><a href="#s-quiz">⑤ 확인 퀴즈</a>
-  <a class="next" href="../why/">다음: 관측 원리 →</a>
+  <a href="#s-dir">① 동서남북 · 방위각 · 고도</a><a href="#s-coord">② 위도·경도 → 적경·적위</a><a href="#s-rot">③ 자전 → 일주 운동 · 남중 고도</a><a href="#s-rev">④ 공전 → 연주 운동</a><a href="#s-quiz">⑤ 확인 퀴즈</a>
+  <a class="next" href="../">다음: 관측회 하늘 미리보기 →</a>
 </nav>
 
 <!-- ① 방위 -->
@@ -136,13 +136,47 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
   </div>
 </section>
 
-<!-- ② 자전 -->
+<!-- ② 위도·경도·적위 -->
+<section class="blk" id="s-coord">
+  <h2>② 위도·경도 → 천구의 적경·적위 <small>지구의 위도·경도를 하늘에 그대로 옮긴 "별의 주소"</small></h2>
+  <div class="grid2">
+    <div class="card"><div class="cap">천구 — 드래그해서 돌려 보세요 (가운데 = 지구, 주황 사람 = 관측자)</div><canvas id="sphere" class="drag" width="900" height="640" style="background:#0b1020"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <div class="row" id="objs">
+          <button class="btn on" data-o="0">북극성</button><button class="btn" data-o="1">직녀성</button><button class="btn" data-o="2">안드로메다 은하</button><button class="btn" data-o="3">플레이아데스</button><button class="btn" data-o="4">카시오페이아</button><button class="btn" data-o="5">베텔게우스</button><button class="btn" data-o="6">포말하우트</button>
+        </div>
+        <div class="lbl"><span>적경 (α)</span><span id="raV">2h 32m</span></div>
+        <input type="range" id="ra" min="0" max="24" step="0.05" value="2.53" aria-label="적경">
+        <div class="lbl"><span>적위 (δ)</span><span id="decV">+89°</span></div>
+        <input type="range" id="dec" min="-90" max="90" step="0.5" value="89.3" aria-label="적위">
+        <div class="lbl"><span>관측자 위도 (φ)</span><span id="latV">서울 37.5°N</span></div>
+        <input type="range" id="lat" min="-90" max="90" step="0.5" value="37.5" aria-label="위도">
+        <div class="stat" style="margin-top:6px;border:0"><span>관측자 머리 위(천정)의 적위</span><b id="zenV">+37.5°</b></div>
+        <p class="note" style="margin:0">지구 위도 φ에 선 사람의 <b>천정</b>은 천구에서 <b>적위 φ</b>인 곳. 위도를 하늘로 쭉 늘인 것이 적위다.</p>
+      </div>
+      <div class="card">
+        <table class="ana">
+          <tr><th></th><th>지구 (땅의 주소)</th><th>천구 (별의 주소)</th></tr>
+          <tr><td>위아래</td><td>위도 0°~±90°</td><td><b>적위</b> 0°~±90° (천구 적도 기준)</td></tr>
+          <tr><td>옆으로</td><td>경도 (본초 자오선 기준)</td><td><b>적경</b> 0h~24h (<b>춘분점</b> 기준, 동쪽으로)</td></tr>
+          <tr><td>단위</td><td>도(°)</td><td>시(h) — 1h = 15°</td></tr>
+        </table>
+        <p class="note">적경을 "시간"으로 쓰는 이유: 하늘이 1시간에 15°씩 돌기 때문에, <b>적경이 1h 큰 별은 정확히 1시간 늦게 남중</b>한다. 적경 = 남쪽 하늘을 지나가는 순서!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 자전 -->
 <section class="blk" id="s-rot">
-  <h2>② 지구의 자전 → 태양과 별의 일주 운동 <small>우주에서 본 지구 ↔ 서울에서 본 하늘, 같은 순간을 나란히</small></h2>
+  <h2>③ 지구의 자전 → 태양과 별의 일주 운동 <small>우주에서 본 지구 ↔ 서울에서 본 하늘, 같은 순간을 나란히</small></h2>
   <div class="grid">
     <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 우주에서 본 지구 (드래그로 회전)</div><canvas id="d3out" class="drag three"></canvas></div>
     <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 서울에서 본 하늘 (드래그로 회전)</div><canvas id="d3in" class="drag three"></canvas>
-      <div class="row" style="margin-top:6px"><button class="btn on" data-dv="tilt">비스듬히 내려다보기</button><button class="btn" data-dv="eye">관측자 눈높이</button></div></div>
+      <div class="row" style="margin-top:6px"><button class="btn on" data-dv="tilt">비스듬히 내려다보기</button><button class="btn" data-dv="eye">관측자 눈높이</button></div>
+      <div class="row" style="margin-top:6px" id="dLats"><b style="font-size:15px">관측 위치:</b><button class="btn" data-dl="0">적도 0°</button><button class="btn on" data-dl="37.47">서울 37.5°</button><button class="btn" data-dl="90">북극 90°</button>
+        <label class="chk" style="font-size:15px;font-weight:700"><input type="checkbox" id="cStarPath"> 별의 일주 경로</label></div></div>
     <div class="col side">
       <div class="card">
         <div class="lbl"><span>태양시</span><span id="dT" style="font-size:24px">09:00</span></div>
@@ -176,11 +210,32 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
         <p class="note">북극성은 지구 자전축을 연장한 곳에 거의 딱 놓여 있어서 밤새 움직이지 않는다. 남쪽 하늘의 별은 동쪽에서 떠서 남쪽 하늘을 지나 서쪽으로 진다.</p></div>
     </div>
   </div>
+  <h3 style="font-size:18px;font-weight:900;margin:22px 0 10px">📐 남중 고도 — 정남쪽에 왔을 때 가장 높다</h3>
+  <div class="grid2">
+    <div class="card"><div class="cap">관측자에서 본 남북 방향 단면 — 하루 동안 지나는 길을 옆에서 본 모습</div><canvas id="meri" width="640" height="600" style="max-width:640px;margin:0 auto"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <div class="row" id="mObjs">
+          <button class="btn on" data-m="23.44" data-n="태양(하지)">태양 · 하지</button><button class="btn" data-m="0" data-n="태양(춘·추분)">태양 · 춘추분</button><button class="btn" data-m="-23.44" data-n="태양(동지)">태양 · 동지</button>
+          <button class="btn" data-m="1.1" data-n="토성(11/6)">토성 (11/6)</button><button class="btn" data-m="89.26" data-n="북극성">북극성</button><button class="btn" data-m="24.12" data-n="플레이아데스">플레이아데스</button><button class="btn" data-m="-29.62" data-n="포말하우트">포말하우트</button>
+        </div>
+        <div class="lbl"><span>적위 (δ)</span><span id="mdecV">+23.4°</span></div>
+        <input type="range" id="mdec" min="-90" max="90" step="0.5" value="23.44" aria-label="적위">
+        <div class="lbl"><span>관측자 위도 (φ)</span><span id="mlatV">서울 37.5°N</span></div>
+        <input type="range" id="mlat" min="-90" max="90" step="0.5" value="37.5" aria-label="위도">
+        <div class="row" id="mLats"><button class="btn" data-ml="0">적도</button><button class="btn on" data-ml="37.5">서울</button><button class="btn" data-ml="90">북극</button></div>
+        <div class="stat" style="margin-top:6px"><span>남중 고도 h = 90° − φ + δ</span><b id="culm">–</b></div>
+        <div class="stat" style="border:0"><span>이 천체는</span><b id="kind">–</b></div>
+      </div>
+      <div class="card"><p class="key">남중 고도 <b>h = 90° − φ(위도) + δ(적위)</b></p>
+        <p class="note">서울(37.5°)에서 태양의 남중 고도: 하지 76°, 춘추분 52.5°, 동지 29°. 이 차이가 계절을 만든다.<br>11/6 토성(적위 약 +1°)은 약 53.5°까지 올라간다.</p></div>
+    </div>
+  </div>
 </section>
 
-<!-- ③ 공전 -->
+<!-- ④ 공전 -->
 <section class="blk" id="s-rev">
-  <h2>③ 지구의 공전 → 태양의 연주 운동 <small>태양은 1년 동안 별자리 사이를 서→동으로 한 바퀴 돈다</small></h2>
+  <h2>④ 지구의 공전 → 태양의 연주 운동 · 태양의 적위 변화 <small>태양은 1년 동안 별자리 사이를 서→동으로 한 바퀴 돈다</small></h2>
   <div class="grid">
     <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 태양계를 밖에서 본 모습 (드래그로 회전)</div><canvas id="y3out" class="drag three"></canvas></div>
     <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 지구에서 본 천구와 태양 (드래그로 회전)</div><canvas id="y3in" class="drag three"></canvas>
@@ -198,39 +253,6 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
       </div>
       <div class="card"><p class="key">지구가 공전하면 지구에서 본 태양의 방향이 바뀐다 → 태양은 별자리 사이를 <b>서→동으로 하루 약 1°</b>씩 옮겨 가 1년에 한 바퀴 (태양의 연주 운동). 이 길이 <b>황도</b>.</p>
         <p class="note">황도는 천구 적도와 <b>23.5°</b> 기울어 있다(자전축이 기울어서) → 태양의 적위가 −23.5°~+23.5°로 바뀌고, 남중 고도와 낮의 길이가 달라져 <b>계절</b>이 생긴다.<br>태양이 있는 별자리는 낮에 떠서 보이지 않고, 그 <b>반대쪽 별자리</b>가 한밤중에 보인다. 같은 별은 매일 약 4분씩 일찍 뜬다.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ④ 적경 적위 -->
-<section class="blk" id="s-coord">
-  <h2>④ 천구와 적경 · 적위 <small>지구의 위도·경도를 하늘에 그대로 옮긴 "별의 주소"</small></h2>
-  <div class="grid">
-    <div class="card"><div class="cap">천구 — 드래그해서 돌려 보세요 (가운데 = 지구)</div><canvas id="sphere" class="drag" width="640" height="600" style="background:#0b1020"></canvas></div>
-    <div class="card"><div class="cap">서울(관측자)에서 본 남북 방향 단면 — 별이 하루 동안 지나는 길</div><canvas id="meri" width="640" height="600"></canvas></div>
-    <div class="col side">
-      <div class="card">
-        <div class="row" id="objs">
-          <button class="btn on" data-o="0">북극성</button><button class="btn" data-o="1">직녀성</button><button class="btn" data-o="2">안드로메다 은하</button><button class="btn" data-o="3">플레이아데스</button><button class="btn" data-o="4">카시오페이아</button><button class="btn" data-o="5">베텔게우스</button><button class="btn" data-o="6">포말하우트</button>
-        </div>
-        <div class="lbl"><span>적경 (α)</span><span id="raV">2h 32m</span></div>
-        <input type="range" id="ra" min="0" max="24" step="0.05" value="2.53" aria-label="적경">
-        <div class="lbl"><span>적위 (δ)</span><span id="decV">+89°</span></div>
-        <input type="range" id="dec" min="-90" max="90" step="0.5" value="89.3" aria-label="적위">
-        <div class="lbl"><span>관측자 위도 (φ)</span><span id="latV">서울 37.5°N</span></div>
-        <input type="range" id="lat" min="-90" max="90" step="0.5" value="37.5" aria-label="위도">
-        <div class="stat" style="margin-top:6px"><span>남중 고도 = 90° − φ + δ</span><b id="culm">–</b></div>
-        <div class="stat" style="border:0"><span>이 별은</span><b id="kind">–</b></div>
-      </div>
-      <div class="card">
-        <table class="ana">
-          <tr><th></th><th>지구 (땅의 주소)</th><th>천구 (별의 주소)</th></tr>
-          <tr><td>위아래</td><td>위도 0°~±90°</td><td><b>적위</b> 0°~±90° (천구 적도 기준)</td></tr>
-          <tr><td>옆으로</td><td>경도 (본초 자오선 기준)</td><td><b>적경</b> 0h~24h (<b>춘분점</b> 기준, 동쪽으로)</td></tr>
-          <tr><td>단위</td><td>도(°)</td><td>시(h) — 1h = 15°</td></tr>
-        </table>
-        <p class="note">적경을 "시간"으로 쓰는 이유: 하늘이 1시간에 15°씩 돌기 때문에, <b>적경이 1h 큰 별은 정확히 1시간 늦게 남중</b>한다. 적경 = 남쪽 하늘을 지나가는 순서!</p>
-      </div>
     </div>
   </div>
 </section>
@@ -559,7 +581,8 @@ function init3D(){
     v.size(); return v;
   }
   const loc = (alt, az, r) => V3(r * Math.cos(alt * D2R) * Math.sin(az * D2R), r * Math.sin(alt * D2R), -r * Math.cos(alt * D2R) * Math.cos(az * D2R));
-  const sunAA = (t, dec) => altaz(0, dec, t - 12, LAT);
+  let dLat = LAT;
+  const sunAA = (t, dec) => altaz(0, dec, t - 12, dLat);
 
   /* ═════ ① 3D 지구 위 관측자 ═════ */
   {
@@ -641,8 +664,10 @@ function init3D(){
     const e = pts[29], t = pts[29].clone().sub(pts[27]).normalize(); cone.position.copy(e); cone.quaternion.setFromUnitVectors(V3(0, 1, 0), t); rotArrow.add(cone);
     const l = label('자전: 서 → 동', '#ffffff', 0.7); l.position.set(0.2, 1.45, -1.3); rotArrow.add(l); }
   // 서울 관측자: 지구 표면에 붙은 작은 지평면
-  const ph = LAT * D2R, UP = V3(Math.cos(ph), Math.sin(ph), 0), NO = V3(-Math.sin(ph), Math.cos(ph), 0), EA = V3(0, 0, -1), SO = NO.clone().negate();
-  const obs = new THREE.Group(); obs.position.copy(UP.clone().multiplyScalar(1.004)); obs.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(EA, UP, SO)); earth.add(obs);
+  const obs = new THREE.Group(); earth.add(obs);
+  const placeObs = () => { const ph = Math.min(89.9, dLat) * D2R, UP = V3(Math.cos(ph), Math.sin(ph), 0), NO = V3(-Math.sin(ph), Math.cos(ph), 0), EA = V3(0, 0, -1), SO = NO.clone().negate();
+    obs.position.copy(UP.clone().multiplyScalar(1.004)); obs.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(EA, UP, SO)); };
+  placeObs();
   const MS = 0.34;
   { const disk = new THREE.Mesh(new THREE.CircleGeometry(MS, 40), new THREE.MeshBasicMaterial({ color: 0x51cf66, transparent: true, opacity: 0.85, side: THREE.DoubleSide })); disk.rotation.x = -Math.PI / 2; obs.add(disk);
     obs.add(line(ring(40, a => V3(MS * Math.cos(a), MS * Math.sin(a) * 0 + 0, MS * Math.sin(a))), 0xffffff, 0.8));
@@ -650,7 +675,7 @@ function init3D(){
     obs.add(line([V3(0, 0, 0), V3(0, 0.55, 0)], 0xff8787, 1));
     const nl = label('북', '#ff6b6b', 0.55); nl.position.set(0, 0.03, -MS - 0.08); obs.add(nl);
     const sl = label('남', '#ffffff', 0.55); sl.position.set(0, 0.03, MS + 0.08); obs.add(sl);
-    const ol = label('서울 관측자', '#ff922b', 0.65); ol.position.set(0, 0.68, 0); obs.add(ol); }
+    const ol = label('관측자', '#ff922b', 0.65); ol.position.set(0, 0.68, 0); obs.add(ol); }
   const obsPath = new THREE.Group(); obs.add(obsPath);
   const obsSun = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd43b })); obs.add(obsSun);
   // 안 (서울)
@@ -664,19 +689,28 @@ function init3D(){
     for (const [n, az, col, s] of [['북', 0, '#ff6b6b', 1.4], ['동', 90, '#ffffff', 1.4], ['남', 180, '#ffffff', 1.4], ['서', 270, '#ffffff', 1.4], ['북동', 45, '#ced4da', 0.9], ['남동', 135, '#ced4da', 0.9], ['남서', 225, '#ced4da', 0.9], ['북서', 315, '#ced4da', 0.9]]){
       const l = label(n, col, s); l.position.copy(loc(0, az, SR + 0.6)).setY(0.15); I.scene.add(l); }
     const zl = label('천정 (머리 위)', '#bac8ff', 0.8); zl.position.set(0, SR + 0.35, 0); I.scene.add(zl);
-    I.scene.add(line([V3(0, 0, 0), loc(LAT, 0, SR + 0.4)], 0xffd43b, 0.9, true));
-    const pl = label('천구 북극 (북극성 쪽)', '#ffd43b', 0.75); pl.position.copy(loc(LAT, 0, SR + 0.9)); I.scene.add(pl);
-    I.scene.add(line(Array.from({ length: 145 }, (_, i) => { const a = altaz(0, 0, (i / 144 * 24) - 12, LAT); return loc(a.alt, a.az, SR * 0.995); }), 0x74c0fc, 0.45, true));
     const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 12), new THREE.MeshLambertMaterial({ color: 0xf1f3f5 })); stick.position.y = 0.5; I.scene.add(stick);
     const me = label('🧑 나', '#ffffff', 0.9); me.position.set(0.45, 1.15, 0); I.scene.add(me); }
-  const seasonPaths = new THREE.Group(); I.scene.add(seasonPaths);
-  for (const [n, dec, col] of [['하지', 23.44, 0xff922b], ['춘·추분', 0, 0x74c0fc], ['동지', -23.44, 0x91a7ff]]){
-    const pts = []; for (let t = 0; t <= 24; t += 0.1){ const a = sunAA(t, dec); if (a.alt >= 0) pts.push(loc(a.alt, a.az, SR)); }
-    seasonPaths.add(line(pts, col, 0.45)); const a = sunAA(12, dec), l = label(n, '#' + col.toString(16).padStart(6, '0'), 0.7); l.position.copy(loc(a.alt + 3, a.az, SR + 0.2)); seasonPaths.add(l); }
+  const latDeco = new THREE.Group(); I.scene.add(latDeco);
+  const starPaths = new THREE.Group(); I.scene.add(starPaths);
+  function buildLat(){
+    for (const g of [latDeco, starPaths]) while (g.children.length) g.remove(g.children[0]);
+    latDeco.add(line([V3(0, 0, 0), loc(dLat, 0, SR + 0.4)], 0xffd43b, 0.9, true));
+    const pl = label('천구 북극 (북극성 쪽)', '#ffd43b', 0.75); pl.position.copy(loc(dLat, 0, SR + 0.9)); latDeco.add(pl);
+    latDeco.add(line(Array.from({ length: 145 }, (_, i) => { const a = altaz(0, 0, (i / 144 * 24) - 12, dLat); return loc(a.alt, a.az, SR * 0.995); }), 0x74c0fc, 0.45, true));
+    for (const [n, dec, col] of [['하지', 23.44, 0xff922b], ['춘·추분', 0, 0x74c0fc], ['동지', -23.44, 0x91a7ff]]){
+      const pts = []; for (let t = 0; t <= 24; t += 0.1){ const a = sunAA(t, dec); if (a.alt >= 0) pts.push(loc(a.alt, a.az, SR)); }
+      if (pts.length > 1) latDeco.add(line(pts, col, 0.45)); const a = sunAA(12, dec); if (a.alt > 0){ const l = label(n, '#' + col.toString(16).padStart(6, '0'), 0.7); l.position.copy(loc(Math.min(85, a.alt + 3), a.az, SR + 0.2)); latDeco.add(l); } }
+    for (const dec of [-60, -30, 0, 30, 60, 80]){ const up = []; for (let t = 0; t <= 24.001; t += 0.1){ const a = altaz(0, dec, t - 12, dLat); if (a.alt >= 0) up.push(loc(a.alt, a.az, SR * 0.99)); }
+      if (up.length > 1) starPaths.add(line(up, 0xffffff, 0.55)); }
+    starPaths.visible = $('cStarPath').checked;
+    placeObs(); lastDec = null;
+  }
   const todayPath = new THREE.Group(); I.scene.add(todayPath);
   const iSun = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 12), new THREE.MeshBasicMaterial({ color: 0xffd43b })); I.scene.add(iSun);
   const shadow = new THREE.Mesh(new THREE.BoxGeometry(1, 0.02, 0.1), new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.7 })); I.scene.add(shadow);
   let lastDec = null;
+  buildLat();
   function dBuild(dec){
     for (const g of [todayPath, obsPath, oRays]) while (g.children.length) g.remove(g.children[0]);
     const up = [], dn = [];
@@ -706,12 +740,14 @@ function init3D(){
     else shadow.visible = false;
     $('dT').textContent = hhmm(dT); $('dD').textContent = dayName(dDay);
     $('dAlt').textContent = a.alt > 0 ? `${a.alt.toFixed(0)}° · ${dname(a.az)}쪽 (${a.az.toFixed(0)}°)` : `지평선 아래 (${a.alt.toFixed(0)}°)`;
-    const c = -Math.tan(LAT * D2R) * Math.tan(dec * D2R), H0 = Math.acos(Math.max(-1, Math.min(1, c))) / D2R / 15;
-    $('dRise').textContent = `${hhmm(12 - H0)} / ${hhmm(12 + H0)}`; $('dCulm').textContent = `${(90 - LAT + dec).toFixed(1)}° (적위 ${dec >= 0 ? '+' : ''}${dec.toFixed(1)}°)`;
+    const c = -Math.tan(dLat * D2R) * Math.tan(dec * D2R), H0 = Math.acos(Math.max(-1, Math.min(1, c))) / D2R / 15;
+    $('dRise').textContent = `${hhmm(12 - H0)} / ${hhmm(12 + H0)}`; $('dCulm').textContent = `${(90 - dLat + dec).toFixed(1)}° (적위 ${dec >= 0 ? '+' : ''}${dec.toFixed(1)}°)`;
     $('dLen').textContent = `${Math.floor(2 * H0)}시간 ${Math.round((2 * H0 % 1) * 60)}분`;
     O.draw(); I.draw();
   }
   $('dTime').addEventListener('input', e => { dT = +e.target.value; dUpdate(); });
+  document.querySelectorAll('#dLats [data-dl]').forEach(b => b.addEventListener('click', () => { dLat = +b.dataset.dl; document.querySelectorAll('#dLats [data-dl]').forEach(x => x.classList.toggle('on', x === b)); buildLat(); dUpdate(); }));
+  $('cStarPath').addEventListener('change', () => { starPaths.visible = $('cStarPath').checked; I.draw(); });
   $('dDay').addEventListener('input', e => { dDay = +e.target.value; document.querySelectorAll('#dDays .btn').forEach(b => b.classList.toggle('on', +b.dataset.dd === dDay)); dUpdate(); });
   document.querySelectorAll('#dDays .btn').forEach(b => b.addEventListener('click', () => { dDay = +b.dataset.dd; $('dDay').value = dDay; document.querySelectorAll('#dDays .btn').forEach(x => x.classList.toggle('on', x === b)); dUpdate(); }));
   document.querySelectorAll('[data-dv]').forEach(b => b.addEventListener('click', () => { I.mode = b.dataset.dv === 'eye' ? 'look' : 'orbit'; if (I.mode === 'look'){ I.yaw = 0; I.pitch = 0.62; } document.querySelectorAll('[data-dv]').forEach(x => x.classList.toggle('on', x === b)); I.draw(); }));
@@ -807,7 +843,7 @@ function view3(v){ const y = yaw * D2R, p = pitch * D2R;
   const y2 = y1 * Math.cos(p) - z1 * Math.sin(p), z2 = y1 * Math.sin(p) + z1 * Math.cos(p);
   return [x1, -z2, -y2]; } // 화면 x, 화면 y, 깊이(+ = 앞)
 function drawSphere(){
-  const c = $('sphere').getContext('2d'), W = 640, H = 600, cx = 320, cy = 300, R = 230;
+  const c = $('sphere').getContext('2d'), W = 900, H = 640, cx = 450, cy = 320, R = 250;
   c.fillStyle = '#0b1020'; c.fillRect(0, 0, W, H);
   const S2 = v => { const q = view3(v); return [cx + q[0] * R, cy + q[1] * R, q[2]]; };
   c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.stroke();
@@ -840,11 +876,20 @@ function drawSphere(){
   const st = S2(sphereVec(ra, dec));
   c.globalAlpha = st[2] >= 0 ? 1 : 0.4; c.fillStyle = '#fff'; c.beginPath(); c.arc(st[0], st[1], 8, 0, 7); c.fill(); c.strokeStyle = '#ff5a1f'; c.lineWidth = 3; c.stroke();
   c.font = `900 17px ${FONT}`; c.fillStyle = '#fff'; c.fillText(curName(), st[0] + 12, st[1] - 10); c.globalAlpha = 1;
+  // 관측자: 지구 위도 φ → 천정 = 적위 φ (같은 적경 방향에 세워 별이 남중한 순간처럼)
+  { const ER = 34 / R, ob = S2(sphereVec(ra, lat).map(x => x * ER)), zn = S2(sphereVec(ra, lat)), ctr = S2([0, 0, 0]);
+    c.strokeStyle = '#ffb547'; c.lineWidth = 2; c.setLineDash([6,5]); c.globalAlpha = zn[2] >= 0 ? 1 : 0.4; c.beginPath(); c.moveTo(ctr[0], ctr[1]); c.lineTo(zn[0], zn[1]); c.stroke(); c.setLineDash([]);
+    curve(t => sphereVec(ra, t * lat).map(x => x * 1.3 * ER), 20, '#ffb547', 2.5);
+    c.fillStyle = '#ff5a1f'; c.beginPath(); c.arc(ob[0], ob[1], 6, 0, 7); c.fill();
+    c.fillStyle = '#ffb547'; c.beginPath(); c.arc(zn[0], zn[1], 6, 0, 7); c.fill();
+    c.font = `800 15px ${FONT}`; c.fillText(`천정 (적위 = 위도 ${lat >= 0 ? '+' : ''}${lat.toFixed(1)}°)`, zn[0] + 10, zn[1] + 18);
+    c.fillStyle = '#ff8c5a'; c.fillText('🧑 관측자', ob[0] + 8, ob[1] + 4); c.globalAlpha = 1; }
   // 다른 대상
   for (const [n, r2, d2] of OBJ){ if (n === curName()) continue; const p = S2(sphereVec(r2, d2)); c.globalAlpha = p[2] >= 0 ? 0.85 : 0.25; c.fillStyle = '#ffd98a'; c.beginPath(); c.arc(p[0], p[1], 3.5, 0, 7); c.fill(); c.font = `700 13px ${FONT}`; c.fillText(n, p[0] + 6, p[1] - 4); }
   c.globalAlpha = 1;
 }
 function curName(){ const o = OBJ.find(o => Math.abs(o[1] - ra) < 0.06 && Math.abs(o[2] - dec) < 0.6); return o ? o[0] : '내가 고른 별'; }
+let mdec = 23.44, mlat = 37.5, mname = '태양(하지)';
 function drawMeri(){
   const c = $('meri').getContext('2d'), W = 640, H = 600, cx = 320, cy = 340, R = 240;
   c.clearRect(0, 0, W, H);
@@ -858,30 +903,30 @@ function drawMeri(){
   const z = P(90); c.font = `800 15px ${FONT}`; c.textAlign = 'right'; c.fillText('천정(머리 위)', z[0] - 10, z[1] - 8); c.textAlign = 'left';
   c.fillStyle = '#ff5a1f'; c.beginPath(); c.arc(cx, cy, 7, 0, 7); c.fill(); c.font = `800 15px ${FONT}`; c.fillText('나', cx - 8, cy + 26);
   // 천구 북극 (고도 = 위도)
-  const pAng = 180 - lat, pole = P(pAng), spole = P(pAng + 180);
+  const pAng = 180 - mlat, pole = P(pAng), spole = P(pAng + 180);
   c.strokeStyle = '#ffc93c'; c.lineWidth = 2; c.setLineDash([6,5]); c.beginPath(); c.moveTo(spole[0], spole[1]); c.lineTo(pole[0], pole[1]); c.stroke(); c.setLineDash([]);
   c.fillStyle = '#ffc93c'; c.beginPath(); c.arc(pole[0], pole[1], 7, 0, 7); c.fill();
-  c.font = `800 15px ${FONT}`; c.fillText(`천구 북극${Math.abs(dec) >= 86 ? ' ≈ ' + curName() : ''} (고도 ${lat.toFixed(1)}° = 위도)`, Math.max(10, pole[0] - 40), pole[1] + (lat >= 0 ? -14 : 24));
+  c.font = `800 15px ${FONT}`; c.fillText(`천구 북극${Math.abs(mdec) >= 86 ? ' ≈ ' + mname : ''} (고도 ${mlat.toFixed(1)}° = 위도)`, Math.max(10, pole[0] - 40), pole[1] + (mlat >= 0 ? -14 : 24));
   // 천구 적도
-  const eqA = 90 - lat, e1 = P(eqA), e2 = P(eqA + 180);
+  const eqA = 90 - mlat, e1 = P(eqA), e2 = P(eqA + 180);
   c.strokeStyle = '#74c0fc'; c.lineWidth = 3; c.beginPath(); c.moveTo(e1[0], e1[1]); c.lineTo(e2[0], e2[1]); c.stroke();
   c.fillStyle = '#4dabf7'; c.fillText('천구 적도', e1[0] - 70, e1[1] - 12);
   // 별의 일주권 (위에서 보면 선분)
-  const up = 90 - lat + dec, low = 180 - (lat + dec - 90); // 남중(위), 하중(아래)
+  const up = 90 - mlat + mdec, low = 180 - (mlat + mdec - 90); // 남중(위), 하중(아래)
   const a = P(up), b = P(low);
   // 지평선 위/아래 나누어 그리기
   const N = 60; for (let i = 0; i < N; i++){ const t1 = i / N, t2 = (i + 1) / N; const x1 = a[0] + (b[0] - a[0]) * t1, y1 = a[1] + (b[1] - a[1]) * t1, x2 = a[0] + (b[0] - a[0]) * t2, y2 = a[1] + (b[1] - a[1]) * t2;
     const above = (y1 + y2) / 2 <= cy; c.strokeStyle = '#ff5a1f'; c.globalAlpha = above ? 1 : 0.3; c.lineWidth = 5; c.setLineDash(above ? [] : [5,5]); c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); }
   c.globalAlpha = 1; c.setLineDash([]);
   c.fillStyle = '#fff'; c.strokeStyle = '#ff5a1f'; c.lineWidth = 3; c.beginPath(); c.arc(a[0], a[1], 8, 0, 7); c.fill(); c.stroke();
-  c.fillStyle = ink(); c.font = `800 15px ${FONT}`; if (Math.abs(dec) < 86) c.fillText(`${curName()} 남중`, a[0] + 10, a[1] + (a[1] < 60 ? 20 : -10));
+  c.fillStyle = ink(); c.font = `800 15px ${FONT}`; if (Math.abs(mdec) < 86) c.fillText(`${mname} 남중`, a[0] + 10, a[1] + (a[1] < 60 ? 20 : -10));
   // 남중 고도 각 표시
-  const culm = 90 - lat + dec;
+  const culm = 90 - mlat + mdec;
   if (culm > 0 && culm <= 90){ c.strokeStyle = '#ff5a1f'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, 60, -culm * D2R, 0); c.stroke(); c.fillStyle = '#ff5a1f'; c.fillText(`${culm.toFixed(1)}°`, cx + 66, cy - 12); }
   c.fillStyle = '#8a7f75'; c.font = `700 14px ${FONT}`; c.fillText('주황 선: 별이 하루 동안 도는 길을 옆에서 본 모습 (점선 = 지평선 아래)', 14, H - 14);
   // 수치
-  const hu = 90 - Math.abs(lat - dec), hl = Math.abs(lat + dec) - 90;
-  $('culm').textContent = `${hu.toFixed(1)}°` + (dec > lat ? ' (천정 넘어 북쪽)' : dec < lat ? ' (남쪽 하늘)' : ' (천정)');
+  const hu = 90 - Math.abs(mlat - mdec), hl = Math.abs(mlat + mdec) - 90;
+  $('culm').textContent = `${hu.toFixed(1)}°` + (mdec > mlat ? ' (천정 넘어 북쪽)' : mdec < mlat ? ' (남쪽 하늘)' : ' (천정)');
   $('kind').textContent = hu < 0 ? '🚫 이곳에선 안 떠오름' : hl > 0 ? '🔄 주극성 — 지지 않음' : '🌅 뜨고 지는 별';
 }
 function setCoord(){
@@ -890,11 +935,20 @@ function setCoord(){
   const latN = { '37.5':'서울', '0':'적도', '90':'북극', '-34':'시드니' }[String(lat)] || '';
   $('latV').textContent = `${latN} ${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}`.trim();
   document.querySelectorAll('#objs .btn').forEach(b => { const o = OBJ[+b.dataset.o]; b.classList.toggle('on', o[0] === curName()); });
-  drawSphere(); drawMeri();
+  $('zenV').textContent = `${lat >= 0 ? '+' : ''}${lat.toFixed(1)}°`;
+  drawSphere();
 }
 $('ra').addEventListener('input', e => { ra = +e.target.value; setCoord(); });
 $('dec').addEventListener('input', e => { dec = +e.target.value; setCoord(); });
 $('lat').addEventListener('input', e => { lat = +e.target.value; setCoord(); });
+function setMeri(){ $('mdecV').textContent = `${mdec >= 0 ? '+' : ''}${mdec.toFixed(1)}°`;
+  const nm = { '37.5':'서울', '0':'적도', '90':'북극' }[String(mlat)] || ''; $('mlatV').textContent = `${nm} ${Math.abs(mlat).toFixed(1)}°${mlat >= 0 ? 'N' : 'S'}`.trim();
+  document.querySelectorAll('#mObjs .btn').forEach(b => b.classList.toggle('on', +b.dataset.m === mdec));
+  document.querySelectorAll('#mLats .btn').forEach(b => b.classList.toggle('on', +b.dataset.ml === mlat)); drawMeri(); }
+document.querySelectorAll('#mObjs .btn').forEach(b => b.addEventListener('click', () => { mdec = +b.dataset.m; mname = b.dataset.n; $('mdec').value = mdec; setMeri(); }));
+document.querySelectorAll('#mLats .btn').forEach(b => b.addEventListener('click', () => { mlat = +b.dataset.ml; $('mlat').value = mlat; setMeri(); }));
+$('mdec').addEventListener('input', e => { mdec = +e.target.value; mname = '선택한 천체'; setMeri(); });
+$('mlat').addEventListener('input', e => { mlat = +e.target.value; setMeri(); });
 document.querySelectorAll('#objs .btn').forEach(b => b.addEventListener('click', () => { const o = OBJ[+b.dataset.o]; ra = o[1]; dec = o[2]; $('ra').value = ra; $('dec').value = dec; setCoord(); }));
 let drag = null; const sph = $('sphere');
 sph.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw, pitch }; sph.setPointerCapture(e.pointerId); sph.style.cursor = 'grabbing'; });
@@ -935,8 +989,8 @@ function qRender(){
 $('qn').addEventListener('click', () => { qi++; qRender(); });
 $('qr').addEventListener('click', () => { qi = 0; res = []; qRender(); });
 
-kPick('부산'); showStep(1); gNew(); drawRot(); setCoord(); qRender(); init3D();
-matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { drawKmap(); drawAltv(); drawRot(); setCoord(); });
+kPick('부산'); showStep(1); gNew(); drawRot(); setCoord(); setMeri(); qRender(); init3D();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { drawKmap(); drawAltv(); drawRot(); setCoord(); drawMeri(); });
 })();
 </script>
 </body>
