@@ -268,9 +268,10 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
     <div class="row" style="margin-top:10px"><button class="btn" id="qn" style="display:none">다음 문제 →</button><button class="btn" id="qr" style="display:none">다시 풀기</button></div>
   </div>
 </section>
-<footer>지구 표면 사진: NASA Visible Earth 「Blue Marble」(공공 저작물). 별 위치는 J2000 좌표를 사용한 계산 결과입니다. 공전 그림의 크기와 거리는 실제 비율이 아닙니다.</footer>
+<footer>지구 표면 사진: NASA Visible Earth 「Blue Marble」(공공 저작물). 사람 모형: Cesium 「RiggedFigure」(CC BY 4.0, glTF Sample Models). 별 위치는 J2000 좌표를 사용한 계산 결과입니다. 공전 그림의 크기와 거리는 실제 비율이 아닙니다.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (()=>{
 const $ = id => document.getElementById(id), D2R = Math.PI/180, FONT = '"SUIT Variable","Malgun Gothic",sans-serif';
@@ -561,6 +562,20 @@ function init3D(){
   const earthTex = new THREE.TextureLoader().load('../assets/earth-blue-marble.jpg', () => ALLV.forEach(v => v.draw()));
   earthTex.anisotropy = 8;
   const earthMat = () => new THREE.MeshLambertMaterial({ map: earthTex });
+  // 사람 모형 (Cesium RiggedFigure, CC BY 4.0) — 팔을 내리고 주황색으로
+  function addPerson(parent, height, color = 0xff8c42, back = true){
+    if (!THREE.GLTFLoader) return;
+    new THREE.GLTFLoader().load('../assets/mannequin.glb', g => {
+      const m = g.scene;
+      m.traverse(o => { if (o.isBone && /arm_joint_[RL]_1/.test(o.name)) o.rotateOnAxis(V3(0, 1, 0), (o.name.includes('_R_') ? -1 : 1) * 1.3);
+        if (o.isMesh){ o.material = new THREE.MeshLambertMaterial({ color, skinning: !!o.isSkinnedMesh }); o.frustumCulled = false; } });
+      const holder = new THREE.Group(); holder.add(m); m.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(m), k = height / (b.max.y - b.min.y); m.scale.setScalar(k); m.updateMatrixWorld(true);
+      const b2 = new THREE.Box3().setFromObject(m), c2 = b2.getCenter(V3(0, 0, 0)); m.position.set(-c2.x, -b2.min.y, -c2.z);
+      if (back) holder.rotation.y = Math.PI; // 모형 앞(+z) → 우리 기준 앞(-z)
+      parent.add(holder); ALLV.forEach(v => v.draw());
+    });
+  }
   function viewer(canvas, o){
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
@@ -624,17 +639,13 @@ function init3D(){
       for (const [n, az, col, s] of [['북', 0, '#ff6b6b', 0.75], ['동', 90, '#ffffff', 0.75], ['남', 180, '#ffffff', 0.75], ['서', 270, '#ffffff', 0.75], ['북동', 45, '#dee2e6', 0.5], ['남동', 135, '#dee2e6', 0.5], ['남서', 225, '#dee2e6', 0.5], ['북서', 315, '#dee2e6', 0.5]]){
         const l = label(n, col, s); l.position.set((DR + 0.07) * Math.sin(az * D2R), 0.02, -(DR + 0.07) * Math.cos(az * D2R)); obs.add(l); } }
     const body = new THREE.Group(); body.scale.setScalar(1.5); obs.add(body);
-    { const m = new THREE.MeshLambertMaterial({ color: 0xff5a1f });
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.16, 16), m); torso.position.y = 0.13; body.add(torso);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.04, 16, 12), new THREE.MeshLambertMaterial({ color: 0xffd8a8 })); head.position.y = 0.25; body.add(head);
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.05, 10), new THREE.MeshLambertMaterial({ color: 0xffd8a8 })); nose.rotation.x = -Math.PI / 2; nose.position.set(0, 0.25, -0.05); body.add(nose);
-      for (const sx of [-1, 1]){ const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.06, 8), m); leg.position.set(sx * 0.02, 0.03, 0); body.add(leg); }
+    addPerson(body, 0.24);
+    {
       // 앞 화살표 (몸 기준 -z = 앞)
       const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, DR * 0.75, 10), new THREE.MeshBasicMaterial({ color: 0xff5a1f })); shaft.rotation.x = Math.PI / 2; shaft.position.set(0, 0.01, -DR * 0.375); shaft.scale.y = 0.66; shaft.position.z = -DR * 0.25; body.add(shaft);
       const tip = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.09, 14), new THREE.MeshBasicMaterial({ color: 0xff5a1f })); tip.rotation.x = -Math.PI / 2; tip.position.set(0, 0.01, -DR * 0.55); body.add(tip);
       const fl = label('앞', '#ffb547', 0.6); fl.position.set(0, 0.09, -DR * 0.62); body.add(fl);
-      for (const [n, x] of [['왼손', -1], ['오른손', 1]]){ const a = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.18, 8), new THREE.MeshBasicMaterial({ color: 0x74c0fc })); a.rotation.z = Math.PI / 2; a.position.set(x * 0.13, 0.15, 0); body.add(a);
-        const l = label(n, '#a5d8ff', 0.45); l.position.set(x * 0.26, 0.17, 0); body.add(l); } }
+      for (const [n, x] of [['왼손', -1], ['오른손', 1]]){ const l = label(n, '#a5d8ff', 0.45); l.position.set(x * 0.17, 0.15, 0); body.add(l); } }
     // 앞으로 쭉 간 길 (대원)
     const path = new THREE.Group(); sc.add(path);
     globeDraw = () => {
@@ -685,7 +696,7 @@ function init3D(){
     obs.add(line([V3(0, 0, 0), V3(0, 0.55, 0)], 0xff8787, 1));
     const nl = label('북', '#ff6b6b', 0.55); nl.position.set(0, 0.03, -MS - 0.08); obs.add(nl);
     const sl = label('남', '#ffffff', 0.55); sl.position.set(0, 0.03, MS + 0.08); obs.add(sl);
-    const ol = label('관측자', '#ff922b', 0.65); ol.position.set(0, 0.68, 0); obs.add(ol); }
+    const ol = label('관측자', '#ff922b', 0.65); ol.position.set(0, 0.68, 0); obs.add(ol); addPerson(obs, 0.2, 0xff8c42, false); }
   const obsPath = new THREE.Group(); obs.add(obsPath);
   const obsSun = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd43b })); obs.add(obsSun);
   // 안 (서울)
@@ -700,7 +711,8 @@ function init3D(){
       const l = label(n, col, s); l.position.copy(loc(0, az, SR + 0.6)).setY(0.15); I.scene.add(l); }
     const zl = label('천정 (머리 위)', '#bac8ff', 0.8); zl.position.set(0, SR + 0.35, 0); I.scene.add(zl);
     const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 12), new THREE.MeshLambertMaterial({ color: 0xf1f3f5 })); stick.position.y = 0.5; I.scene.add(stick);
-    const me = label('🧑 나', '#ffffff', 0.9); me.position.set(0.45, 1.15, 0); I.scene.add(me); }
+    const me = label('나', '#ffffff', 0.9); me.position.set(-0.7, 1.7, 0); I.scene.add(me);
+    { const pg = new THREE.Group(); pg.position.set(-0.7, 0, 0); I.scene.add(pg); addPerson(pg, 1.4, 0xff8c42, false); } }
   const latDeco = new THREE.Group(); I.scene.add(latDeco);
   const starPaths = new THREE.Group(); I.scene.add(starPaths);
   function buildLat(){
