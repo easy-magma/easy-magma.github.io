@@ -104,6 +104,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
   <p class="subt" id="subt">2026 서울중등지구과학교육연구회 추계 학생 천체관측회 · 11. 6.(금) 18:30~21:30 · 서울특별시교육청 융합과학교육원(관악구)</p>
 </header>
 <nav class="jump">
+  <a href="./basics/" style="background:var(--ink);color:var(--bg)">⓪ 기초 개념: 자전·공전·적경·적위</a>
   <a href="#s-sky">① 오늘 밤 하늘</a><a href="#s-plan">② 관측 시간표</a><a href="#s-scope">③ 망원경 사전교육</a><a href="#s-mission">④ 관측 미션</a>
 </nav>
 <div id="err">천문 계산 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침 해 주세요.</div>
@@ -138,6 +139,7 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
           <label class="chk"><input type="checkbox" id="cLines" checked>별자리 선</label>
           <label class="chk"><input type="checkbox" id="cNames" checked>별자리 이름</label>
           <label class="chk"><input type="checkbox" id="cGrid">고도선</label>
+          <label class="chk"><input type="checkbox" id="cEq">적경·적위 선</label>
         </div>
       </div>
       <div class="card" id="cond">
@@ -397,6 +399,17 @@ function drawSky(){
     sx.strokeStyle = 'rgba(255,255,255,.18)'; sx.lineWidth = 1.2; sx.setLineDash([4,6]); sx.font = F(600, 15); sx.fillStyle = 'rgba(255,255,255,.45)';
     for (const a of [20,30,60]){ const r = R * Math.tan((90 - a) * D2R / 2); sx.beginPath(); sx.arc(CX, CY, r, 0, 7); sx.stroke(); sx.fillText(a + '°', CX + 4, CY + r - 4); }
     sx.setLineDash([]);
+  }
+  // 적경·적위 선 (적도 좌표계)
+  if ($('cEq').checked){
+    const line = (pts, col, w) => { sx.strokeStyle = col; sx.lineWidth = w; sx.beginPath(); let pen = false;
+      for (const [r, d] of pts){ const h = horRaDec(r, d, t), q = proj(h.alt, h.az); if (!q){ pen = false; continue; } pen ? sx.lineTo(q[0], q[1]) : sx.moveTo(q[0], q[1]); pen = true; } sx.stroke(); };
+    for (const d of [30, 60]) line([...Array(97).keys()].map(i => [i / 4, d]), 'rgba(116,192,252,.35)', 1.2);
+    line([...Array(97).keys()].map(i => [i / 4, 0]), 'rgba(116,192,252,.85)', 2.4);
+    for (let r = 0; r < 24; r += 2) line([...Array(37).keys()].map(i => [r, -60 + i * 4.2]), r === 0 ? 'rgba(255,201,60,.8)' : 'rgba(116,192,252,.3)', r === 0 ? 2 : 1.1);
+    sx.font = F(800, 14); sx.fillStyle = '#a5d8ff';
+    for (let r = 0; r < 24; r += 2){ const h = horRaDec(r, 0, t), q = proj(h.alt, h.az); if (q) sx.fillText(r + 'h', q[0] + 4, q[1] - 4); }
+    const h0 = horRaDec(12, 3, t), q0 = proj(h0.alt, h0.az); if (q0){ sx.fillStyle = '#74c0fc'; sx.fillText('천구 적도', q0[0], q0[1]); }
   }
   const vis = lim - tw * 3.5; // 박명 중엔 덜 보임
   // 별 위치
@@ -726,7 +739,7 @@ $('date').addEventListener('change', e => { if (!e.target.value) return; dateStr
 function setFace(f){ face = ((f % 360) + 360) % 360; document.querySelectorAll('#faces .btn').forEach(x => x.classList.toggle('on', +x.dataset.f === Math.round(face))); drawSky(); }
 document.querySelectorAll('#faces .btn').forEach(b => b.addEventListener('click', () => setFace(+b.dataset.f)));
 document.querySelectorAll('#lps .btn').forEach(b => b.addEventListener('click', () => { lim = +b.dataset.l; document.querySelectorAll('#lps .btn').forEach(x => x.classList.toggle('on', x === b)); drawSky(); }));
-['cLines','cNames','cGrid'].forEach(id => $(id).addEventListener('change', drawSky));
+['cLines','cNames','cGrid','cEq'].forEach(id => $(id).addEventListener('change', drawSky));
 let timer = null;
 $('play').addEventListener('click', () => {
   if (timer){ clearInterval(timer); timer = null; $('play').textContent = '▶ 재생'; return; }
