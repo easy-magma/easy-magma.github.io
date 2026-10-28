@@ -139,6 +139,26 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 <!-- ② 위도·경도·적위 -->
 <section class="blk" id="s-coord">
   <h2>② 위도·경도 → 천구의 적경·적위 <small>지구의 위도·경도를 하늘에 그대로 옮긴 "별의 주소"</small></h2>
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="card" style="padding:8px"><div class="cap">3D 지구에서 보기 — 지구를 끌어서 돌려 보자. 위도와 경도는 모두 <b>지구 중심에서 잰 각도</b>이다.</div><canvas id="llg" class="drag three" style="aspect-ratio:900/600"></canvas></div>
+    <div class="col">
+      <div class="card">
+        <div class="lbl"><span>위도 <small style="color:var(--sub)">(적도에서 남·북으로)</small></span><span id="llLatV" style="color:#e03131">37°N</span></div>
+        <input type="range" id="llLat" min="-90" max="90" step="1" value="37" aria-label="위도">
+        <div class="lbl"><span>경도 <small style="color:var(--sub)">(본초 자오선에서 동·서로)</small></span><span id="llLonV" style="color:#1c7ed6">127°E</span></div>
+        <input type="range" id="llLon" min="-180" max="180" step="1" value="127" aria-label="경도">
+        <div class="row" style="margin-top:6px" id="llGo"><b style="font-size:14px;color:var(--sub)">바로 가기</b>
+          <button class="btn" data-go="51.5,0">런던(그리니치)</button><button class="btn" data-go="0,0">0°, 0°</button><button class="btn on" data-go="37,127">서울</button><button class="btn" data-go="0,127">적도</button><button class="btn" data-go="90,127">북극</button></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="llSky">🌌 천구까지 늘이기</button></div>
+      </div>
+      <div class="card">
+        <p class="key" style="font-size:16px"><span style="color:#e03131">위도</span> = 지구 중심에서 <b>적도면</b>과 그 지점이 이루는 각 (빨간 호). 같은 위도를 이은 선이 위선(가로 원).</p>
+        <p class="key" style="font-size:16px;margin-top:8px"><span style="color:#1c7ed6">경도</span> = 적도면 위에서 <b>본초 자오선</b>(영국 그리니치)과 그 지점의 경선이 이루는 각 (파란 호).</p>
+        <p class="note" id="llSkyNote">「천구까지 늘이기」를 누르면: 지구 중심 → 그 지점 → 머리 위로 쭉 늘인 곳이 <b>천정</b>. 천정의 적위 = 그곳의 위도.</p>
+      </div>
+    </div>
+  </div>
+  <h3 style="font-size:18px;font-weight:900;margin:4px 0 10px">🌐 천구에서는 → 적위 · 적경</h3>
   <div class="grid2">
     <div class="card"><div class="cap">천구 — 드래그해서 돌려 보세요 (가운데 = 지구, 주황 사람 = 관측자)</div><canvas id="sphere" class="drag" width="900" height="640" style="background:#0b1020"></canvas></div>
     <div class="col">
@@ -602,6 +622,73 @@ function init3D(){
   const loc = (alt, az, r) => V3(r * Math.cos(alt * D2R) * Math.sin(az * D2R), r * Math.sin(alt * D2R), -r * Math.cos(alt * D2R) * Math.cos(az * D2R));
   let dLat = LAT;
   const sunAA = (t, dec) => altaz(0, dec, t - 12, dLat);
+
+  /* ═════ ② 3D 지구: 위도·경도 → 적위 ═════ */
+  {
+    let gLat = 37, gLon = 127, sky = false;
+    const ER = 1.5, CRs = 3.8;
+    const P = (lat, lon, r) => { const a = lat * D2R, o = lon * D2R; return V3(r * Math.cos(a) * Math.cos(o), r * Math.sin(a), -r * Math.cos(a) * Math.sin(o)); };
+    const L = viewer($('llg'), { dist: 5.4, theta: 0, phi: 0.45, fov: 40 });
+    { const cv = $('llg'); L.size = () => { const w = cv.clientWidth || 900, h = Math.round(w * 600 / 900); L.renderer.setSize(w, h, false); L.camera.aspect = w / h; }; L.size(); }
+    const sc = L.scene; sc.add(new THREE.AmbientLight(0xffffff, 0.8)); const dl = new THREE.DirectionalLight(0xffffff, 0.45); dl.position.set(5, 6, 8); sc.add(dl);
+    { const em = earthMat(); em.transparent = true; em.opacity = 0.72; sc.add(new THREE.Mesh(new THREE.SphereGeometry(ER, 96, 64), em)); }
+    for (let la = -60; la <= 60; la += 30) if (la) sc.add(line(Array.from({ length: 121 }, (_, i) => P(la, i * 3, ER * 1.003)), 0xffffff, 0.3));
+    for (let lo = 30; lo < 360; lo += 30) sc.add(line(Array.from({ length: 61 }, (_, i) => P(-90 + i * 3, lo, ER * 1.003)), 0xffffff, 0.22));
+    sc.add(line(Array.from({ length: 121 }, (_, i) => P(0, i * 3, ER * 1.004)), 0xff8787, 0.95));
+    sc.add(line(Array.from({ length: 61 }, (_, i) => P(-90 + i * 3, 0, ER * 1.004)), 0x74c0fc, 0.95));
+    { const l = label('적도 (위도 0°)', '#ff8787', 0.6); l.position.copy(P(-4, -40, ER * 1.05)); sc.add(l);
+      const l2 = label('본초 자오선 (경도 0°)', '#74c0fc', 0.6); l2.position.copy(P(25, 0, ER * 1.06)); sc.add(l2);
+      const l3 = label('그리니치', '#ffffff', 0.5); l3.position.copy(P(51.5, 0, ER * 1.05)); sc.add(l3); }
+    sc.add(line([V3(0, -ER * 1.6, 0), V3(0, ER * 1.6, 0)], 0xffffff, 0.6, true));
+    { const l = label('북극', '#ffffff', 0.6); l.position.set(0, ER * 1.72, 0); sc.add(l); }
+    // 천구 (토글)
+    const skyG = new THREE.Group(); skyG.visible = false; sc.add(skyG);
+    skyG.add(new THREE.Mesh(new THREE.SphereGeometry(CRs, 48, 32), new THREE.MeshBasicMaterial({ color: 0x5c7cfa, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
+    skyG.add(line(Array.from({ length: 161 }, (_, i) => P(0, i * 2.25, CRs)), 0x74c0fc, 0.85));
+    for (let lo = 0; lo < 180; lo += 30) skyG.add(line(Array.from({ length: 121 }, (_, i) => P(-90 + i * 1.5, lo, CRs)), 0x91a7ff, 0.15));
+    { const l = label('천구 적도', '#74c0fc', 0.65); l.position.copy(P(-3, 200, CRs)); skyG.add(l); const l2 = label('천구 북극', '#ffffff', 0.6); l2.position.set(0, CRs + 0.25, 0); skyG.add(l2); }
+    skyG.add(line([V3(0, ER * 1.6, 0), V3(0, CRs, 0)], 0xffffff, 0.6, true));
+    // 관측자 (사람 모형)
+    const who = new THREE.Group(); sc.add(who); addPerson(who, 0.28, 0xff8c42, false);
+    const dyn = new THREE.Group(); sc.add(dyn);
+    const arc = (pts, col, r) => tube(pts, col, r);
+    function upd(){
+      while (dyn.children.length) dyn.remove(dyn.children[0]);
+      const pt = P(gLat, gLon, ER), foot = P(0, gLon, ER), n = pt.clone().normalize();
+      // 지구 중심 → 점, → 적도 발, → 본초 자오선
+      dyn.add(line([V3(0, 0, 0), pt], 0xffffff, 0.95)); dyn.add(line([V3(0, 0, 0), foot], 0xffffff, 0.6, true)); dyn.add(line([V3(0, 0, 0), P(0, 0, ER)], 0xffffff, 0.6, true));
+      // 위도 호 (빨강), 경도 호 (파랑)
+      const la = Array.from({ length: 31 }, (_, i) => P(gLat * i / 30, gLon, ER * 0.7)); dyn.add(arc(la, 0xff4d4d, 0.04));
+      const lo = Array.from({ length: 41 }, (_, i) => P(0, gLon * i / 40, ER * 0.55)); if (Math.abs(gLon) > 0.5) dyn.add(arc(lo, 0x339af0, 0.04));
+      // 위선·경선 강조
+      dyn.add(line(Array.from({ length: 121 }, (_, i) => P(gLat, i * 3, ER * 1.006)), 0xff6b6b, 0.9));
+      dyn.add(line(Array.from({ length: 61 }, (_, i) => P(-90 + i * 3, gLon, ER * 1.006)), 0x4dabf7, 0.9));
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.04, 16, 10), new THREE.MeshBasicMaterial({ color: 0xffd43b })); dot.position.copy(pt.clone().multiplyScalar(1.004)); dyn.add(dot);
+      const ns = gLat >= 0 ? 'N' : 'S', ew = gLon >= 0 ? 'E' : 'W';
+      { const l = label(`위도 ${Math.abs(gLat)}°${gLat ? ns : ''}`, '#ff6b6b', 0.7); l.position.copy(P(gLat / 2, gLon, ER * 0.85)); dyn.add(l);
+        if (Math.abs(gLon) > 0.5){ const l2 = label(`경도 ${Math.abs(gLon)}°${ew}`, '#4dabf7', 0.7); l2.position.copy(P(0, gLon / 2, ER * 0.68)).add(V3(0, -0.14, 0)); dyn.add(l2); }
+        const l3 = label(`${Math.abs(gLat)}°${ns}, ${Math.abs(gLon)}°${ew}`, '#ffd43b', 0.75); l3.position.copy(pt.clone().multiplyScalar(1.25)); dyn.add(l3); }
+      // 사람
+      who.position.copy(pt.clone().multiplyScalar(1.002)); who.quaternion.setFromUnitVectors(V3(0, 1, 0), n);
+      // 천구까지 늘이기
+      if (sky){ const zn = n.clone().multiplyScalar(CRs);
+        dyn.add(tube([pt.clone().multiplyScalar(1.02), zn], 0xffd43b, 0.018));
+        const zd = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 10), new THREE.MeshBasicMaterial({ color: 0xffd43b })); zd.position.copy(zn); dyn.add(zd);
+        dyn.add(arc(Array.from({ length: 31 }, (_, i) => P(gLat * i / 30, gLon, CRs * 0.985)), 0xff4d4d, 0.03));
+        dyn.add(line([V3(0, 0, 0), P(0, gLon, CRs)], 0xffffff, 0.45, true));
+        const l = label(`천정 · 적위 ${gLat >= 0 ? '+' : ''}${gLat}° (= 위도)`, '#ffd43b', 0.8); l.position.copy(zn.clone().multiplyScalar(1.07)); dyn.add(l); }
+      dyn.traverse(o => { if (o.material && o !== dot){ o.material.depthTest = false; o.renderOrder = o.isSprite ? 12 : 4; } });
+      $('llLatV').textContent = `${Math.abs(gLat)}°${gLat ? ns : ''}`; $('llLonV').textContent = `${Math.abs(gLon)}°${gLon ? ew : ''}`;
+      L.draw();
+    }
+    function face(){ const n = P(Math.max(-60, Math.min(60, gLat * 0.5)), gLon - 38, 1); L.theta = Math.atan2(n.x, n.z); L.phi = Math.max(-1.0, Math.min(1.0, Math.asin(n.y) + 0.3)); }
+    function go(la, lo){ gLat = la; gLon = lo; $('llLat').value = la; $('llLon').value = lo; document.querySelectorAll('#llGo .btn').forEach(b => b.classList.toggle('on', b.dataset.go === `${la},${lo}`)); face(); upd(); }
+    $('llLat').addEventListener('input', e => { gLat = +e.target.value; upd(); });
+    $('llLon').addEventListener('input', e => { gLon = +e.target.value; upd(); });
+    document.querySelectorAll('#llGo .btn').forEach(b => b.addEventListener('click', () => { const [la, lo] = b.dataset.go.split(',').map(Number); go(la, lo); }));
+    $('llSky').addEventListener('click', () => { sky = !sky; skyG.visible = sky; L.dist = sky ? 11 : 5.4; $('llSky').classList.toggle('on', sky); $('llSky').textContent = sky ? '🌍 지구만 보기' : '🌌 천구까지 늘이기'; upd(); });
+    go(37, 127);
+  }
 
   /* ═════ ① 3D 지구 위 관측자 ═════ */
   {
