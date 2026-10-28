@@ -102,6 +102,7 @@
     <button data-s="earth">지구과학</button>
     <button data-s="integrated">통합과학</button>
     <button data-s="middle">중학교 과학</button>
+    <button data-s="astro">천체 관측</button>
   </nav>
   <div id="list"></div>
 
@@ -110,7 +111,7 @@
 
 <script>
 /* ===== 자료 목록: 새 자료는 여기에 추가 =====
-   s: earth | integrated | middle,  course: 과목명,  unit: 대단원 › 중단원 */
+   s: earth | integrated | middle | astro,  course: 과목명,  unit: 대단원 › 중단원 */
 const ITEMS = [
   { s:'earth', course:'지구시스템과학', unit:'Ⅱ. 해수의 운동 › 05. 조석', no:'⓪',
     title:'기초 개념: 자전과 공전, 위도', desc:'지구의 자전과 달의 공전 → 위도와 적도 → 달이 다시 남중하기까지 + 확인 퀴즈',
@@ -148,11 +149,14 @@ const ITEMS = [
   { s:'integrated', course:'통합과학2', unit:'Ⅱ. 환경과 에너지 › 지구 환경의 변화', no:'①',
     title:'엘니뇨 실험실', desc:'El Clásico로 여는 엘니뇨 어원 → 기초 개념(위도·경도와 세계 지도, 무역풍, 층상 구조) → 무역풍 세기를 바꾸는 태평양 3D 블록 모형 → 세계 영향과 확인 문제',
     tags:['시뮬레이션','1학기 복습','퀴즈'], href:'./elnino/' },
+  { s:'astro', course:'천체 관측', unit:'2026 추계 학생 천체관측회 › 11. 6.(금) 융합과학교육원', no:'①~④',
+    title:'천체관측회 하늘 미리보기', desc:'관측 당일 시각별 하늘(도심·시골 하늘 밝기 비교) → 대상별 고도 시간표와 관측 순서 → 망원경 배율·실시야와 접안렌즈 화면 시뮬레이터, 조립 순서 게임 → 관측 미션 도장판',
+    tags:['시뮬레이션','사전교육','게임'], href:'./observing/' },
   { s:'middle', course:'중학교 과학', unit:'기초 개념 › 위도와 경도', no:'①',
     title:'위도와 경도', desc:'3D 지구본에서 지구 중심 각으로 위도·경도 보기 → 세계 지도에서 끌어서 읽기 → 좌표로 도시 찾기 게임',
     tags:['시뮬레이션','게임'], href:'./latlon/' },
 ];
-const SUBJ = { earth:{ name:'지구과학', color:'var(--magma)' }, integrated:{ name:'통합과학', color:'var(--teal)' }, middle:{ name:'중학교 과학', color:'var(--violet)' } };
+const SUBJ = { earth:{ name:'지구과학', color:'var(--magma)' }, integrated:{ name:'통합과학', color:'var(--teal)' }, middle:{ name:'중학교 과학', color:'var(--violet)' }, astro:{ name:'천체 관측', color:'var(--lava)' } };
 let cur = 'all';
 const $ = id => document.getElementById(id);
 
