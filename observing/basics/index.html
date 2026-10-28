@@ -83,29 +83,53 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 
 <!-- ① 방위 -->
 <section class="blk" id="s-dir">
-  <h2>① 동서남북 · 방위각 · 고도 <small>"남동쪽 낮은 하늘"이 정확히 어디일까?</small></h2>
-  <div class="grid">
-    <div class="card"><div class="cap">위에서 내려다본 나 — 드래그하거나 버튼으로 몸을 돌려 보세요</div><canvas id="compass" class="drag" width="640" height="600"></canvas></div>
-    <div class="card"><div class="cap">땅 지도와 하늘 지도(성도)는 동·서가 반대!</div><canvas id="maps" width="640" height="600"></canvas></div>
-    <div class="col side">
-      <div class="card">
-        <div class="lbl"><span>내가 바라보는 방향</span><span id="faceV" style="font-size:22px">남쪽 (180°)</span></div>
-        <div class="row" style="margin-top:4px" id="faceBtns"><button class="btn" data-f="0">북</button><button class="btn" data-f="90">동</button><button class="btn on" data-f="180">남</button><button class="btn" data-f="270">서</button></div>
-        <div class="stat" style="margin-top:8px"><span>내 왼쪽</span><b id="leftV">동</b></div>
-        <div class="stat" style="border:0"><span>내 오른쪽</span><b id="rightV">서</b></div>
+  <h2>① 동서남북 · 방위각 · 고도 <small>익숙한 한반도 지도에서 시작해서 밤하늘까지, 한 단계씩</small></h2>
+  <div class="row steptabs" id="dirTabs" style="margin-bottom:12px">
+    <button class="btn on" data-p="1">1. 지도에서 동서남북</button><button class="btn" data-p="2">2. 서울에서 바라보기 · 방위각</button><button class="btn" data-p="3">3. 고도 · 손으로 재기</button><button class="btn" data-p="4">4. 별 찾기 게임</button>
+  </div>
+  <div class="dpanel" data-p="1">
+    <div class="grid2">
+      <div class="card"><div class="cap">한반도 지도 — 도시를 눌러 보세요 (빨간 별 = 서울)</div><canvas id="kmap" width="760" height="640" style="cursor:pointer"></canvas></div>
+      <div class="col">
+        <div class="card"><p class="note" style="margin:0">서울에서</p><p style="font-size:30px;font-weight:900;margin:2px 0" id="kCity">부산은</p><p style="font-size:44px;font-weight:900;color:var(--accent);margin:0;line-height:1.1" id="kDir">남동쪽</p>
+          <div class="row" style="margin-top:12px" id="kBtns"></div></div>
+        <div class="card"><p class="key">지도는 <b>위가 북</b>, <b>아래가 남</b>,<br><b>오른쪽이 동</b>(동해), <b>왼쪽이 서</b>(서해).</p>
+          <p class="note">북과 동 사이 = <b>북동</b>, 남과 동 사이 = <b>남동</b>. 서울에서 부산은 남쪽과 동쪽 사이, 남동쪽이다.</p></div>
+        <button class="btn" data-next="2" style="align-self:flex-end">다음: 서울에서 바라보기 →</button>
       </div>
-      <div class="card"><p class="key"><b>방위각</b>: 북쪽 0°에서 시계 방향으로 잰 각 (동 90°, 남 180°, 서 270°)<br><b>고도</b>: 지평선 0°에서 위로 잰 각 (머리 위 = 90°)</p>
-        <p class="note">남쪽을 보고 서면 <b>왼쪽이 동쪽, 오른쪽이 서쪽</b>. 별은 왼쪽(동)에서 떠서 오른쪽(서)으로 진다.<br>
-        밤에 방향 찾기: <b>북극성 = 북쪽</b>, <b>해가 진 쪽 ≈ 서쪽</b>(11월 초에는 서남서 약 248°), 휴대폰 나침반 앱.</p></div>
-      <div class="card"><h3>✊ 손으로 각도 재기 (팔을 쭉 뻗고)</h3>
-        <div class="stat"><span>☝️ 새끼손가락 굵기</span><b>약 1°</b></div>
-        <div class="stat"><span>✌️ 손가락 세 개 폭</span><b>약 5°</b></div>
-        <div class="stat"><span>✊ 주먹 하나</span><b>약 10°</b></div>
-        <div class="stat" style="border:0"><span>🖐️ 활짝 편 손 (엄지~새끼)</span><b>약 20°</b></div>
-        <p class="note">보름달 지름 = 0.5° (새끼손가락으로 가려진다). 북두칠성 국자 길이 ≈ 25°.</p></div>
     </div>
   </div>
-  <div class="card" style="margin-top:16px">
+  <div class="dpanel" data-p="2" hidden>
+    <div class="grid2">
+      <div class="card"><div class="cap">서울에 서서 그쪽을 바라본 모습 — 드래그하거나 버튼으로 몸을 돌려 보세요</div><canvas id="pov" class="drag" width="900" height="520"></canvas>
+        <div class="row" style="margin-top:8px" id="faceBtns"><button class="btn" data-f="0">북 보기</button><button class="btn" data-f="90">동 보기</button><button class="btn on" data-f="180">남 보기</button><button class="btn" data-f="270">서 보기</button></div></div>
+      <div class="col">
+        <div class="card"><p class="note" style="margin:0">지금 바라보는 쪽</p><p style="font-size:40px;font-weight:900;color:var(--accent);margin:2px 0;line-height:1.1" id="faceV">남쪽</p><p class="note" style="margin:0 0 6px" id="faceA">방위각 180°</p>
+          <div class="stat"><span>👈 왼손 쪽</span><b id="leftV">동</b></div><div class="stat" style="border:0"><span>오른손 쪽 👉</span><b id="rightV">서</b></div></div>
+        <div class="card"><p class="key"><b>남쪽(부산·제주 쪽)을 보고 서면</b><br>왼손 = 동(동해), 오른손 = 서(서해), 등 뒤 = 북</p>
+          <p class="note"><b>방위각</b>은 방향을 숫자로 쓴 것: 북에서 시작해 <b>시계 방향</b>으로 북 0° → 동 90° → 남 180° → 서 270°.<br>그림 아래의 작은 숫자가 방위각이다.</p></div>
+        <button class="btn" data-next="3" style="align-self:flex-end">다음: 고도 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="dpanel" data-p="3" hidden>
+    <div class="grid2">
+      <div class="card"><div class="cap">옆에서 본 나 — 땅(지평선)에서 몇 도 올려다보나</div><canvas id="altv" width="900" height="460"></canvas>
+        <div class="lbl"><span>고도</span><span id="altV">30°</span></div><input type="range" id="altS" min="0" max="90" step="1" value="30" aria-label="고도">
+        <div class="row"><button class="btn" data-a="0">지평선</button><button class="btn" data-a="20">건물 위</button><button class="btn" data-a="38">토성(20시)</button><button class="btn" data-a="37.5">북극성</button><button class="btn" data-a="90">머리 위</button></div></div>
+      <div class="col">
+        <div class="card"><p class="key"><b>고도</b> = 땅(지평선)에서 위로 잰 각<br>지평선 0° · 머리 위 90°</p>
+          <p class="note">도심에서는 고도 20° 아래가 건물에 가리기 쉽다.<br>서울에서 북극성의 고도는 37.5° = 서울의 위도.</p></div>
+        <div class="card"><h3>✊ 팔을 쭉 뻗고 손으로 재기</h3>
+          <div class="stat"><span>주먹 하나</span><b>약 10°</b></div>
+          <div class="stat"><span>활짝 편 손 (엄지 끝~새끼 끝)</span><b>약 20°</b></div>
+          <div class="stat" style="border:0"><span>새끼손가락 굵기</span><b>약 1°</b></div>
+          <p class="note">"남동쪽, 고도 30°" = 남동쪽을 보고, 지평선에서 주먹 3개 위.</p></div>
+        <button class="btn" data-next="4" style="align-self:flex-end">다음: 별 찾기 게임 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="dpanel card" data-p="4" hidden>
     <div class="row" style="justify-content:space-between">
       <h3 style="margin:0">🎯 방위각·고도로 별 찾기 게임 <span style="font-weight:700">(11월 6일 19:30 실제 하늘)</span></h3>
       <div class="row"><span class="pill" id="gRound" style="border:2px solid var(--ink);border-radius:999px;padding:2px 10px;font-weight:800">1 / 5</span><b id="gScore">0점</b><button class="btn" id="gNew">새 게임</button></div>
@@ -264,64 +288,119 @@ const hm = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 6
 /* ───── ① 방위 ───── */
 const DIR16 = ['북','북북동','북동','동북동','동','동남동','남동','남남동','남','남남서','남서','서남서','서','서북서','북서','북북서'];
 const dname = az => DIR16[Math.round((((az % 360) + 360) % 360) / 22.5) % 16];
+const DIR8 = ['북','북동','동','남동','남','남서','서','북서'];
+const d8 = az => DIR8[Math.round((((az % 360) + 360) % 360) / 45) % 8];
+// 단계 탭
+function showStep(n){ document.querySelectorAll('#dirTabs .btn').forEach(b => b.classList.toggle('on', b.dataset.p === String(n)));
+  document.querySelectorAll('.dpanel').forEach(p => p.hidden = p.dataset.p !== String(n));
+  if (n == 1) drawKmap(); if (n == 2) drawPov(); if (n == 3) drawAltv(); if (n == 4) drawPano(); }
+document.querySelectorAll('#dirTabs .btn').forEach(b => b.addEventListener('click', () => showStep(b.dataset.p)));
+document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => { showStep(b.dataset.next); document.getElementById('s-dir').scrollIntoView({ behavior:'smooth' }); }));
+// 한반도 지도
+const KR = [[124.3,39.9],[125.3,40.6],[126.9,41.8],[128.1,41.4],[128.9,42.0],[129.7,42.4],[130.2,42.9],[130.7,42.3],[129.8,41.6],[129.7,40.8],[128.6,40.1],[127.6,39.8],[127.4,39.2],[128.3,38.6],[128.6,38.2],[128.9,37.75],[129.3,37.1],[129.45,36.5],[129.55,36.0],[129.45,35.5],[129.1,35.1],[128.6,34.9],[128.0,34.85],[127.5,34.6],[126.9,34.4],[126.5,34.3],[126.3,34.7],[126.5,35.4],[126.7,35.9],[126.5,36.4],[126.1,36.8],[126.6,37.0],[126.6,37.45],[126.2,37.75],[125.7,37.9],[125.2,37.8],[124.8,38.1],[125.1,38.6],[125.3,39.0],[125.0,39.5],[124.6,39.6]];
+const SEOUL = [126.98, 37.57];
+const CITIES = [['강릉',128.9,37.75],['인천',126.62,37.46],['부산',129.08,35.18],['제주',126.53,33.5],['광주',126.85,35.16],['대전',127.38,36.35],['평양',125.75,39.03],['울릉도',130.87,37.5]];
+let kSel = '부산';
+const KL = { lon0:123.6, lon1:132.4, lat0:33.0, lat1:43.2 };
+const kx = lon => 40 + (lon - KL.lon0) / (KL.lon1 - KL.lon0) * 680, ky = lat => 20 + (KL.lat1 - lat) / (KL.lat1 - KL.lat0) * 600;
+function bearing(a, b){ const p1 = a[1] * D2R, p2 = b[1] * D2R, dl = (b[0] - a[0]) * D2R;
+  return ((Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) / D2R) + 360) % 360; }
+function arrow(c, x1, y1, x2, y2, col, w){ c.strokeStyle = col; c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+  const a = Math.atan2(y2 - y1, x2 - x1); c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - 18 * Math.cos(a - 0.4), y2 - 18 * Math.sin(a - 0.4)); c.lineTo(x2 - 18 * Math.cos(a + 0.4), y2 - 18 * Math.sin(a + 0.4)); c.closePath(); c.fill(); }
+function drawKmap(){
+  const c = $('kmap').getContext('2d'), W = 760, H = 640;
+  c.fillStyle = '#cfe3f5'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#f3e6c8'; c.strokeStyle = '#8a7a5a'; c.lineWidth = 2; c.beginPath(); KR.forEach(([lo, la], i) => i ? c.lineTo(kx(lo), ky(la)) : c.moveTo(kx(lo), ky(la))); c.closePath(); c.fill(); c.stroke();
+  c.beginPath(); c.ellipse(kx(126.55), ky(33.38), 22, 9, 0, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = '#8a7a5a'; for (const [lo, la] of [[130.87,37.5],[131.87,37.24]]){ c.beginPath(); c.arc(kx(lo), ky(la), 4, 0, 7); c.fill(); }
+  c.font = `800 26px ${FONT}`; c.fillStyle = '#3b6fa0'; c.textAlign = 'center';
+  c.fillText('동해', kx(131.0), ky(39.2)); c.fillText('서해', kx(124.6), ky(36.4)); c.fillText('남해', kx(128.2), ky(33.7));
+  c.font = `700 15px ${FONT}`; c.fillText('독도', kx(131.87), ky(37.24) + 20);
+  // 서울 기준 십자선
+  const sx0 = kx(SEOUL[0]), sy0 = ky(SEOUL[1]);
+  c.setLineDash([6,6]); c.strokeStyle = 'rgba(31,26,23,.35)'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(sx0, 20); c.lineTo(sx0, H - 20); c.moveTo(40, sy0); c.lineTo(W - 20, sy0); c.stroke(); c.setLineDash([]);
+  c.font = `900 30px ${FONT}`; c.fillStyle = '#c92a2a'; c.fillText('북', sx0, 42); c.fillStyle = '#1f1a17'; c.fillText('남', sx0, H - 18);
+  c.textAlign = 'left'; c.fillText('동', W - 50, sy0 - 10); c.fillText('서', 48, sy0 - 10); c.textAlign = 'center';
+  // 선택한 도시 화살표
+  const ct = CITIES.find(x => x[0] === kSel);
+  if (ct) arrow(c, sx0, sy0, kx(ct[1]), ky(ct[2]), '#ff5a1f', 5);
+  // 도시
+  for (const [n, lo, la] of CITIES){ const x = kx(lo), y = ky(la), on = n === kSel;
+    c.fillStyle = on ? '#ff5a1f' : '#1f1a17'; c.beginPath(); c.arc(x, y, on ? 9 : 6, 0, 7); c.fill();
+    c.font = `${on ? 900 : 700} ${on ? 24 : 19}px ${FONT}`; c.fillText(n, x, y - 14); }
+  c.fillStyle = '#e03131'; c.font = '30px sans-serif'; c.fillText('★', sx0, sy0 + 10); c.font = `900 22px ${FONT}`; c.fillStyle = '#c92a2a'; c.fillText('서울', sx0 + 38, sy0 + 30);
+  c.textAlign = 'left';
+  if (ct){ const b = bearing(SEOUL, [ct[1], ct[2]]); $('kCity').textContent = `${ct[0]}${/[가-힣]$/.test(ct[0]) && ((ct[0].charCodeAt(ct[0].length - 1) - 0xac00) % 28) ? '은' : '는'}`; $('kDir').textContent = `${d8(b)}쪽`; }
+}
+$('kBtns').innerHTML = CITIES.map(([n]) => `<button class="btn" data-k="${n}">${n}</button>`).join('');
+function kPick(n){ kSel = n; document.querySelectorAll('#kBtns .btn').forEach(b => b.classList.toggle('on', b.dataset.k === n)); const ct = CITIES.find(x => x[0] === n); face = Math.round(bearing(SEOUL, [ct[1], ct[2]])); drawKmap(); drawPov(); }
+document.querySelectorAll('#kBtns .btn').forEach(b => b.addEventListener('click', () => kPick(b.dataset.k)));
+$('kmap').addEventListener('click', e => { const r = $('kmap').getBoundingClientRect(), x = (e.clientX - r.left) * 760 / r.width, y = (e.clientY - r.top) * 640 / r.height;
+  let best = null, bd = 40; for (const [n, lo, la] of CITIES){ const d = Math.hypot(kx(lo) - x, ky(la) - y); if (d < bd){ bd = d; best = n; } } if (best) kPick(best); });
+// 서울에서 바라보기 (1인칭 파노라마, 시야 180°)
 let face = 180;
-const MARK = [['🌇 해 지는 곳 (11/6)', 248, '#ff922b'], ['⭐ 북극성 (고도 37.5°)', 0, '#ffc93c'], ['🪐 토성 (19:30)', 126, '#f2d48a']];
-function drawCompass(){
-  const c = $('compass').getContext('2d'), W = 640, H = 600, cx = 320, cy = 300, R = 220;
-  c.clearRect(0, 0, W, H);
-  c.fillStyle = 'rgba(64,192,87,.16)'; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fill();
-  c.strokeStyle = ink(); c.lineWidth = 3; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.stroke();
-  const pt = (az, r) => [cx + r * Math.sin(az * D2R), cy - r * Math.cos(az * D2R)];
-  // 눈금
-  for (let a = 0; a < 360; a += 15){ const [x1, y1] = pt(a, R), [x2, y2] = pt(a, R - (a % 90 ? 10 : 22)); c.lineWidth = a % 90 ? 1.5 : 3; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); }
-  c.textAlign = 'center'; c.textBaseline = 'middle';
-  for (const [n, a] of [['북',0],['동',90],['남',180],['서',270]]){ const [x, y] = pt(a, R + 30); c.font = `900 28px ${FONT}`; c.fillStyle = n === '북' ? '#e03131' : ink(); c.fillText(n, x, y);
-    const [x2, y2] = pt(a, R - 40); c.font = `700 14px ${FONT}`; c.fillStyle = '#8a7f75'; c.fillText(a + '°', x2, y2); }
-  for (const [n, a] of [['북동',45],['남동',135],['남서',225],['북서',315]]){ const [x, y] = pt(a, R + 26); c.font = `800 16px ${FONT}`; c.fillStyle = '#8a7f75'; c.fillText(n, x, y); }
-  // 표지
-  for (const [n, a, col] of MARK){ const [x, y] = pt(a, R - 70); c.fillStyle = col; c.beginPath(); c.arc(x, y, 7, 0, 7); c.fill(); c.font = `800 14px ${FONT}`; c.fillStyle = ink(); c.fillText(n, x, y + (a > 90 && a < 270 ? 20 : -18)); }
-  // 시야 부채꼴
-  c.fillStyle = 'rgba(255,90,31,.15)'; c.beginPath(); c.moveTo(cx, cy); c.arc(cx, cy, R - 4, (face - 90 - 45) * D2R, (face - 90 + 45) * D2R); c.closePath(); c.fill();
+const SKYMARK = [['⭐ 북극성', 0, 37.5, '#ffd43b'], ['🪐 토성 (11/6 20시)', 124, 38, '#f2d48a'], ['🌇 해 지는 곳 (11월)', 248, 1, '#ff922b']];
+function drawPov(){
+  const c = $('pov').getContext('2d'), W = 900, H = 520, HZ = 360, K = W / 180;
+  const X = az => { let d = ((az - face + 540) % 360) - 180; return Math.abs(d) > 92 ? null : W / 2 + d * K; }, Y = alt => HZ - alt * 5.2;
+  const g = c.createLinearGradient(0, 0, 0, HZ); g.addColorStop(0, '#0e1430'); g.addColorStop(1, '#3a4b7a'); c.fillStyle = g; c.fillRect(0, 0, W, HZ);
+  c.fillStyle = '#2b3a22'; c.fillRect(0, HZ, W, H - HZ); c.strokeStyle = '#d0d7e6'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, HZ); c.lineTo(W, HZ); c.stroke();
+  // 고도 눈금
+  c.font = `600 14px ${FONT}`; c.fillStyle = 'rgba(255,255,255,.45)';
+  for (const a of [30, 60]){ c.strokeStyle = 'rgba(255,255,255,.12)'; c.beginPath(); c.moveTo(0, Y(a)); c.lineTo(W, Y(a)); c.stroke(); c.fillText(`고도 ${a}°`, 8, Y(a) - 4); }
+  // 하늘 표지
+  c.textAlign = 'center';
+  for (const [n, az, alt, col] of SKYMARK){ const x = X(az); if (x == null) continue; c.fillStyle = col; c.beginPath(); c.arc(x, Y(alt), 7, 0, 7); c.fill(); c.font = `800 18px ${FONT}`; c.fillText(n, x, Y(alt) - 14); }
+  // 지평선의 도시 (멀리)
+  for (const [n, az] of [['동해 쪽', 90], ['남해 쪽', 180], ['서해 쪽', 270], ['북한 쪽', 0]]){ const x = X(az); if (x == null) continue; c.fillStyle = '#9fc2e8'; c.font = `700 16px ${FONT}`; c.fillText(n, x, HZ - 10); }
+  { const ct = CITIES.find(x => x[0] === kSel); if (ct){ const x = X(bearing(SEOUL, [ct[1], ct[2]])); if (x != null){ c.fillStyle = '#ff8c5a'; c.font = `900 22px ${FONT}`; c.fillText(`${ct[0]} ▾`, x, HZ - 34); } } }
+  // 방위 글자와 방위각 눈금
+  for (let az = 0; az < 360; az += 15){ const x = X(az); if (x == null) continue; const major = az % 45 === 0;
+    c.strokeStyle = '#d0d7e6'; c.lineWidth = major ? 3 : 1.5; c.beginPath(); c.moveTo(x, HZ); c.lineTo(x, HZ + (major ? 16 : 8)); c.stroke();
+    if (major){ c.fillStyle = az % 90 ? '#c9d3ea' : '#ffffff'; c.font = `900 ${az % 90 ? 22 : 34}px ${FONT}`; c.fillText(d8(az), x, HZ + 52); c.font = `700 16px ${FONT}`; c.fillStyle = '#9fb0d0'; c.fillText(`${az}°`, x, HZ + 76); } }
+  // 앞 표시
+  c.fillStyle = '#ff5a1f'; c.beginPath(); c.moveTo(W / 2, H - 46); c.lineTo(W / 2 - 14, H - 22); c.lineTo(W / 2 + 14, H - 22); c.fill(); c.font = `900 18px ${FONT}`; c.fillText('앞', W / 2, H - 6);
+  c.textAlign = 'left'; c.fillStyle = '#ffffff'; c.font = `800 18px ${FONT}`; c.fillText(`👈 왼쪽: ${d8(face - 90)}`, 10, H - 10);
+  c.textAlign = 'right'; c.fillText(`오른쪽: ${d8(face + 90)} 👉`, W - 10, H - 10); c.textAlign = 'left';
+  $('faceV').textContent = `${d8(face)}쪽`; $('faceA').textContent = `방위각 ${Math.round(face)}°`; $('leftV').textContent = d8(face - 90); $('rightV').textContent = d8(face + 90);
+  document.querySelectorAll('#faceBtns .btn').forEach(b => b.classList.toggle('on', +b.dataset.f === Math.round(face) % 360));
+}
+document.querySelectorAll('#faceBtns .btn').forEach(b => b.addEventListener('click', () => { face = +b.dataset.f; drawPov(); }));
+{ const cv = $('pov'); let d = null;
+  cv.addEventListener('pointerdown', e => { d = { x: e.clientX, f: face }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!d) return; face = ((d.f - (e.clientX - d.x) * 180 / cv.clientWidth) % 360 + 360) % 360; drawPov(); });
+  cv.addEventListener('pointerup', () => d = null); }
+// 고도 (옆에서 본 모습)
+let altA = 30;
+function drawAltv(){
+  const c = $('altv').getContext('2d'), W = 900, H = 460, gy = 380, ex = 170, ey = 300;
+  c.fillStyle = '#0e1430'; c.fillRect(0, 0, W, gy); c.fillStyle = '#2b3a22'; c.fillRect(0, gy, W, H - gy);
+  // 건물
+  c.fillStyle = '#1b2240'; for (const [x, h] of [[520, 60], [600, 95], [690, 50], [760, 120], [840, 70]]) c.fillRect(x, gy - h, 60, h);
   // 사람
-  const [fx, fy] = pt(face, 120); c.strokeStyle = '#ff5a1f'; c.lineWidth = 6; c.beginPath(); c.moveTo(cx, cy); c.lineTo(fx, fy); c.stroke();
-  c.fillStyle = '#ff5a1f'; c.save(); c.translate(fx, fy); c.rotate(face * D2R); c.beginPath(); c.moveTo(0, -16); c.lineTo(-11, 6); c.lineTo(11, 6); c.fill(); c.restore();
-  c.fillStyle = '#1f1a17'; c.beginPath(); c.arc(cx, cy, 18, 0, 7); c.fill(); c.font = '22px sans-serif'; c.fillText('🧑', cx, cy + 1);
-  c.font = `900 18px ${FONT}`;
-  for (const [n, d] of [['앞', 0], ['오른쪽', 90], ['뒤', 180], ['왼쪽', -90]]){ const [x, y] = pt(face + d, d ? 70 : 150); c.fillStyle = d === 0 ? '#ff5a1f' : ink(); c.fillText(n, x, y); }
-  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
-  $('faceV').textContent = `${dname(face)}쪽 (${Math.round(face)}°)`; $('leftV').textContent = `${dname(face - 90)} (${Math.round((face + 270) % 360)}°)`; $('rightV').textContent = `${dname(face + 90)} (${Math.round((face + 90) % 360)}°)`;
-  document.querySelectorAll('#faceBtns .btn').forEach(b => b.classList.toggle('on', +b.dataset.f === Math.round(face)));
+  c.strokeStyle = '#f4efe6'; c.lineWidth = 6; c.lineCap = 'round';
+  c.beginPath(); c.arc(150, 285, 18, 0, 7); c.stroke(); c.beginPath(); c.moveTo(150, 303); c.lineTo(150, 345); c.lineTo(132, gy); c.moveTo(150, 345); c.lineTo(168, gy); c.stroke();
+  // 지평선 기준선
+  c.setLineDash([8,8]); c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 2; c.beginPath(); c.moveTo(ex, ey); c.lineTo(W - 20, ey); c.stroke(); c.setLineDash([]);
+  c.font = `700 18px ${FONT}`; c.fillStyle = 'rgba(255,255,255,.6)'; c.fillText('지평선 방향 (고도 0°)', W - 220, ey - 10);
+  // 팔·시선
+  const L = 560, a = altA * D2R, tx = ex + L * Math.cos(a), ty = ey - L * Math.sin(a);
+  c.strokeStyle = '#ffb547'; c.lineWidth = 6; c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex + 70 * Math.cos(a), ey - 70 * Math.sin(a)); c.stroke();
+  c.lineWidth = 2.5; c.setLineDash([3,6]); c.beginPath(); c.moveTo(ex, ey); c.lineTo(tx, ty); c.stroke(); c.setLineDash([]);
+  // 주먹 쌓기 (10°마다)
+  const R = 230; c.fillStyle = '#ff5a1f';
+  for (let k = 0; k < Math.floor(altA / 10); k++){ const m = (k + 0.5) * 10 * D2R; c.beginPath(); c.arc(ex + R * Math.cos(m), ey - R * Math.sin(m), 17, 0, 7); c.fill(); c.fillStyle = '#fff'; c.font = '18px sans-serif'; c.textAlign = 'center'; c.fillText('✊', ex + R * Math.cos(m), ey - R * Math.sin(m) + 6); c.fillStyle = '#ff5a1f'; }
+  c.textAlign = 'left';
+  c.strokeStyle = '#ff5a1f'; c.lineWidth = 3; c.beginPath(); c.arc(ex, ey, 120, -a, 0); c.stroke();
+  c.fillStyle = '#ffb547'; c.font = `900 30px ${FONT}`; c.fillText(`${Math.round(altA)}°`, ex + 130 * Math.cos(a / 2) + 6, ey - 130 * Math.sin(a / 2) + 10);
+  c.fillStyle = '#ffd43b'; c.beginPath(); c.arc(tx, ty, 10, 0, 7); c.fill();
+  c.fillStyle = '#ffffff'; c.font = `800 22px ${FONT}`; c.fillText(`고도 ${Math.round(altA)}° ≈ 주먹 ${(altA / 10).toFixed(1).replace('.0', '')}개`, 20, 40);
+  if (altA < 20){ c.fillStyle = '#ff8a8a'; c.font = `700 18px ${FONT}`; c.fillText('도심에서는 건물에 가리기 쉬운 높이', 20, 68); }
+  $('altV').textContent = `${Math.round(altA)}°`;
 }
-function drawMaps(){
-  const c = $('maps').getContext('2d'), W = 640, H = 600;
-  c.clearRect(0, 0, W, H); c.textAlign = 'center'; c.textBaseline = 'middle';
-  const panel = (x0, title, sub, sky) => {
-    const cx = x0 + 150, cy = 250, r = 100;
-    c.fillStyle = sky ? '#0b1020' : 'rgba(64,192,87,.16)'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.fill(); c.strokeStyle = ink(); c.lineWidth = 2.5; c.stroke();
-    c.font = `900 20px ${FONT}`; c.fillStyle = ink(); c.fillText(title, cx, 50); c.font = `700 14px ${FONT}`; c.fillStyle = '#8a7f75'; c.fillText(sub, cx, 76);
-    const L = sky ? [['북',0,-1],['남',0,1],['동',-1,0],['서',1,0]] : [['북',0,-1],['남',0,1],['동',1,0],['서',-1,0]];
-    for (const [n, dx, dy] of L){ c.font = `900 24px ${FONT}`; c.fillStyle = n === '동' ? '#ff5a1f' : n === '북' ? '#e03131' : ink(); c.fillText(n, cx + dx * (r + 24), cy + dy * (r + 24)); }
-    if (sky){ // 카시오페이아 W와 북극성, 별 몇 개
-      c.fillStyle = '#fff'; for (const [x, y] of [[-40,-70],[-20,-50],[0,-68],[20,-48],[40,-66]]){ c.beginPath(); c.arc(cx + x, cy + y, 3, 0, 7); c.fill(); }
-      c.fillStyle = '#ffc93c'; c.beginPath(); c.arc(cx, cy - 20, 4, 0, 7); c.fill(); c.font = `700 12px ${FONT}`; c.fillText('북극성', cx + 30, cy - 20);
-      c.fillStyle = '#fff'; for (const [x, y] of [[-60,30],[50,40],[-20,70],[70,-10],[-80,-10]]){ c.beginPath(); c.arc(cx + x, cy + y, 2, 0, 7); c.fill(); }
-      c.fillStyle = '#a5d8ff'; c.font = `700 13px ${FONT}`; c.fillText('가운데 = 머리 위', cx, cy + 22);
-    } else {
-      c.font = '26px sans-serif'; c.fillText('🏫', cx - 40, cy - 30); c.fillText('🌳', cx + 50, cy + 20); c.fillText('🏠', cx - 10, cy + 60);
-    }
-  };
-  panel(4, '🗺️ 땅 지도', '위에서 내려다본다 → 동쪽이 오른쪽', false);
-  panel(336, '🌌 하늘 지도(성도)', '아래에서 올려다본다 → 동쪽이 왼쪽', true);
-  c.font = `800 17px ${FONT}`; c.fillStyle = ink();
-  c.fillText('하늘 지도는 머리 위로 들어 올려 하늘에 겹쳐 보는 지도라서', W / 2, 450);
-  c.fillText('땅 지도를 뒤집은 것처럼 동·서가 바뀐다.', W / 2, 476);
-  c.fillStyle = '#ff5a1f'; c.fillText('사용법: 보려는 방향(예: 남)이 아래로 오게 들고, 그 방향을 보고 선다.', W / 2, 520);
-  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
-}
-document.querySelectorAll('#faceBtns .btn').forEach(b => b.addEventListener('click', () => { face = +b.dataset.f; drawCompass(); }));
-{ const cv = $('compass'); let on = false;
-  const set = e => { const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * 640 / r.width - 320, y = (e.clientY - r.top) * 600 / r.height - 300; face = ((Math.atan2(x, -y) / D2R) + 360) % 360; face = Math.round(face / 5) * 5 % 360; drawCompass(); };
-  cv.addEventListener('pointerdown', e => { on = true; cv.setPointerCapture(e.pointerId); set(e); }); cv.addEventListener('pointermove', e => on && set(e)); cv.addEventListener('pointerup', () => on = false); }
+$('altS').addEventListener('input', e => { altA = +e.target.value; drawAltv(); });
+document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { altA = +b.dataset.a; $('altS').value = altA; drawAltv(); }));
 
 /* 방위각·고도 게임: 11/6 19:30 실제 하늘 */
 const GT = [['북극성','Polaris'],['직녀성(베가)','Vega'],['견우성(알타이르)','Altair'],['데네브','Deneb'],['카펠라','Capella'],['포말하우트','Fomalhaut'],['플레이아데스 성단','Alcyone'],['카시오페이아 W 가운데 별','gCas'],['북두칠성 국자 끝(두베)','Dubhe'],['안드로메다자리 미라크','Mirach'],['페가수스 사각형 마르카브','Markab']];
@@ -796,7 +875,7 @@ sph.addEventListener('pointerup', () => { drag = null; sph.style.cursor = 'grab'
 const QZ = [
   ['남쪽을 바라보고 섰을 때, 동쪽은 어디일까?', ['앞','뒤','왼쪽','오른쪽'], 2, '남쪽을 보면 왼쪽이 동쪽, 오른쪽이 서쪽. 그래서 별은 왼쪽에서 떠서 오른쪽으로 진다.'],
   ['방위각 270°, 고도 30°인 별은 어디에 있을까?', ['북쪽, 주먹 3개 높이','동쪽, 주먹 3개 높이','서쪽, 주먹 3개 높이','서쪽, 머리 위'], 2, '방위각은 북 0° → 동 90° → 남 180° → 서 270°. 팔을 뻗은 주먹 하나 ≈ 10°.'],
-  ['하늘 지도(성도)에서 동쪽이 왼쪽에 그려진 까닭은?', ['인쇄 실수라서','하늘을 올려다보며 쓰는 지도라서','북반구라서','지구가 자전해서'], 1, '땅 지도는 내려다보고, 하늘 지도는 올려다본다. 머리 위로 들어 보면 동·서가 바뀐다.'],
+  ['서울에서 부산은 어느 쪽일까?', ['북서쪽','북동쪽','남서쪽','남동쪽'], 3, '지도에서 부산은 서울보다 아래(남)이고 오른쪽(동)이다 → 남동쪽. 방위각으로는 약 145°.'],
   ['북쪽 하늘을 바라볼 때, 북극성 주변의 별들은 어느 방향으로 돌까?', ['시계 방향','시계 반대 방향','움직이지 않는다','북극성 쪽으로 다가온다'], 1, '지구가 서→동(북극 위에서 보면 시계 반대)으로 자전하므로, 북쪽 하늘의 별은 북극성을 중심으로 시계 반대 방향으로 돈다.'],
   ['별은 1시간에 약 몇 도씩 움직여 보일까?', ['1°','4°','15°','30°'], 2, '하루 24시간에 360° → 1시간에 15°.'],
   ['어제 밤 9시에 남쪽 하늘 꼭대기에 있던 별이 오늘 같은 자리에 오는 시각은?', ['약 8시 56분','정확히 9시','약 9시 4분','약 10시'], 0, '지구 공전 때문에 하루 약 1°씩 밀려, 같은 별은 매일 약 4분 일찍 같은 자리에 온다.'],
@@ -826,8 +905,8 @@ function qRender(){
 $('qn').addEventListener('click', () => { qi++; qRender(); });
 $('qr').addEventListener('click', () => { qi = 0; res = []; qRender(); });
 
-drawCompass(); drawMaps(); gNew(); drawRot(); setCoord(); qRender(); init3D();
-matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { drawCompass(); drawMaps(); drawRot(); setCoord(); });
+kPick('부산'); showStep(1); gNew(); drawRot(); setCoord(); qRender(); init3D();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { drawKmap(); drawPov(); drawAltv(); drawRot(); setCoord(); });
 })();
 </script>
 </body>
