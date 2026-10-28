@@ -646,11 +646,17 @@ function init3D(){
   /* ═════ ② 일주 운동 ═════ */
   let dT = 9, dDay = 309;
   // 바깥 (우주)
-  const O = viewer($('d3out'), { dist: 6.2, theta: 1.05, phi: 0.38, fov: 40 });
+  const O = viewer($('d3out'), { dist: 8.3, theta: 1.05, phi: 0.38, fov: 40 });
   O.scene.add(new THREE.AmbientLight(0xffffff, 0.13));
   const oLight = new THREE.DirectionalLight(0xffffff, 1.2); O.scene.add(oLight);
-  const oSun = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 16), new THREE.MeshBasicMaterial({ color: 0xffd43b })); O.scene.add(oSun);
-  const oSunL = label('태양 (실제로는 아주 멀리)', '#ffd43b', 0.9); O.scene.add(oSunL);
+  // 천구 (반투명 구 + 천구 적도 + 경선 몇 개)
+  const OCR = 3.6;
+  O.scene.add(new THREE.Mesh(new THREE.SphereGeometry(OCR, 48, 32), new THREE.MeshBasicMaterial({ color: 0x5c7cfa, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false })));
+  O.scene.add(line(ring(160, a => V3(OCR * Math.cos(a), 0, OCR * Math.sin(a))), 0x74c0fc, 0.7));
+  for (let k = 0; k < 6; k++){ const lo = k * Math.PI / 6; O.scene.add(line(ring(120, a => V3(OCR * Math.cos(a) * Math.cos(lo), OCR * Math.sin(a), OCR * Math.cos(a) * Math.sin(lo))), 0x91a7ff, 0.18)); }
+  { const l = label('천구', '#bac8ff', 0.8); l.position.set(-OCR * 0.75, OCR * 0.75, 0); O.scene.add(l); const l2 = label('천구 적도', '#74c0fc', 0.65); l2.position.set(0, -0.25, OCR + 0.1); O.scene.add(l2); }
+  const oSun = new THREE.Mesh(new THREE.SphereGeometry(0.11, 20, 12), new THREE.MeshBasicMaterial({ color: 0xffd43b })); O.scene.add(oSun);
+  const oSunL = label('천구 위 태양의 위치', '#ffd43b', 0.8); O.scene.add(oSunL);
   const oRays = new THREE.Group(); O.scene.add(oRays);
   const earth = new THREE.Group(); O.scene.add(earth);
   earth.add(new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32), new THREE.MeshLambertMaterial({ color: 0x2f7fd0 })));
@@ -726,8 +732,9 @@ function init3D(){
     if (mp.length > 1) obsPath.add(line(mp, 0xffd43b, 1));
     // 햇빛
     const dir = V3(Math.cos(dec * D2R), Math.sin(dec * D2R), 0), side = V3(0, 0, 1), up2 = new THREE.Vector3().crossVectors(dir, side).normalize();
-    for (const [u, w] of [[0,0],[0.7,0],[-0.7,0],[0,0.7],[0,-0.7]]){ const st = dir.clone().multiplyScalar(4.6).add(side.clone().multiplyScalar(w)).add(up2.clone().multiplyScalar(u)); oRays.add(line([st, st.clone().add(dir.clone().multiplyScalar(-2.4))], 0xffe066, 0.55, true)); }
-    oSun.position.copy(dir.clone().multiplyScalar(5.6)); oLight.position.copy(dir.clone().multiplyScalar(10)); oSunL.position.copy(dir.clone().multiplyScalar(5.6)).add(V3(0, 0.75, 0));
+    oRays.add(tube([dir.clone().multiplyScalar(1.02), dir.clone().multiplyScalar(OCR)], 0xffd43b, 0.025));
+    { const l = label('태양 방향', '#ffe066', 0.65); l.position.copy(dir.clone().multiplyScalar(OCR * 0.6)).add(V3(0, 0.22, 0)); oRays.add(l); }
+    oSun.position.copy(dir.clone().multiplyScalar(OCR)); oLight.position.copy(dir.clone().multiplyScalar(10)); oSunL.position.copy(dir.clone().multiplyScalar(OCR)).add(V3(0, 0.35, 0));
   }
   function dUpdate(){
     const dec = sunDec(dDay); if (dec !== lastDec){ dBuild(dec); lastDec = dec; }
