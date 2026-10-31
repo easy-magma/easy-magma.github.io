@@ -69,6 +69,8 @@ table.plan td.nm:hover{color:var(--accent)}
 table.plan tr.sel td.nm{color:var(--accent)}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--sub);margin-top:8px}
 .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.mini{width:100%;border-collapse:collapse;font-size:13.5px}.mini th,.mini td{padding:4px 6px;border-bottom:1px solid var(--line,#ddd);text-align:center}.mini tr.cur{background:rgba(255,160,40,.18);font-weight:800}
+details.ans{margin:8px 0;font-size:14px}details.ans summary{cursor:pointer;font-weight:800}details.ans ol{margin:6px 0 0 20px;padding:0}
 /* 조립 게임 */
 .steps{display:flex;flex-direction:column;gap:6px}
 .step{font:700 15px var(--f-body);text-align:left;padding:8px 10px;border:2px solid var(--ink);border-radius:10px;background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
@@ -175,11 +177,17 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
   <div class="grid">
     <div class="card">
       <h3>접안렌즈로 본 모습 시뮬레이터</h3>
-      <div class="row">
-        <select id="ePick" aria-label="관측 대상"></select>
-        <label class="chk"><input type="checkbox" id="cFlip">상하좌우 뒤집힌 상(도립상)</label>
+      <div class="row" id="epMode">
+        <button class="btn on" data-m="night">🌙 밤: 별·천체</button>
+        <button class="btn" data-m="day">🏢 낮: 아파트</button>
       </div>
-      <canvas id="ep" width="760" height="560" style="width:100%;margin-top:8px;background:#000"></canvas>
+      <div class="row" style="margin-top:6px">
+        <select id="ePick" aria-label="관측 대상"></select>
+        <label class="chk" id="aptBox" style="display:none">아파트까지 <input type="range" id="aptDist" min="200" max="1000" step="50" value="400"> <b id="aptDv">400 m</b></label>
+        <label class="chk"><input type="checkbox" id="cFlip">상하좌우 뒤집힌 상(도립상)</label>
+        <label class="chk"><input type="checkbox" id="cRings">다른 접안렌즈 시야 겹쳐 보기</label>
+      </div>
+      <canvas id="ep" width="760" height="560" style="width:100%;margin-top:8px;background:#000;touch-action:none"></canvas>
       <p class="note" id="epNote"></p>
     </div>
     <div class="col">
@@ -200,6 +208,11 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
         </div>
       </div>
       <div class="card">
+        <h3>접안렌즈 「20mm」의 뜻</h3>
+        <p class="note" style="margin:0 0 8px"><b>숫자 = 그 접안렌즈 자체의 초점 거리(mm)</b>. 망원경(대물)의 초점 거리 ÷ 접안렌즈 숫자 = 배율. <b>숫자가 작을수록 배율↑ · 시야↓ · 어두워짐.</b><br>접안렌즈마다 눈에 보이는 원의 크기(겉보기 시야 ≈ 52°)는 같고, 그 안에 담기는 <b>실제 하늘 폭</b>이 달라집니다. 실시야 = 52° ÷ 배율.</p>
+        <table class="mini" id="epTab"></table>
+      </div>
+      <div class="card">
         <div><span class="big" id="mag">36</span> <span style="font-size:18px;font-weight:800;color:var(--sub)">배</span> <span id="magBadge"></span></div>
         <div class="stat"><span>배율 = 대물 초점 거리 ÷ 접안 초점 거리</span><b id="magF">900 ÷ 25</b></div>
         <div class="stat"><span>실제로 보이는 하늘 폭 (실시야)</span><b id="tfov">–</b></div>
@@ -214,8 +227,10 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
     <div class="card">
       <h3>조립 순서 게임</h3>
       <div class="row" id="gmode"><button class="btn on" data-g="setup">설치하기</button><button class="btn" data-g="pack">정리하기</button><button class="btn" id="gReset">다시</button></div>
+      <p class="note" style="margin-bottom:6px">🔁 <b>분해(정리)는 조립(설치)의 역순.</b> 마지막에 단 것을 가장 먼저 뺀다.</p>
       <p class="note" id="gMsg" style="margin-bottom:8px">다음에 할 일을 순서대로 누르세요.</p>
       <ol class="done" id="gDone"></ol>
+      <details class="ans"><summary>정답 순서 보기</summary><ol id="gAns"></ol></details>
       <div class="steps" id="gSteps"></div>
       <p class="note">⚖️ 적도의식 가대라면 경통보다 <b>균형추를 먼저</b> 달고, 정리할 때는 <b>경통을 먼저</b> 뺀 뒤 균형추를 뺍니다. (반대로 하면 가대가 넘어집니다)</p>
     </div>
@@ -563,7 +578,48 @@ function drawPlan(){
 
 /* ───────── ③ 접안렌즈 시뮬레이터 ───────── */
 const ep = $('ep'), ex = ep.getContext('2d');
-let Dmm = 80, Fmm = 900, Emm = 25, AFOV = 52;
+let Dmm = 80, Fmm = 900, Emm = 25, AFOV = 52, epMode = 'night', aptD = 400, aptX = 0, aptY = 38;
+const EPS = [25, 20, 10, 6, 4];
+function drawApt(sc, flip, mag, tfov){
+  const ppd = sc * 3600, mpx = 57.2958 / aptD * ppd; // px per m
+  const X = m => (m - aptX) * mpx, Y = m => -(m - aptY) * mpx; // 화면 좌표(중심 기준)
+  const R = 400;
+  let g = ex.createLinearGradient(0, Y(90), 0, Y(0)); g.addColorStop(0, '#6fb1ea'); g.addColorStop(1, '#cfe7fb');
+  ex.fillStyle = g; ex.fillRect(-R*2, -R*2, R*4, R*4);
+  ex.fillStyle = '#6a9a55'; ex.fillRect(-R*2, Y(0), R*4, R*4); // 땅
+  const bld = (x0, x1, h, col, num) => {
+    ex.fillStyle = col; ex.fillRect(X(x0), Y(h), (x1 - x0) * mpx, h * mpx);
+    const fl = Math.floor(h / 3);
+    for (let f = 0; f < fl; f++) for (let c = 0; c < Math.floor((x1 - x0) / 3.6); c++){
+      const wx = x0 + 1.0 + c * 3.6, wy = f * 3 + 0.9; if (X(wx) > R || X(wx + 1.8) < -R || Y(wy) < -R || Y(wy + 1.5) > R) continue;
+      const h1 = ((f * 73 + c * 31 + num) * 2654435761 >>> 0) % 100;
+      ex.fillStyle = '#4b6f93'; ex.fillRect(X(wx), Y(wy + 1.5), 1.8 * mpx, 1.5 * mpx);
+      if (h1 < 35){ ex.fillStyle = h1 < 12 ? '#f3d9d0' : h1 < 24 ? '#e8efd0' : '#fff'; ex.fillRect(X(wx), Y(wy + 1.5), 0.8 * mpx, 1.5 * mpx); }
+      ex.fillStyle = 'rgba(255,255,255,.25)'; ex.fillRect(X(wx), Y(wy + 1.5), 1.8 * mpx, 0.25 * mpx);
+      if (h1 > 88){ ex.fillStyle = '#9aa0a6'; ex.fillRect(X(wx + 2.0), Y(wy + 0.9), 0.7 * mpx, 0.6 * mpx); } // 에어컨 실외기
+    }
+    ex.fillStyle = 'rgba(0,0,0,.18)'; for (let f = 1; f < fl; f++) ex.fillRect(X(x0), Y(f * 3) - 0.1 * mpx, (x1 - x0) * mpx, 0.2 * mpx);
+  };
+  bld(75, 130, 52, '#cfc7b8', 7); bld(-45, 45, 75, '#e3dccd', 3);
+  ex.fillStyle = '#c0392b'; ex.fillRect(X(-45), Y(75), 90 * mpx, 1.6 * mpx);
+  ex.save(); ex.fillStyle = '#2f3b52'; ex.font = `900 ${5 * mpx}px ${FONT}`; ex.textAlign = 'center'; ex.textBaseline = 'middle';
+  if (5 * mpx < 2000) ex.fillText('101동', X(0), Y(70)); ex.restore();
+  ex.fillStyle = '#3f7a3a'; for (const tx of [-60, -52, 60, 66, 52]){ ex.beginPath(); ex.arc(X(tx), Y(7), 6 * mpx, 0, 7); ex.fill(); ex.fillStyle = '#5b3a1e'; ex.fillRect(X(tx) - 0.4 * mpx, Y(1), 0.8 * mpx, 1 * mpx); ex.fillStyle = '#3f7a3a'; }
+  const wm = Math.tan(tfov * D2R) * aptD;
+  return `아파트까지 ${aptD}m · 실시야 ${tfov.toFixed(2)}° = 가로 약 ${wm.toFixed(1)}m(창문 ${(wm / 3.6).toFixed(1)}칸)가 보입니다. ` + (wm > 60 ? '건물 전체가 한눈에!' : wm > 12 ? '건물 몇 층이 보여요.' : '창문 몇 개만 크게 보이죠 — 배율↑ = 시야↓.') + ' 이미지를 끌어서 움직여 보세요.';
+}
+function drawAptInset(Rv, sc){
+  const ppd = sc * 3600, mpx = 57.2958 / aptD * ppd;
+  const x0 = 12, w = 200, h = 168, y0 = 560 - 12 - h, s = 1.5, gy = y0 + h - 16, bx = x0 + w / 2;
+  ex.save(); ex.beginPath(); ex.rect(x0, y0, w, h); ex.fillStyle = 'rgba(207,231,251,.95)'; ex.fill(); ex.clip();
+  ex.fillStyle = '#6a9a55'; ex.fillRect(x0, gy, w, 20);
+  ex.fillStyle = '#e3dccd'; ex.fillRect(bx - 45 * s, gy - 75 * s, 90 * s, 75 * s); ex.fillStyle = '#cfc7b8'; ex.fillRect(bx + 75 * s - 20, gy - 52 * s, 55 * s * 0.8, 52 * s);
+  ex.strokeStyle = 'rgba(0,0,0,.12)'; for (let f = 1; f < 25; f++){ ex.beginPath(); ex.moveTo(bx - 45 * s, gy - f * 3 * s); ex.lineTo(bx + 45 * s, gy - f * 3 * s); ex.stroke(); }
+  const rr = Math.max(2.5, Rv / mpx * s), ccx = bx + aptX * s, ccy = gy - aptY * s;
+  ex.strokeStyle = '#e8590c'; ex.lineWidth = 2.5; ex.beginPath(); ex.arc(ccx, ccy, rr, 0, 7); ex.stroke();
+  ex.restore(); ex.strokeStyle = '#333'; ex.lineWidth = 1.5; ex.strokeRect(x0, y0, w, h);
+  ex.fillStyle = '#1b2240'; ex.font = `800 13px ${FONT}`; ex.fillText('맨눈으로 본 모습', x0 + 6, y0 + 16); ex.fillStyle = '#e8590c'; ex.fillText('○ = 망원경 시야', x0 + 6, y0 + 32);
+}
 function rnd(seed){ let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 function clusterStars(n, rDeg, seed, mag0, mag1, conc){ const r = rnd(seed), out = []; for (let i = 0; i < n; i++){ const a = r() * 6.283, d = Math.pow(r(), conc) * rDeg; out.push([d * Math.cos(a) * 3600, d * Math.sin(a) * 3600, mag0 + Math.pow(r(), 0.6) * (mag1 - mag0)]); } return out; }
 const PLE = [[3.7914,24.1051,2.87,'알키오네'],[3.8193,24.0534,3.62,'아틀라스'],[3.7479,24.1133,3.70,'엘렉트라'],[3.7636,24.3678,3.87,'마이아'],[3.7720,23.9484,4.18,'메로페'],[3.7535,24.4673,4.30,'타이게타'],[3.8197,24.1367,5.05,'플레이오네'],[3.7378,24.2894,5.45,'켈라이노'],[3.7543,24.5547,5.76,'아스테로페']];
@@ -589,9 +645,10 @@ function drawEP(){
   const star = (x, y, m, col) => { if (m > limT) return; const [px, py] = P(x, y); const r = Math.max(1.1, 4.4 - 0.42 * m) + Math.max(0, seeing * sc * 0.5 - 0.5);
     const a = Math.min(1, 0.35 + (limT - m) * 0.18); ex.globalAlpha = a; ex.fillStyle = col || '#f4f6ff'; ex.beginPath(); ex.arc(px, py, r, 0, 7); ex.fill(); ex.globalAlpha = 1; };
   const pa = (sep, deg) => [sep * Math.sin(deg * D2R), sep * Math.cos(deg * D2R)]; // 위치각: 북→동
+  let note = '';
+  if (epMode === 'day'){ note = drawApt(sc, flip, mag, tfov); } else {
   // 배경 별
   for (const [x, y, m] of FIELD) star(x, y, m + 0.5);
-  let note = '';
   const glow = (x, y, rx, ry, rot, alpha, col='200,210,230') => { const [px, py] = P(x, y); ex.save(); ex.translate(px, py); ex.rotate(rot); ex.scale(1, ry / rx);
     const gg = ex.createRadialGradient(0,0,0,0,0,rx); gg.addColorStop(0, `rgba(${col},${alpha})`); gg.addColorStop(1, `rgba(${col},0)`); ex.fillStyle = gg; ex.beginPath(); ex.arc(0,0,rx,0,7); ex.fill(); ex.restore(); };
   const dim = Math.min(1, (Dmm / mag) / 2.5);
@@ -652,9 +709,10 @@ function drawEP(){
     for (const [x, y, m] of [[0,0,5.1],[13,-9,6.7],[-8,12,6.7],[-4,-14,7.5]]) star(x, y, m);
     note = '가운데 트라페지움 4개 별은 고배율(약 50배 이상)에서 갈라져 보입니다.';
   }
+  }
   ex.restore();
   // 돋보기: 행성·이중성은 실제 크기로는 작아서 4배 확대 화면을 덧붙임
-  if (tg.body || tg.eye === 'double'){
+  if (epMode !== 'day' && (tg.body || tg.eye === 'double')){
     const lr = 92, lx = W - lr - 14, ly = H - lr - 14;
     ex.save(); ex.beginPath(); ex.arc(lx, ly, lr, 0, 7); ex.fillStyle = '#05060a'; ex.fill(); ex.clip();
     ex.translate(lx - cx * 4, ly - cy * 4); ex.scale(4, 4); ex.drawImage(ep, cx - lr / 4, cy - lr / 4, lr / 2, lr / 2, cx - lr / 4, cy - lr / 4, lr / 2, lr / 2);
@@ -669,7 +727,13 @@ function drawEP(){
   ex.textAlign = 'right'; ex.fillText(flip < 0 ? '남 ↑ (뒤집힘)' : '북 ↑', W - 16, 30); ex.fillText(flip < 0 ? '서 ←' : '동 ←', W - 16, 56); ex.textAlign = 'left';
   // 달 크기 비교 막대
   const moonPx = 0.5 * 3600 * sc;
-  if (moonPx / 2 < Rv - 4){ ex.strokeStyle = '#6c757d'; ex.setLineDash([4,4]); ex.beginPath(); ex.arc(cx, cy, moonPx / 2, 0, 7); ex.stroke(); ex.setLineDash([]);
+  if ($('cRings').checked){
+    for (const e of EPS){ if (e === Emm) continue; const tf = AFOV / (Fmm / e), r = Rv * tf / tfov; if (r < 16 || r > Rv - 6) continue;
+      ex.strokeStyle = '#ffc93c'; ex.lineWidth = 1.8; ex.setLineDash([6,5]); ex.beginPath(); ex.arc(cx, cy, r, 0, 7); ex.stroke(); ex.setLineDash([]);
+      ex.fillStyle = '#ffc93c'; ex.font = `800 14px ${FONT}`; ex.textAlign = 'center'; ex.fillText(`${e}mm (${(Fmm / e).toFixed(0)}배)`, cx, cy - r + 16); ex.textAlign = 'left'; }
+  }
+  if (epMode === 'day') drawAptInset(Rv, sc);
+  if (epMode !== 'day' && moonPx / 2 < Rv - 4){ ex.strokeStyle = '#6c757d'; ex.setLineDash([4,4]); ex.beginPath(); ex.arc(cx, cy, moonPx / 2, 0, 7); ex.stroke(); ex.setLineDash([]);
     ex.fillStyle = '#6c757d'; ex.font = `700 14px ${FONT}`; ex.fillText('보름달 크기', cx + moonPx / 2 * 0.72 + 4, cy - moonPx / 2 * 0.72); }
   $('epNote').textContent = note;
   // 수치
@@ -679,6 +743,7 @@ function drawEP(){
   $('res').textContent = `${(116 / Dmm).toFixed(1)}″`;
   $('lg').textContent = `${Math.round((Dmm / 7) ** 2)}배`;
   $('eV').textContent = `${Emm} mm`;
+  $('epTab').innerHTML = `<tr><th>접안렌즈</th><th>배율</th><th>실시야</th><th>보름달 몇 개 폭</th></tr>` + EPS.map(e => { const m = Fmm / e, t = AFOV / m; return `<tr class="${e === Emm ? 'cur' : ''}"><td>${e}mm</td><td>${m.toFixed(0)}배</td><td>${t >= 1 ? t.toFixed(2) + '°' : (t * 60).toFixed(0) + '′'}</td><td>${(t / 0.5).toFixed(1)}</td></tr>`; }).join('');
   $('magBadge').innerHTML = mag > Dmm * 2 ? `<span class="pill" style="background:#ffc9c9;color:#1f1a17">배율 과다 — 흐려요</span>` : mag > 150 ? `<span class="pill" style="background:#ffec99;color:#1f1a17">도심 대기에선 흔들림</span>` : mag < 50 ? `<span class="pill" style="background:#d0ebff;color:#1f1a17">저배율 · 찾기 좋음</span>` : `<span class="pill" style="background:#b2f2bb;color:#1f1a17">적당</span>`;
 }
 
@@ -694,6 +759,7 @@ function gStart(){
   const best = ls.get('em-astro-best-' + gm);
   $('gMsg').textContent = '다음에 할 일을 순서대로 누르세요.' + (best ? ` (최고 기록 ${best.s}초, 실수 ${best.m}번)` : '');
   $('gDone').innerHTML = ''; gRender();
+  $('gAns').innerHTML = STEPS[gm].map(t => `<li>${t}</li>`).join('');
 }
 function gRender(){
   $('gSteps').innerHTML = gOrder.filter(i => i >= gNext).map(i => `<button class="step" data-i="${i}">${STEPS[gm][i]}</button>`).join('');
@@ -761,7 +827,17 @@ document.querySelectorAll('#eps .btn').forEach(b => b.addEventListener('click', 
 $('D').addEventListener('input', e => { Dmm = Math.max(30, +e.target.value || 80); document.querySelectorAll('#scopes .btn').forEach(x => x.classList.remove('on')); drawEP(); });
 $('F').addEventListener('input', e => { Fmm = Math.max(200, +e.target.value || 900); document.querySelectorAll('#scopes .btn').forEach(x => x.classList.remove('on')); drawEP(); });
 $('ePick').addEventListener('change', e => pick(e.target.value));
-$('cFlip').addEventListener('change', drawEP);
+$('cFlip').addEventListener('change', drawEP); $('cRings').addEventListener('change', drawEP);
+document.querySelectorAll('#epMode .btn').forEach(b => b.addEventListener('click', () => { epMode = b.dataset.m; document.querySelectorAll('#epMode .btn').forEach(x => x.classList.toggle('on', x === b));
+  $('ePick').style.display = epMode === 'day' ? 'none' : ''; $('aptBox').style.display = epMode === 'day' ? '' : 'none'; drawEP(); }));
+$('aptDist').addEventListener('input', e => { aptD = +e.target.value; $('aptDv').textContent = aptD + ' m'; drawEP(); });
+let epDrag = null;
+ep.addEventListener('pointerdown', e => { if (epMode !== 'day') return; epDrag = { x: e.clientX, y: e.clientY }; ep.setPointerCapture(e.pointerId); });
+ep.addEventListener('pointermove', e => { if (!epDrag) return; const r = ep.getBoundingClientRect(), k = 760 / r.width, flip = $('cFlip').checked ? -1 : 1;
+  const mag = Fmm / Emm, tfov = AFOV / mag, sc = 250 / (tfov * 3600 / 2), mpx = 57.2958 / aptD * sc * 3600;
+  const dx = (e.clientX - epDrag.x) * k, dy = (e.clientY - epDrag.y) * k; epDrag = { x: e.clientX, y: e.clientY };
+  aptX = Math.max(-100, Math.min(130, aptX - dx / (flip * mpx))); aptY = Math.max(-2, Math.min(90, aptY + dy / (flip * mpx))); drawEP(); });
+ep.addEventListener('pointerup', () => { epDrag = null; });
 document.querySelectorAll('#gmode [data-g]').forEach(b => b.addEventListener('click', () => { gm = b.dataset.g; document.querySelectorAll('#gmode [data-g]').forEach(x => x.classList.toggle('on', x === b)); gStart(); }));
 $('gReset').addEventListener('click', gStart);
 $('mReset').addEventListener('click', () => { done = new Set(); ls.set('em-astro-mis', []); mRender(); });
