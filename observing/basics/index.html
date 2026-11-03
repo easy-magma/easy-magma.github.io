@@ -199,8 +199,8 @@ footer{max-width:1520px;margin:0 auto;padding:12px 24px 40px;font-size:13px;colo
 <section class="blk" id="s-rot">
   <h2>③ 지구의 자전 → 태양의 일주 운동 <small>우주에서 본 지구 ↔ 서울에서 본 하늘, 같은 순간을 나란히</small></h2>
   <div class="grid">
-    <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 우주에서 본 지구 (드래그로 회전)</div><canvas id="d3out" class="drag three"></canvas></div>
-    <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 서울에서 본 하늘 (드래그로 회전)</div><canvas id="d3in" class="drag three"></canvas>
+    <div class="card" style="padding:8px"><div class="cap">🚀 지구 밖 관찰자 — 우주에서 본 지구 (드래그: 회전 · 휠/두 손가락: 확대 · 더블클릭: 원래대로)</div><canvas id="d3out" class="drag three"></canvas></div>
+    <div class="card" style="padding:8px"><div class="cap">🧑 지구 안 관측자 — 서울에서 본 하늘 (드래그: 회전 · 휠/두 손가락: 확대)</div><canvas id="d3in" class="drag three"></canvas>
       <div class="row" style="margin-top:6px"><button class="btn on" data-dv="tilt">비스듬히 내려다보기</button><button class="btn" data-dv="eye">관측자 눈높이</button></div>
       <div class="row" style="margin-top:6px" id="dLats"><b style="font-size:15px">관측 위치:</b><button class="btn" data-dl="0">적도 0°</button><button class="btn on" data-dl="37.47">서울 37.5°</button><button class="btn" data-dl="90">북극 90°</button>
         <label class="chk" style="font-size:15px;font-weight:700"><input type="checkbox" id="cStarPath"> 별의 일주 경로</label></div></div>
@@ -613,21 +613,31 @@ function init3D(){
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0b1020);
     const camera = new THREE.PerspectiveCamera(o.fov || 40, 640 / 560, 0.02, 500);
-    const v = { renderer, scene, camera, mode: o.mode || 'orbit', target: V3(...(o.target || [0,0,0])), dist: o.dist, theta: o.theta, phi: o.phi, eye: V3(...(o.eye || [0,0,0])), yaw: o.yaw || 0, pitch: o.pitch || 0 };
+    const v = { renderer, scene, camera, mode: o.mode || 'orbit', target: V3(...(o.target || [0,0,0])), dist: o.dist, theta: o.theta, phi: o.phi, eye: V3(...(o.eye || [0,0,0])), yaw: o.yaw || 0, pitch: o.pitch || 0, zoom: 1 };
     v.place = () => {
-      if (v.mode === 'orbit'){ camera.fov = o.fov || 40; camera.position.set(v.target.x + v.dist * Math.cos(v.phi) * Math.sin(v.theta), v.target.y + v.dist * Math.sin(v.phi), v.target.z + v.dist * Math.cos(v.phi) * Math.cos(v.theta)); camera.lookAt(v.target); }
-      else { camera.fov = o.eyeFov || 75; camera.position.copy(v.eye); camera.lookAt(v.eye.x + Math.cos(v.pitch) * Math.sin(v.yaw), v.eye.y + Math.sin(v.pitch), v.eye.z + Math.cos(v.pitch) * Math.cos(v.yaw)); }
+      if (v.mode === 'orbit'){ const D = v.dist * v.zoom; camera.fov = o.fov || 40; camera.position.set(v.target.x + D * Math.cos(v.phi) * Math.sin(v.theta), v.target.y + D * Math.sin(v.phi), v.target.z + D * Math.cos(v.phi) * Math.cos(v.theta)); camera.lookAt(v.target); }
+      else { camera.fov = Math.max(12, Math.min(115, (o.eyeFov || 75) * v.zoom)); camera.position.copy(v.eye); camera.lookAt(v.eye.x + Math.cos(v.pitch) * Math.sin(v.yaw), v.eye.y + Math.sin(v.pitch), v.eye.z + Math.cos(v.pitch) * Math.cos(v.yaw)); }
       camera.updateProjectionMatrix();
       if (camera.fov !== v.lastFov){ v.lastFov = camera.fov; const k = Math.tan(camera.fov / 2 * D2R) / Math.tan(20 * D2R);
         scene.traverse(o => { if (o.isSprite && o.userData.base) o.scale.set(o.userData.base[0] * k, o.userData.base[1] * k, 1); }); }
     };
     v.size = () => { const w = canvas.clientWidth || 640, h = Math.round(w * 560 / 640); renderer.setSize(w, h, false); camera.aspect = w / h; };
     v.draw = () => { v.lastFov = null; v.place(); renderer.render(scene, camera); };
-    let d = null;
-    canvas.addEventListener('pointerdown', e => { d = { x: e.clientX, y: e.clientY, th: v.theta, ph: v.phi, yw: v.yaw, pt: v.pitch }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; v.touched = true; });
-    canvas.addEventListener('pointermove', e => { if (!d) return; const k = 4 / (canvas.clientWidth || 640), dx = (e.clientX - d.x) * k, dy = (e.clientY - d.y) * k;
+    // 드래그 = 회전, 휠·두 손가락 벌리기 = 확대/축소, 더블클릭 = 원래 크기
+    let d = null; const pts = new Map(); let pinch = null;
+    const setZoom = z => { v.zoom = Math.max(o.zMin || 0.2, Math.min(o.zMax || 2.5, z)); v.draw(); };
+    const pdist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    canvas.addEventListener('pointerdown', e => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); canvas.setPointerCapture(e.pointerId); v.touched = true;
+      if (pts.size === 2){ d = null; pinch = { d0: pdist(), z0: v.zoom }; return; }
+      d = { x: e.clientX, y: e.clientY, th: v.theta, ph: v.phi, yw: v.yaw, pt: v.pitch }; canvas.style.cursor = 'grabbing'; });
+    canvas.addEventListener('pointermove', e => { if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && pts.size === 2){ setZoom(pinch.z0 * pinch.d0 / Math.max(1, pdist())); return; }
+      if (!d) return; const k = 4 / (canvas.clientWidth || 640), dx = (e.clientX - d.x) * k, dy = (e.clientY - d.y) * k;
       if (v.mode === 'orbit'){ v.theta = d.th - dx; v.phi = Math.max(-1.45, Math.min(1.45, d.ph + dy)); } else { v.yaw = d.yw + dx * 0.5; v.pitch = Math.max(-1.3, Math.min(1.45, d.pt + dy * 0.5)); } v.draw(); });
-    canvas.addEventListener('pointerup', () => { d = null; canvas.style.cursor = 'grab'; });
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; d = null; canvas.style.cursor = 'grab'; };
+    canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+    canvas.addEventListener('wheel', e => { e.preventDefault(); setZoom(v.zoom * Math.exp(e.deltaY * (e.deltaMode ? 0.05 : 0.0015))); }, { passive: false });
+    canvas.addEventListener('dblclick', () => setZoom(1));
     if (window.ResizeObserver) new ResizeObserver(() => { v.size(); v.draw(); }).observe(canvas);
     v.size(); ALLV.push(v); return v;
   }
@@ -760,16 +770,16 @@ function init3D(){
   /* ═════ ② 일주 운동 ═════ */
   let dT = 9, dDay = 309;
   // 바깥 (우주)
-  const O = viewer($('d3out'), { dist: 8.3, theta: 1.05, phi: 0.38, fov: 40 });
+  const O = viewer($('d3out'), { dist: 22, theta: 1.05, phi: 0.38, fov: 40, zMin: 0.14, zMax: 1.5 });
   O.scene.add(new THREE.AmbientLight(0xffffff, 0.13));
   const oLight = new THREE.DirectionalLight(0xffffff, 1.2); O.scene.add(oLight);
   // 천구 (반투명 구 + 천구 적도 + 경선 몇 개)
-  const OCR = 3.6;
+  const OCR = 8; // 크게 잡아야 관측자→태양 선과 지구 중심→태양 선이 거의 평행 (천구는 무한히 멂)
   O.scene.add(new THREE.Mesh(new THREE.SphereGeometry(OCR, 48, 32), new THREE.MeshBasicMaterial({ color: 0x5c7cfa, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false })));
   O.scene.add(line(ring(160, a => V3(OCR * Math.cos(a), 0, OCR * Math.sin(a))), 0x74c0fc, 0.7));
   for (let k = 0; k < 6; k++){ const lo = k * Math.PI / 6; O.scene.add(line(ring(120, a => V3(OCR * Math.cos(a) * Math.cos(lo), OCR * Math.sin(a), OCR * Math.cos(a) * Math.sin(lo))), 0x91a7ff, 0.18)); }
   { const l = label('천구', '#bac8ff', 0.8); l.position.set(-OCR * 0.75, OCR * 0.75, 0); O.scene.add(l); const l2 = label('천구 적도', '#74c0fc', 0.65); l2.position.set(0, -0.25, OCR + 0.1); O.scene.add(l2); }
-  const oSun = new THREE.Mesh(new THREE.SphereGeometry(0.11, 20, 12), new THREE.MeshBasicMaterial({ color: 0xffd43b })); O.scene.add(oSun);
+  const oSun = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 12), new THREE.MeshBasicMaterial({ color: 0xffd43b })); O.scene.add(oSun);
   const oSunL = label('천구 위 태양의 위치', '#ffd43b', 0.8); O.scene.add(oSunL);
   const oRays = new THREE.Group(); O.scene.add(oRays);
   const earth = new THREE.Group(); O.scene.add(earth);
@@ -798,6 +808,9 @@ function init3D(){
     const ol = label('관측자', '#ff922b', 0.65); ol.position.set(0, 0.68, 0); obs.add(ol); addPerson(obs, 0.2, 0xff8c42, false); }
   const obsPath = new THREE.Group(); obs.add(obsPath);
   const obsSun = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd43b })); obs.add(obsSun);
+  // 관측자 → 천구 위 태양 (노란 선)
+  const obsRay = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd43b, transparent: true, opacity: 0.85 })); O.scene.add(obsRay);
+  const _a = V3(0, 0, 0), _b = V3(0, 0, 0);
   // 안 (서울)
   const I = viewer($('d3in'), { dist: 13.5, theta: Math.PI + 0.35, phi: 0.42, fov: 42, target: [0, 1.4, 0], eye: [0, 0.3, 0], yaw: 0, pitch: 0.4, eyeFov: 85 });
   I.scene.add(new THREE.AmbientLight(0xffffff, 0.75)); const iLight = new THREE.DirectionalLight(0xffffff, 0.5); I.scene.add(iLight);
@@ -849,7 +862,7 @@ function init3D(){
     const dir = V3(Math.cos(dec * D2R), Math.sin(dec * D2R), 0), side = V3(0, 0, 1), up2 = new THREE.Vector3().crossVectors(dir, side).normalize();
     oRays.add(tube([dir.clone().multiplyScalar(1.02), dir.clone().multiplyScalar(OCR)], 0xffd43b, 0.025));
     { const l = label('태양 방향', '#ffe066', 0.65); l.position.copy(dir.clone().multiplyScalar(OCR * 0.6)).add(V3(0, 0.22, 0)); oRays.add(l); }
-    oSun.position.copy(dir.clone().multiplyScalar(OCR)); oLight.position.copy(dir.clone().multiplyScalar(10)); oSunL.position.copy(dir.clone().multiplyScalar(OCR)).add(V3(0, 0.35, 0));
+    oSun.position.copy(dir.clone().multiplyScalar(OCR)); oLight.position.copy(dir.clone().multiplyScalar(10)); oSunL.position.copy(dir.clone().multiplyScalar(OCR)).add(V3(0, 0.5, 0));
   }
   function dUpdate(){
     const dec = sunDec(dDay); if (dec !== lastDec){ dBuild(dec); lastDec = dec; }
@@ -858,6 +871,8 @@ function init3D(){
     iSun.position.copy(p); iSun.visible = a.alt > -2; iLight.position.copy(p);
     I.scene.background.set(a.alt > 0 ? 0x1c3d6e : a.alt > -12 ? 0x13234a : 0x0b1020);
     obsSun.position.copy(loc(a.alt, a.az, MS)); obsSun.visible = a.alt > -1;
+    earth.updateMatrixWorld(true); obs.getWorldPosition(_a); _b.copy(oSun.position).sub(_a);
+    obsRay.visible = a.alt > -1; obsRay.scale.y = _b.length(); obsRay.position.copy(_a).addScaledVector(_b, 0.5); obsRay.quaternion.setFromUnitVectors(V3(0, 1, 0), _b.normalize());
     if (a.alt > 1){ const len = Math.min(4.6, 1 / Math.tan(a.alt * D2R)), hz = V3(-Math.sin(a.az * D2R), 0, Math.cos(a.az * D2R)); shadow.visible = true; shadow.scale.x = len; shadow.position.copy(hz.clone().multiplyScalar(len / 2)).setY(0.02); shadow.rotation.y = Math.atan2(-hz.z, hz.x); }
     else shadow.visible = false;
     $('dT').textContent = hhmm(dT); $('dD').textContent = dayName(dDay);
