@@ -860,8 +860,6 @@ function init3D(){
     if (mp.length > 1) obsPath.add(line(mp, 0xffd43b, 1));
     // 햇빛
     const dir = V3(Math.cos(dec * D2R), Math.sin(dec * D2R), 0), side = V3(0, 0, 1), up2 = new THREE.Vector3().crossVectors(dir, side).normalize();
-    oRays.add(tube([dir.clone().multiplyScalar(1.02), dir.clone().multiplyScalar(OCR)], 0xffd43b, 0.025));
-    { const l = label('태양 방향', '#ffe066', 0.65); l.position.copy(dir.clone().multiplyScalar(OCR * 0.6)).add(V3(0, 0.22, 0)); oRays.add(l); }
     oSun.position.copy(dir.clone().multiplyScalar(OCR)); oLight.position.copy(dir.clone().multiplyScalar(10)); oSunL.position.copy(dir.clone().multiplyScalar(OCR)).add(V3(0, 0.5, 0));
   }
   function dUpdate(){
